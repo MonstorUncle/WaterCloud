@@ -11,17 +11,30 @@
         //加载数据
         wcLoading.close();
         //权限控制(js是值传递)
+        currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
         toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
         commonTable.rendertable({
             elem: '#currentTableId',
             url: '/SystemManage/CodeGenerator/GetTablePageListJson',
             sqlkey: 'TableName',//数据库主键
             cols: [[
+                { type: "radio", width: 50, fixed: 'left' },
                 { field: 'TableName', title: '表名称', width: 200, sort: true },
                 { field: 'TableKeyName', title: '主键名称', minWidth: 250 },
-                { field: 'TableKey', title: '主键字段', minWidth: 100 },
+                { field: 'TableKey', title: '主键字段', width: 150 },
                 { field: 'TableCount', title: '记录数', width: 80 },
+                {
+                    field: 'CreateTime', title: '创建时间', width: 170,
+                    templet: function (d) {
+                        if (d.CreateTime) {
+                            var time = new Date(d.CreateTime);
+                            return time.Format("yyyy-MM-dd hh:mm:ss");
+                        }
+                        return '';
+                    }
+                },
                 { field: 'Remark', title: '备注', minWidth: 150 },
+                { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
             ]]
         });
         // 监听搜索操作
@@ -32,48 +45,46 @@
                 curr: 1,
                 where: { keyword: data.field.txt_keyword}
             });
-            entity = null;
             return false;
         });
-        var entity;
-        table.on('row(currentTableFilter)', function (obj) {
-            obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-            entity = obj;
-        })
+        //行点击事件监听，控制按钮显示
+        var oneList = ["NF-entitycode", "NF-add", "NF-details"];//选择1条显示
+        commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
         /**
          * toolbar监听事件
          */
         table.on('toolbar(currentTableFilter)', function (obj) {
+            var data = table.checkStatus('currentTableId').data;
             if (obj.event === 'add') {  // 监听删除操作
-                if (entity == null) {
+                if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.openNewTabByIframe({
                     title: "模板代码生成",
-                    href: "/SystemManage/CodeGenerator/Form?keyValue=" + entity.data.TableName,
+                    href: "/SystemManage/CodeGenerator/Form?keyValue=" + data[0].TableName,
                 });
             }
             else if (obj.event === 'entitycode') {
-                if (entity == null) {
+                if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.modalOpen({
                     title: "实体类生成",
-                    url: "/SystemManage/CodeGenerator/EntityCode?keyValue=" + entity.data.TableName,
+                    url: "/SystemManage/CodeGenerator/EntityCode?keyValue=" + data[0].TableName,
                     width: "700px",
                     height: "600px",
                 });
             }
             else if (obj.event === 'details') {
-                if (entity == null) {
+                if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.modalOpen({
                     title: "查看数据表",
-                    url: "/SystemManage/CodeGenerator/Details?keyValue=" + entity.data.TableName,
+                    url: "/SystemManage/CodeGenerator/Details?keyValue=" + data[0].TableName,
                     width: "700px",
                     height: "600px",
                     btn: []
@@ -86,6 +97,33 @@
                 } else {
                     _that.addClass('layui-hide');
                 }
+            }
+            return false;
+        });
+        //toolrow监听事件
+        table.on('tool(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {  // 监听
+                common.openNewTabByIframe({
+                    title: "模板代码生成",
+                    href: "/SystemManage/CodeGenerator/Form?keyValue=" + obj.data.TableName,
+                });
+            }
+            else if (obj.event === 'entitycode') {
+                common.modalOpen({
+                    title: "实体类生成",
+                    url: "/SystemManage/CodeGenerator/EntityCode?keyValue=" + obj.data.TableName,
+                    width: "700px",
+                    height: "600px",
+                });
+            }
+            else if (obj.event === 'details') {
+                common.modalOpen({
+                    title: "查看数据表",
+                    url: "/SystemManage/CodeGenerator/Details?keyValue=" + obj.data.TableName,
+                    width: "700px",
+                    height: "600px",
+                    btn: []
+                });
             }
             return false;
         });
@@ -114,12 +152,16 @@
 
         <script type="text/html" id="toolbarDemo">
             <div class="layui-btn-container" id="toolbar">
-                <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>模板生成</button>
-                <button id="NF-entitycode" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="entitycode"><i class="layui-icon">&#xe654;</i>实体生成</button>
-                <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                <button id="NF-add" name="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>模板生成</button>
+                <button id="NF-entitycode" name="NF-entitycode" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="entitycode"><i class="layui-icon">&#xe67a;</i>实体生成</button>
+                <button id="NF-details" name="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
             </div>
         </script>
-
+        <script type="text/html" id="currentTableBar">
+            <a id="NF-add" authorize class="layui-btn layui-btn-sm" lay-event="add"><i class="layui-icon">&#xe654;</i></a>
+            <a id="NF-entitycode" authorize class="layui-btn layui-btn-sm " lay-event="entitycode"><i class="layui-icon">&#xe67a;</i></a>
+            <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
+        </script>
         <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
 
     </div>

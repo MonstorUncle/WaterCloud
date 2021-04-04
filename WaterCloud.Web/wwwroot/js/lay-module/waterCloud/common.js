@@ -21,6 +21,7 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
                 defaultToolbar: ['filter', 'exports', 'print'],//默认工具栏
                 search: true,//搜索按钮
                 loading: false,
+                checkOther:false,//关闭复选框联动
                 tree: {
                     iconIndex: 0,           // 折叠图标显示在第几列  多选等记得修改
                     isPidData: true,        // 是否是id、pid形式数据
@@ -235,11 +236,17 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
                 url: "",
                 param: [],
                 success: null,
-                close: true
+                close: true,
+                preventReuse:'.site-demo-active'//防止重复的参数
             };
             var options = $.extend(defaults, options);
             //ie缓存问题
             options.url = obj.urlAddTime(options.url);
+            // 单击之后提交按钮不可选,防止重复提交
+            if (!!options.preventReuse) {
+                $(options.preventReuse).addClass('layui-btn-disabled');
+                $(options.preventReuse).attr('disabled', 'disabled');
+            }
             window.setTimeout(function () {
                 if ($('[name=__RequestVerificationToken]').length > 0) {
                     var csrfToken = $('[name=__RequestVerificationToken]').val();
@@ -271,15 +278,19 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
                             }
                         } else {
                             obj.modalAlert(data.message, data.state);
-                            $('.site-demo-active').removeClass('layui-btn-disabled');
-                            $('.site-demo-active').removeAttr('disabled');
+                        }
+                        if (!!options.preventReuse) {
+                            $(options.preventReuse).removeClass('layui-btn-disabled');
+                            $(options.preventReuse).removeAttr('disabled');
                         }
                     },
                     error: function (XMLHttpRequest, textStatus, errorThrown) {
                         parent.layer.close(index);
                         obj.modalAlert(errorThrown, "error");
-                        $('.site-demo-active').removeClass('layui-btn-disabled');
-                        $('.site-demo-active').removeAttr('disabled');
+                        if (!!options.preventReuse) {
+                            $(options.preventReuse).removeClass('layui-btn-disabled');
+                            $(options.preventReuse).removeAttr('disabled');
+                        }
                     },
                     beforeSend: function () {
                     },
@@ -428,9 +439,6 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
                         });
                     }, 500);
                 }
-                else {
-                    parent.layer.close(index);
-                }
             });
 
         },
@@ -522,7 +530,7 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
             readForm.find('input,textarea,select').removeAttr('lay-verify');
             readForm.find('.layui-layedit iframe').contents().find('body').prop('contenteditable', false);
         },
-        //按钮权限(控制js模板)
+        //按钮权限(控制js模板,格式必须严格,新)
         authorizeButtonNew: function (innerHTML) {
             //行操作权限控制
             var moduleId = top.$(".layui-tab-title>.layui-this").attr("lay-id");
@@ -584,10 +592,11 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
                     }
                 }
             }
-            returnhtml = returnhtml.replace(/ layui-hide/g, '');
+            //去除隐藏
+            //returnhtml = returnhtml.replace(/ layui-hide/g, '');
             return returnhtml;
         },
-        //权限按钮(控制dom)
+        //权限按钮(控制dom,只控制button,旧)
         authorizeButton: function (id) {
             var moduleId = top.$(".layui-tab-title>.layui-this").attr("lay-id");
             //没有就全清
@@ -604,12 +613,38 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
             if (dataJson != undefined) {
                 $.each(dataJson, function (i) {
                     $element.find("#" + dataJson[i].F_EnCode).attr('authorize', 'yes');
-                    $element.find("#" + dataJson[i].F_EnCode).removeClass('layui-hide');
+                    //去除隐藏
+                    //$element.find("#" + dataJson[i].F_EnCode).removeClass('layui-hide');
                 });
             }
             $element.find("[authorize=no]").parents('button').prev('.split').remove();
             $element.find("[authorize=no]").parents('button').remove();
             $element.find('[authorize=no]').remove();
+        },
+        //权限控制单个按钮，返回是否
+        authorizeButtonOne: function (id) {
+            var moduleId = top.$(".layui-tab-title>.layui-this").attr("lay-id");
+            var isOk = false;
+            if (!top.clients || !top.clients.authorizeButton || !top.clients.authorizeButton[moduleId.split("?")[0]]) {
+                isOk = false;
+            }
+            else {
+                var dataJson = top.clients.authorizeButton[moduleId.split("?")[0]];
+
+                for (var i = 0; i < dataJson.length; i++) {
+                    if (dataJson[i].F_EnCode == id) {
+                        isOk = true;
+                    }
+                }
+            }
+            if (isOk) {
+                $("#" + id).parent().removeClass('layui-hide');
+            }
+            else {
+                $("#" + id).remove();;
+                $("#" + id).parent().remove();;
+            }
+            return isOk;
         },
         //表单权限字段
         authorizeFields: function (filter) {
@@ -811,6 +846,96 @@ layui.define(["jquery", "layer", 'table', 'treeTable', 'xmSelect', 'miniTab'], f
                 cols[0] = array;
             };
             return cols;
+        },
+        //treetable行点击事件及按钮显示控制
+        treeTableRowClick: function (type, rendertree ,tableId, oneList, moreList) {
+            var oneList = !!oneList ? oneList : [];
+            var moreList = !!moreList ? moreList : [];
+            treeTable.on('row(' + tableId + ')', function (obj) {
+                obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
+                obj.tr.find("div.layui-unselect.layui-form-" + type)[0].click();
+                if (type =="radio") {
+                    for (var i = 0; i < oneList.length; i++) {
+                        $('[name="' + oneList[i] + '"]').removeClass("layui-hide");
+                    }
+                    for (var i = 0; i < moreList.length; i++) {
+                        $('[name="' + moreList[i] + '"]').removeClass("layui-hide");
+                    }
+                }
+            })
+            //多选框监听
+            treeTable.on(type + '(' + tableId + ')', function (obj) {
+                //控制按钮
+                var data = rendertree.checkStatus(false);
+                if (obj.type == "all") {
+                    if (obj.checked && rendertree.options.data.length != 0) {
+                        if (rendertree.options.data.length > 1) {
+                            for (var i = 0; i < oneList.length; i++) {
+                                $('[name="' + oneList[i] + '"]').addClass("layui-hide");
+                            }
+                            for (var i = 0; i < moreList.length; i++) {
+                                $('[name="' + moreList[i] + '"]').removeClass("layui-hide");
+                            }
+                        }
+                        else {
+                            for (var i = 0; i < oneList.length; i++) {
+                                $('[name="' + oneList[i] + '"]').removeClass("layui-hide");
+                            }
+                            for (var i = 0; i < moreList.length; i++) {
+                                $('[name="' + moreList[i] + '"]').removeClass("layui-hide");
+                            }
+                        }
+                    }
+                    else {
+                        for (var i = 0; i < oneList.length; i++) {
+                            $('[name="' + oneList[i] + '"]').addClass("layui-hide");
+                        }
+                        for (var i = 0; i < moreList.length; i++) {
+                            $('[name="' + moreList[i] + '"]').addClass("layui-hide");
+                        }
+                    }
+                }
+                else {
+                    if (data.length > 1) {
+                        for (var i = 0; i < oneList.length; i++) {
+                            $('[name="' + oneList[i] + '"]').addClass("layui-hide");
+                        }
+                        for (var i = 0; i < moreList.length; i++) {
+                            $('[name="' + moreList[i] + '"]').removeClass("layui-hide");
+                        }
+                    }
+                    else if (data.length == 1) {
+                        for (var i = 0; i < oneList.length; i++) {
+                            $('[name="' + oneList[i] + '"]').removeClass("layui-hide");
+                        }
+                        for (var i = 0; i < moreList.length; i++) {
+                            $('[name="' + moreList[i] + '"]').removeClass("layui-hide");
+                        }
+                    }
+                    else {
+                        for (var i = 0; i < oneList.length; i++) {
+                            $('[name="' + oneList[i] + '"]').addClass("layui-hide");
+                        }
+                        for (var i = 0; i < moreList.length; i++) {
+                            $('[name="' + moreList[i] + '"]').addClass("layui-hide");
+                        }
+                    }
+                }
+            });
+
+        },
+        //form参数过滤方法，值不存在直接删除
+        removeEmpty: function (filter, formdate) {
+            var element = $('div[lay-filter=' + filter + ']');
+            if (!!formdate) {
+                for (var key in formdate) {
+                    var $id = element.find('#' + key);
+                    if (!!$id && formdate[key] != 0 && formdate[key]!=false && !formdate[key]) {
+                        $id.parent().parent().remove();
+                    }
+                };
+                return false;
+            }
         },
         //表格单元格自动列宽
         //tableResize: function (id) {

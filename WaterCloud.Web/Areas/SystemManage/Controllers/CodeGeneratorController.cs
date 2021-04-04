@@ -17,7 +17,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
     [Area("SystemManage")]
     public class CodeGeneratorController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         private readonly IDatabaseTableService _service;
         private readonly IDbContext _context;
         public CodeGeneratorController(IDbContext context)
@@ -47,7 +47,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         #region 获取数据
         [HttpGet]
         [HandlerAjaxOnly]
-        public async Task<ActionResult> GetTablePageListJson(Pagination pagination,string keyword)
+        public async Task<ActionResult> GetTablePageListJson(Pagination pagination, string keyword)
         {
             //导出全部页使用
             if (pagination.rows == 0 && pagination.page == 0)
@@ -55,21 +55,21 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                 pagination.rows = 99999999;
                 pagination.page = 1;
             }
-            List<TableInfo> data =await _service.GetTablePageList(keyword, pagination);
+            List<TableInfo> data = await _service.GetTablePageList(keyword, pagination);
             return Success(pagination.records, data);
         }
         [HttpGet]
         [HandlerAjaxOnly]
         public async Task<ActionResult> GetTableJson(string keyword)
         {
-            List<TableInfo> data =await _service.GetTableList(keyword);
+            List<TableInfo> data = await _service.GetTableList(keyword);
             return Content(data.ToJson());
         }
         [HttpGet]
         [HandlerAjaxOnly]
         public async Task<ActionResult> GetTableSelectJson(string keyword)
         {
-            List<TableInfo> data =await _service.GetTableList(keyword);
+            List<TableInfo> data = await _service.GetTableList(keyword);
             List<object> list = new List<object>();
             foreach (var item in data)
             {
@@ -79,9 +79,9 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         }
         [HttpGet]
         [HandlerAjaxOnly]
-        public async Task<ActionResult> GetTableFieldJson(string keyValue,string keyword)
+        public async Task<ActionResult> GetTableFieldJson(string keyValue, string keyword)
         {
-            List<TableFieldInfo> data =await _service.GetTableFieldList(keyValue);
+            List<TableFieldInfo> data = await _service.GetTableFieldList(keyValue);
             if (!string.IsNullOrEmpty(keyword))
             {
                 data = data.Where(a => a.TableColumn.Contains(keyword)).ToList();
@@ -92,7 +92,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         [HandlerAjaxOnly]
         public async Task<ActionResult> GetTableFieldSelectJson(string keyValue)
         {
-            List<TableFieldInfo> data =await _service.GetTableFieldList(keyValue);
+            List<TableFieldInfo> data = await _service.GetTableFieldList(keyValue);
             List<object> list = new List<object>();
             foreach (var item in data)
             {
@@ -107,13 +107,21 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
             BaseConfigModel data = new BaseConfigModel();
 
             string tableDescription = string.Empty;
-            List<TableFieldInfo> tDataTableField =await _service.GetTableFieldList(keyValue);
+            List<TableFieldInfo> tDataTableField = await _service.GetTableFieldList(keyValue);
 
-            var columnList = tDataTableField.Where(p => !BaseField.BaseFieldList.Contains(p.TableColumn)&&p.TableIdentity!="Y").Select(p =>new { p.TableColumn,p.Remark }).ToList();
-            Dictionary<string, string> dic = new Dictionary<string, string>();
+            var columnList = tDataTableField.Where(p => !BaseField.BaseFieldList.Contains(p.TableColumn) && p.TableIdentity != "Y").Select(p => new { p.TableColumn, p.Remark }).ToList();
+            List<ColumnField> dic = new List<ColumnField>();
             foreach (var item in columnList)
             {
-                dic.Add(item.TableColumn, string.IsNullOrEmpty(item.Remark) ? item.TableColumn : item.Remark);
+                ColumnField field = new ColumnField();
+                field.field = item.TableColumn;
+                field.title = string.IsNullOrEmpty(item.Remark) ? item.TableColumn : item.Remark;
+                field.isFilter = true;
+                field.isAotuWidth = false;
+                field.isSorted = true;
+                field.isShow = true;
+                field.width = 100;
+                dic.Add(field);
             }
             string serverPath = GlobalContext.HostingEnvironment.ContentRootPath;
             data = new SingleTableTemplate(_context).GetBaseConfig(serverPath, _logService.currentuser.UserName, keyValue, tableDescription, dic);
@@ -129,20 +137,15 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         {
             try
             {
-                List<TableFieldInfo> list =await _service.GetTableFieldList(baseConfig.TableName);
+                List<TableFieldInfo> list = await _service.GetTableFieldList(baseConfig.TableName);
                 SingleTableTemplate template = new SingleTableTemplate(_context);
                 DataTable dt = DataTableHelper.ListToDataTable(list);  // 用DataTable类型，避免依赖
                 string idcolumn = string.Empty;
                 Dictionary<string, string> dic = new Dictionary<string, string>();
-                baseConfig.PageIndex.ButtonList=ExtList.removeNull(baseConfig.PageIndex.ButtonList);
-                baseConfig.PageIndex.ColumnList.Remove("");
+                baseConfig.PageIndex.ButtonList = ExtList.removeNull(baseConfig.PageIndex.ButtonList);
+                baseConfig.PageIndex.ColumnList = baseConfig.PageIndex.ColumnList.Where(a => a.field != "").ToList();
                 baseConfig.PageForm.FieldList.Remove("");
                 string idType = "string";
-                string[] isDeleteMarkFieldNames = new[] { "F_DeleteMark", "IsDelete" };
-                string[] createTimeFieldNames = new[] { "F_CreatorTime", "AddTime" };
-
-                string isDeleteMarkField = "F_DeleteMark";
-                string createTimeField = "F_CreatorTime";
                 foreach (DataRow dr in dt.Rows)
                 {
 
@@ -157,7 +160,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                         }
                         else if (datatype == "long?")
                         {
-                            idType = "long";  
+                            idType = "long";
                         }
                         else
                         {
@@ -165,30 +168,16 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                         }
                     }
                     string columnName = dr["TableColumn"].ToString();
-                    foreach(var isDeleteMarkFieldName in isDeleteMarkFieldNames)
-                    {
-                        if (string.Compare(isDeleteMarkFieldName, columnName, true) == 0)
-                        {
-                            isDeleteMarkField = columnName;
-                        }
-                    }
-                    foreach (var createTimeFieldName in createTimeFieldNames)
-                    {
-                        if (string.Compare(createTimeFieldName, columnName, true) == 0)
-                        {
-                            createTimeField = columnName;
-                        }
-                    }
                 }
 
-  
+
                 string codeEntity = template.BuildEntity(baseConfig, dt, idcolumn);
-                string codeService = template.BuildService(baseConfig,dt, idcolumn,idType,isDeleteMarkField,createTimeField);
-                string codeController = template.BuildController(baseConfig, idcolumn,idType, createTimeField);
+                string codeService = template.BuildService(baseConfig, dt, idcolumn, idType);
+                string codeController = template.BuildController(baseConfig, idcolumn, idType);
                 string codeIndex = template.BuildIndex(baseConfig, idcolumn);
                 string codeForm = template.BuildForm(baseConfig);
                 string codeDetails = template.BuildDetails(baseConfig);
-                string codeMenu = template.BuildMenu(baseConfig,idcolumn);
+                string codeMenu = template.BuildMenu(baseConfig, idcolumn);
                 var json = new
                 {
                     CodeEntity = HttpUtility.HtmlEncode(codeEntity),
@@ -199,7 +188,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                     CodeDetails = HttpUtility.HtmlEncode(codeDetails),
                     CodeMenu = HttpUtility.HtmlEncode(codeMenu)
                 };
-               return Success("操作成功",json);
+                return Success("操作成功", json);
             }
             catch (System.Exception ex)
             {
@@ -221,10 +210,9 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         public virtual ActionResult EntityCode()
         {
             return View();
-        }   
+        }
         [HttpPost]
         [HandlerAjaxOnly]
-        [ServiceFilter(typeof(HandlerAuthorizeAttribute))]
         public async Task<ActionResult> CodeGenerateJson(BaseConfigModel baseConfig, string Code)
         {
             try
@@ -238,16 +226,15 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                     SingleTableTemplate template = new SingleTableTemplate(_context);
                     await template.CreateCode(baseConfig, HttpUtility.UrlDecode(Code));
                 }
-                return await Success("操作成功。", className, "");
+                return await Success("操作成功。", "", "");
             }
             catch (System.Exception ex)
             {
-                return await Error(ex.Message, className, "");
+                return await Error(ex.Message, "", "");
             }
         }
         [HttpPost]
         [HandlerAjaxOnly]
-        [ServiceFilter(typeof(HandlerAuthorizeAttribute))]
         public async Task<ActionResult> EntityCodeGenerateJson(BaseConfigModel baseConfig, string keyValue)
         {
             try
@@ -272,11 +259,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                     string codeEntity = template.BuildEntity(baseConfig, dt, idcolumn);
                     await template.EntityCreateCode(baseConfig, codeEntity);
                 }
-                return await Success("操作成功。", className, "");
+                return await Success("操作成功。", "", "");
             }
             catch (System.Exception ex)
             {
-                return await Error(ex.Message, className, "");
+                return await Error(ex.Message, "", "");
             }
         }
         #endregion

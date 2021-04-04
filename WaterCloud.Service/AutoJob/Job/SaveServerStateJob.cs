@@ -1,17 +1,14 @@
 ﻿using Chloe;
 using Microsoft.AspNetCore.Hosting;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using WaterCloud.Code;
-using WaterCloud.DataBase;
 using WaterCloud.Domain.SystemSecurity;
-using WaterCloud.Service.CommonService;
 using WaterCloud.Service.SystemSecurity;
 
 namespace WaterCloud.Service.AutoJob
 {
-    public class SaveServerStateJob : IJobTask
+	public class SaveServerStateJob : IJobTask
     {
         private IWebHostEnvironment _hostingEnvironment;
         private ServerStateService _server;
@@ -20,9 +17,9 @@ namespace WaterCloud.Service.AutoJob
             _hostingEnvironment = GlobalContext.HostingEnvironment;
             _server = new ServerStateService(context);
          }
-        public async Task<AjaxResult> Start()
+        public async Task<AlwaysResult> Start()
         {
-            AjaxResult obj = new AjaxResult();
+            AlwaysResult obj = new AlwaysResult();
             try
             {
                 ServerStateEntity entity = new ServerStateEntity();

@@ -2,61 +2,111 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Index.cshtml";
  }
- <div class="layuimini-container">
-     <div class="layuimini-main">
-         <fieldset class="table-search-fieldset layui-hide" id="searchField">
-             <div>
-                 <form class="layui-form layui-form-pane" >
-                     <div class="layui-form-item">
-                         <div class="layui-inline">
-                             <label class="layui-form-label">关键字:</label>
-                             <div class="layui-input-inline">
-                                 <input type="text" id="txt_keyword" name="txt_keyword" autocomplete="off" class="layui-input" >
-                             </div>
-                         </div>
-                        <div class="layui-inline"> 
-                             <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon">&#xe615;</i> 搜 索</button>
-                         </div>
-                     </div>
-                 </form>
-             </div>
-         </fieldset>
-         <script type="text/html" id="toolbarDemo">
-             <div class="layui-btn-container" id="toolbar">
-                 <button id="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
-                 <button id="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                 <button id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                 <button id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>预览</button>
-             </div>
-         </script>
-         <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
-     </div>
- </div>
+<div class="layui-fluid" style="padding:0 0px">
+    <div class="layui-row layui-col-space5">
+        <div class="layui-col-md4 layui-col-xs5">
+            <div class="layui-card" style="padding: 5px;">
+                <fieldset class="table-search-fieldset" style="border:1px solid #e6e6e6">
+                    <legend>部门列表</legend>
+                    <form class="layui-form layui-form-pane" action="">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <input type="text" id="temp_keyword" name="temp_keyword" autocomplete="off" class="layui-input" placeholder="">
+                            </div>
+                            <div class="layui-inline">
+                                <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="temp-search-btn"><i class="layui-icon">&#xe615;</i> 搜 索</button>
+                            </div>
+                        </div>
+                    </form>
+                </fieldset>
+                <table class="layui-hide" id="currentTable" lay-filter="currentTable"></table>
+            </div>
+        </div>
+        <div class="layui-col-md8 layui-col-xs7">
+            <div class="layui-card" style="padding: 5px;">
+                <fieldset class="table-search-fieldset" id="searchField">
+                    <legend>表单列表</legend>
+                    <form class="layui-form layui-form-pane">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">关键字:</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="txt_keyword" name="txt_keyword" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon">&#xe615;</i> 搜 索</button>
+                            </div>
+                        </div>
+                    </form>
+                </fieldset>
+                <script type="text/html" id="toolbarDemo">
+                    <div class="layui-btn-container" id="toolbar">
+                        <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
+                        <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                        <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                        <button id="NF-details" name="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>预览</button>
+                    </div>
+                </script>
+                <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+            </div>
+        </div>
+    </div>
+</div>
  <script>
-     layui.use(['form', 'table', 'common', 'commonTable'], function () {
+     layui.use(['form', 'table','treeTable', 'common', 'commonTable'], function () {
          var form = layui.form,
              table = layui.table,
              commonTable = layui.commonTable,
+             treeTable = layui.treeTable,
              common = layui.common;
-         var entity;
+         var ItemId;
          //权限控制(js是值传递)
          toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
+         var options = {
+             elem: '#currentTable',
+             url: '/SystemOrganize/Organize/GetTreeGridJson',
+             defaultToolbar: [],
+             toolbar: false,
+             search: false,
+             treeColIndex: 0,
+             height: 'full-130',
+             treeIdName: 'F_Id',  // id字段名称
+             treePidName: 'F_ParentId',     // pid字段名称
+             cols: [[
+                 { field: 'F_FullName', title: '部门名称', width: 250, filter: true },
+                 { field: 'F_EnCode', title: '部门编号', width: 180, filter: true},
+                 {
+                     field: 'F_CategoryId', title: '部门分类', width: 120, filter: true,
+                     templet: function (d) {
+                         return top.clients.dataItems["OrganizeCategory"][d.F_CategoryId] == null ? "" : top.clients.dataItems["OrganizeCategory"][d.F_CategoryId];
+                     }
+                 }
+             ]],
+         };
+         commonTable.rendertreetable(options);
          commonTable.rendertable({
              elem: '#currentTableId',
              id: 'currentTableId',
-             url: '/SystemManage/Form/GetGridJson',             
+             url: '/SystemManage/Form/GetGridJson', 
+             where: { ItemId: ItemId },
+             limit: 9999,//每页数据 默认
+             page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                 layout: ['count'] //自定义分页布局
+                 , first: false //不显示首页
+                 , last: false //不显示尾页
+             },
+             search:false,
+             height: 'full-130',
              cols: [[                 
-                 //此处需修改
+                 { type: "radio", width: 50 },
                  { field: 'F_Name', title: '表单名称', width: 150, sort: true },
                  { field: 'F_Description', title: '备注', minWidth: 250 },
                  { field: 'F_Fields', title: '字段数', width: 100, sort: true, hide: true },
-                 { field: 'F_ContentData', title: '表单中的字段数据', width: 200, sort: true },
-                 { field: 'F_DbName', title: '关联数据表', width: 120, sort: true },
+                 { field: 'F_ContentData', title: '表单中的字段数据', minWidth: 200, sort: true },
+                 { field: 'F_DbName', title: '关联数据表', width: 120, hide: true },
                  {
-                     field: 'F_OrganizeId', title: '所属部门', width: 120, sort: true,
-                     templet: function (d) {
-                         return !d.F_OrganizeId ? "" : top.clients.organize[d.F_OrganizeId].fullname;
-                     }
+                     field: 'F_OrganizeName', title: '所属部门', width: 120, hide: true
                  },
                  {
                      field: 'F_EnabledMark', title: '状态', width: 80,
@@ -82,37 +132,53 @@
              ]]
          });
          // 监听搜索操作
-         form.on('submit(data-search-btn)', function (data) {
+         form.on('submit(temp-search-btn)', function (data) {
+             var queryJson = data.field.temp_keyword;
              //执行搜索重载
+             options.where = { keyword: queryJson };
+             commonTable.reloadtabletree(options);
+             itemId = null;
+             return false;
+         });
+         // 监听搜索操作
+         form.on('submit(data-search-btn)', function (data) {
              commonTable.reloadtable({
                  elem: 'currentTableId',
-                 curr: 1,
-                 where: { keyword: data.field.txt_keyword }
+                 page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                     layout: ['count'] //自定义分页布局
+                     , first: false //不显示首页
+                     , last: false //不显示尾页
+                 },
+                 where: { ItemId: ItemId,keyword: data.field.txt_keyword }
              });
-             entity = null;
              return false;
          });
          wcLoading.close();
-         table.on('row(currentTableFilter)', function (obj) {
+         table.on('row(currentTable)', function (obj) {
              obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-             entity = obj;
+             ItemId = obj.data.F_Id;
+             $('button[lay-filter="data-search-btn"]').click();//按钮刷新
          })
+         //行点击事件监听，控制按钮显示
+         var oneList = ["NF-edit", "NF-delete", "NF-details"];//选择1条显示
+         commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
          //toolbar监听事件
          table.on('toolbar(currentTableFilter)', function (obj) {
+             var data = table.checkStatus('currentTableId').data;
              if (obj.event === 'add') {  // 监听添加操作
                  common.openNewTabByIframe({
                      title: "添加表单",
-                     href: "/SystemManage/Form/Form",
+                     href: "/SystemManage/Form/Form?ItemId=" + ItemId,
                  });
              }
              else if (obj.event === 'delete') {
-                 if (entity == null) {
+                 if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
                  common.deleteForm({
                      url: "/SystemManage/Form/DeleteForm",
-                     param: { keyValue: entity.data.F_Id },
+                     param: { keyValue: data[0].F_Id },
                      success: function () {
                          common.reload('data-search-btn');
                          entity = null;
@@ -120,35 +186,27 @@
                  });
              }
              else if (obj.event === 'edit') {
-                 if (entity == null) {
+                 if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
                  common.openNewTabByIframe({
                      title: "编辑表单",
-                     href: "/SystemManage/Form/Form?keyValue=" + entity.data.F_Id,
+                     href: "/SystemManage/Form/Form?keyValue=" + data[0].F_Id,
                  });
              }
              else if (obj.event === 'details') {
-                 if (entity == null) {
+                 if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
                  common.modalOpen({
                      title: "预览表单",
-                     url: "/SystemManage/Form/Details?keyValue=" + entity.data.F_Id,
+                     url: "/SystemManage/Form/Details?keyValue=" + data[0].F_Id,
                      width: "600px",
                      height: "600px",
                      btn: []
                  });
-             }
-             else if (obj.event === 'TABLE_SEARCH') {
-                 var _that = $("#searchField");
-                 if (_that.hasClass("layui-hide")) {
-                     _that.removeClass('layui-hide');
-                 } else {
-                     _that.addClass('layui-hide');
-                 }
              }
              return false;
          });

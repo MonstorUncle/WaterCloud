@@ -16,7 +16,7 @@ namespace WaterCloud.Web
             LogHelper.WriteWithTime(context);
             if (context.HttpContext.Request.IsAjaxRequest())
             {
-                AjaxResult obj = new AjaxResult();
+                AlwaysResult obj = new AlwaysResult();
                 obj.state = ResultType.error.ToString();
                 obj.message = context.Exception.GetOriginalException().Message;
                 if (string.IsNullOrEmpty(obj.message))

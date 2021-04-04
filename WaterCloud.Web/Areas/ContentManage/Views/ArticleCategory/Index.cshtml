@@ -23,50 +23,44 @@
          </fieldset>
          <script type="text/html" id="toolbarDemo">
              <div class="layui-btn-container">
-                 <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
-                 <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                 <button id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                 <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                 <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
+                 <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                 <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                 <button id="NF-details" name="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
              </div>
          </script>
          <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
          <script type="text/html" id="currentTableBar">
-             <a id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm" lay-event="edit">修改</a>
-             <a id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete">删除</a>
-             <a id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details">查看</a>
+             <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+             <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
+             <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
          </script>
      </div>
  </div>
  <script>
-     layui.use(['jquery', 'form', 'common', 'treeTable', 'layer'], function () {
+     layui.use(['jquery', 'form', 'common', 'table', 'commonTable', 'layer'], function () {
          var $ = layui.jquery,
              form = layui.form,
              layer = layui.layer,
-             treeTable = layui.treeTable,
+             table = layui.table,
+             commonTable = layui.commonTable,
              common = layui.common;
          //行操作权限控制(js是值传递)
          currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
          toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
          wcLoading.close();
-         var rendertree = common.rendertreetable({
+         var options = {
              elem: '#currentTableId',
              url: '/ContentManage/ArticleCategory/GetTreeGridJson',
-             tree: {
-                 iconIndex: 1,           // 折叠图标显示在第几列
-                 isPidData: true,        // 是否是id、pid形式数据
-                 idName: 'F_Id',  // id字段名称
-                 pidName: 'F_ParentId',     // pid字段名称
-                 arrowType: 'arrow2',
-                 getIcon: 'ew-tree-icon-style2',
-             },
+             treeIdName: 'F_Id',  // id字段名称
+             treePidName: 'F_ParentId',     // pid字段名称
              cols: [[
-                 { type: "checkbox", width: 50 },                 
-                 //此处需修改
-                 { field: 'F_FullName', title: '类别名称', width: 200 },
-                 { field: 'F_SortCode', title: '排序', width: 80 },
-                 { field: 'F_Description', title: '描述', width: 220 },
+                 { type: "radio", width: 50, fixed: 'left' },
+                 { field: 'F_FullName', title: '类别名称', width: 200, filter: true },
+                 { field: 'F_SortCode', title: '排序', width: 80, filter: true},
+                 { field: 'F_Description', title: '描述', minWidth: 220, filter: true },
                  {
-                     field: 'F_EnabledMark', title: '状态', width: 80,
+                     field: 'F_EnabledMark', title: '状态', width: 80, filter: true,
                      templet: function (d) {
                          if (d.F_EnabledMark == true) {
                              return "<span class='layui-btn layui-btn-normal layui-btn-xs'>有效</span>";
@@ -74,9 +68,9 @@
                              return "<span class='layui-btn layui-btn-warm layui-btn-xs'>无效</span>";
                          }
                      }
-                 }, 
+                 },
                  {
-                     field: 'F_CreatorTime', title: '创建时间', minWidth: 100,
+                     field: 'F_CreatorTime', title: '创建时间', minWidth: 150, filter: { type: 'date[yyyy-MM-dd HH:mm:ss]' },
                      templet: function (d) {
                          if (d.F_CreatorTime) {
                              var time = new Date(d.F_CreatorTime);
@@ -86,26 +80,26 @@
                      }
                  },
                  { field: 'F_CreatorUserId', title: '创建人', width: 120, hide: true },
-                 { title: '操作', minWidth: 180, toolbar: '#currentTableBar', align: "center", fixed: 'right' }//插件没有fixed参数
+                 { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right' }//插件没有fixed参数
              ]],
-             done: function () {
-                 //展开全部
-                 rendertree.expandAll();
-             }
-         });
+         };
+         commonTable.rendertreetable(options);
          // 监听搜索操作
          form.on('submit(data-search-btn)', function (data) {
              queryJson = data.field.txt_keyword;
-             common.reloadtreetable(rendertree, {
-                 where: { keyword: queryJson },
-             });
+             options.where = { keyword: queryJson };
+             commonTable.rendertreetable(options);
              return false;
          });
-         treeTable.on('row(currentTableId)', function (obj) {
-             obj.tr.find("div.layui-unselect.layui-form-checkbox")[0].click();
-         })
+         //行点击事件监听，控制按钮显示
+         var oneList = ["NF-edit", "NF-details", "NF-delete"];//选择1条显示
+         //var morerList = ["NF-delete"];//选中1条以上
+         commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
+         //common.treeTableRowClick("radio", rendertree, "currentTableId", oneList, morerList);
          //toolbar监听事件
-         treeTable.on('toolbar(currentTableId)', function (obj) {
+         table.on('toolbar(currentTableFilter)', function (obj) {
+             var data = table.checkStatus('currentTableId').data;
+             var id = data.length > 0 ? data[0].F_Id : null;
              if (obj.event === 'add') {  // 监听添加操作
                  common.modalOpen({
                      title: "添加界面",
@@ -115,7 +109,6 @@
                  });
              }
              else if (obj.event === 'delete') {
-                 var data = rendertree.checkStatus(false);
                  if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
@@ -133,7 +126,7 @@
                  });
              }
              else if (obj.event === 'edit') {
-                 var data = rendertree.checkStatus(false);
+                 var data = table.checkStatus('currentTableId').data;
                  if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
@@ -144,14 +137,14 @@
                  }
                  common.modalOpen({
                      title: "编辑界面",
-                     url: "/ContentManage/ArticleCategory/Form?keyValue=" + data[0].F_Id,
+                     url: "/ContentManage/ArticleCategory/Form?keyValue=" + id,
                      width: "500px",
                      height: "500px",
                      data: data[0],
                  });
              }
              else if (obj.event === 'details') {
-                 var data = rendertree.checkStatus(false);
+                 var data = table.checkStatus('currentTableId').data;
                  if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
@@ -162,7 +155,7 @@
                  }
                  common.modalOpen({
                      title: "查看界面",
-                     url: "/ContentManage/ArticleCategory/Details?keyValue=" + data[0].F_Id,
+                     url: "/ContentManage/ArticleCategory/Details?keyValue=" + id,
                      width: "500px",
                      height: "500px",
                      data: data[0],
@@ -180,7 +173,8 @@
              return false;
          });
          //toolbar监听事件
-         treeTable.on('tool(currentTableId)', function (obj) {
+         table.on('tool(currentTableFilter)', function (obj) {
+             var id = obj.data.F_Id;
              if (obj.event === 'delete') {
                  common.deleteForm({
                      url: "/ContentManage/ArticleCategory/DeleteForm",
@@ -193,7 +187,7 @@
              else if (obj.event === 'edit') {
                  common.modalOpen({
                      title: "编辑界面",
-                     url: "/ContentManage/ArticleCategory/Form?keyValue=" + obj.data.F_Id,
+                     url: "/ContentManage/ArticleCategory/Form?keyValue=" + id,
                      width: "500px",
                      height: "500px",
                      data: obj.data,
@@ -202,7 +196,7 @@
              else if (obj.event === 'details') {
                  common.modalOpen({
                      title: "查看界面",
-                     url: "/ContentManage/ArticleCategory/Details?keyValue=" + obj.data.F_Id,
+                     url: "/ContentManage/ArticleCategory/Details?keyValue=" + id,
                      width: "500px",
                      height: "500px",
                      data: obj.data,

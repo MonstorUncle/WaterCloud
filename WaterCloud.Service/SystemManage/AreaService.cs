@@ -20,7 +20,7 @@ namespace WaterCloud.Service.SystemManage
         {
         }
         //获取类名
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         /// <summary>
         /// 缓存操作类
         /// </summary>
@@ -37,26 +37,18 @@ namespace WaterCloud.Service.SystemManage
         }
         public async Task<List<AreaEntity>> GetLookList(int layers=0)
         {
-            var list =new List<AreaEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
-            {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
-            }
+            var query =repository .IQueryable ().Where(t => t.F_DeleteMark == false && t.F_EnabledMark == true);
             if (layers!=0)
             { 
-                list = list.Where(t => t.F_Layers == layers).ToList();
+                query = query.Where(t => t.F_Layers == layers);
             }
-            return GetFieldsFilterData(list.Where(t => t.F_DeleteMark == false && t.F_EnabledMark == true).OrderBy(t => t.F_SortCode).ToList(), className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u","", query);
+            return query.OrderBy(t => t.F_SortCode).ToList();
         }
         public async Task<AreaEntity> GetLookForm(string keyValue)
         {
             var cachedata =await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata, className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
         public async Task<AreaEntity> GetForm(string keyValue)
         {

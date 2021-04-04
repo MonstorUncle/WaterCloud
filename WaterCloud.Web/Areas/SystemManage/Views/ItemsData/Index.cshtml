@@ -63,9 +63,15 @@
             },
             defaultToolbar: [],
             search:false,
-            page: false,
+            limit: 9999,//每页数据 默认
+            page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                layout: ['count'] //自定义分页布局
+                , first: false //不显示首页
+                , last: false //不显示尾页
+            },
             height: 'full-110',
             cols: [[
+                { type: "radio", width: 50, fixed: 'left' },
                 { field: 'F_ItemName', title: '名称', width: 120 },
                 { field: 'F_ItemCode', title: '编号', width: 120 },
                 { field: 'F_SortCode', title: '排序', width: 60 },
@@ -111,13 +117,16 @@
             //执行搜索重载
             commonTable.reloadtable({
                 elem: 'currentTableId',
-                page: false,
+                page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                    layout: ['count'] //自定义分页布局
+                    , first: false //不显示首页
+                    , last: false //不显示尾页
+                },
                 where: {
                     itemId: treeid,
                     keyword: data.field.txt_keyword,
                 },
             });
-            item = null;
             return false;
         });
         // 监听搜索操作
@@ -126,15 +135,14 @@
             DemoTree.fuzzySearch(data.field.item_keyword);
             return false;
         });
-        var item;
-        table.on('row(currentTableFilter)', function (obj) {
-            obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-            item = obj;
-        })
+        //行点击事件监听，控制按钮显示
+        var oneList = ["NF-edit", "NF-delete", "NF-details"];//选择1条显示
+        commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
         /**
          * toolbar监听事件
          */
         table.on('toolbar(currentTableFilter)', function (obj) {
+            var data = table.checkStatus('currentTableId').data;
             if (obj.event === 'add') {  // 监听操作
                 if (!treeid) {
                     return false;
@@ -147,38 +155,38 @@
                 });
             }
             else if (obj.event === 'delete') {
-                if (item == null) {
+                if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.deleteForm({
                     url: "/SystemManage/ItemsData/DeleteForm",
-                    param: { keyValue: item.data.F_Id },
+                    param: { keyValue: data[0].F_Id },
                     success: function () {
                         common.reload('data-search-btn');
                     }
                 });
             }
             else if (obj.event === 'edit') {
-                if (item == null) {
+                if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.modalOpen({
                     title: "编辑字典",
-                    url: "/SystemManage/ItemsData/Form?itemId=" + treeid + "&keyValue=" + item.data.F_Id,
+                    url: "/SystemManage/ItemsData/Form?itemId=" + treeid + "&keyValue=" + data[0].F_Id,
                     width: "450px",
                     height: "350px",
                 });
             }
             else if (obj.event === 'details') {
-                if (item == null) {
+                if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.modalOpen({
                     title: "查看字典",
-                    url: "/SystemManage/ItemsData/Details?keyValue=" + item.data.F_Id,
+                    url: "/SystemManage/ItemsData/Details?keyValue=" + data[0].F_Id,
                     width: "450px",
                     height: "350px",
                     btn: []
@@ -231,11 +239,11 @@
                 </fieldset>
                 <script type="text/html" id="toolbarDemo">
                     <div class="layui-btn-container" id="toolbar">
-                        <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
-                        <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                        <button id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                        <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
-                        <button id="NF-itemstype" authorize="yes" class="layui-btn layui-btn-sm  data-itemstype-btn layui-hide" lay-event="itemstype"> <i class="fa fa-key"></i>分类管理</button>
+                        <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
+                        <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                        <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                        <button id="NF-details" name="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                        <button id="NF-itemstype" authorize="yes" class="layui-btn layui-btn-sm  data-itemstype-btn" lay-event="itemstype"> <i class="fa fa-key"></i>分类管理</button>
                     </div>
                 </script>
                 <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>

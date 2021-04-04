@@ -47,7 +47,7 @@
 
             <script type="text/html" id="toolbarDemo">
                 <div class="layui-btn-container" id="toolbar">
-                    <button id="NF-removelog" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe640;</i>清空日志</button>
+                    <button id="NF-removelog" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="removelog"><i class="layui-icon">&#xe640;</i>清空日志</button>
                 </div>
             </script>
             <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
@@ -69,8 +69,8 @@
                 id: 'currentTableId',
                 url: '/SystemSecurity/Log/GetGridJson',
                 cols: [[
-                    { field: 'F_Account', title: '账户', width: 100, sort: true },
-                    { field: 'F_NickName', title: '姓名', width: 100, sort: true },
+                    { field: 'F_Account', title: '账户', width: 150, sort: true },
+                    { field: 'F_NickName', title: '姓名', width: 120, sort: true },
                     { field: 'F_ModuleName', title: '操作菜单', width: 220, sort: true },
                     {
                         field: 'F_Type', title: '操作类型', width: 120, sort: true,
@@ -131,9 +131,8 @@
              * toolbar监听事件
              */
             table.on('toolbar(currentTableFilter)', function (obj) {
-                if (obj.event === 'add') {  // 监听删除操作
+                if (obj.event === 'removelog') {  // 监听删除操作
                     common.modalOpen({
-                        id: "removelog",
                         title: "清空日志",
                         url: "/SystemSecurity/Log/RemoveLog",
                         width: "300px",

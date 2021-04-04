@@ -56,20 +56,22 @@
                 },
                 height: 'full-150',
                 cols: [[
+                    { type: "radio", width: 50 },
                     { field: 'Operation', title: '规则间条件', width: 120 },
                     { field: 'Filters', title: '规则内容', minWidth: 200 },
                     { field: 'Description', title: '规则备注', minWidth: 200 },
+                    { title: '操作', width: 130, toolbar: '#currentTableBar', align: "center" }
                 ]]
             });
-            var entity;
-            table.on('row(currentTableFilter)', function (obj) {
-                obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-                entity = obj;
-            })
+            //行点击事件监听，控制按钮显示
+            var oneList = ["NF-edit", "NF-delete"];//选择1条显示
+            commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
             //toolbar监听事件
             table.on('toolbar(currentTableFilter)', function (obj) {
+                var data = table.checkStatus('currentTableId').data;
+                var id = data.length > 0 ? data[0].F_Id : null;
+                var module = $('#F_ModuleId').val();
                 if (obj.event === 'add') {  // 监听删除操作
-                    var module = $('#F_ModuleId').val();
                     if (!module) {
                         common.modalMsg("未选中模块", "warning");
                         return false;
@@ -82,7 +84,7 @@
                     });
                 }
                 else if (obj.event === 'delete') {
-                    if (entity == null) {
+                    if (id == null) {
                         common.modalMsg("未选中数据", "warning");
                         return false;
                     }
@@ -94,7 +96,7 @@
                             try {
                                 var cachedata = table.cache.currentTableId;
                                 for (var i = 0; i < cachedata.length; i++) {
-                                    if (entity.data.F_Id == cachedata[i].F_Id) {
+                                    if (id == cachedata[i].F_Id) {
                                         cachedata.splice(i, 1);
                                         break;
                                     }
@@ -115,18 +117,64 @@
                     });
                 }
                 else if (obj.event === 'edit') {
-                    if (entity == null) {
+                    if (id == null) {
                         common.modalMsg("未选中数据", "warning");
                         return false;
                     }
-                    var module = $('#F_ModuleId').val();
                     if (!module) {
                         common.modalMsg("未选中模块", "warning");
                         return false;
                     }
                     common.modalOpen({
                         title: "编辑规则",
-                        url: "/SystemOrganize/DataPrivilegeRule/RuleForm?keyValue=" + entity.data.F_Id + "&module=" + module,
+                        url: "/SystemOrganize/DataPrivilegeRule/RuleForm?keyValue=" + id + "&module=" + module,
+                        width: "750px",
+                        height: "500px",
+                    });
+                }
+                return false;
+            });
+            //toolrow监听事件
+            table.on('tool(currentTableFilter)', function (obj) {
+                var id = obj.data.F_Id;
+                var module = $('#F_ModuleId').val();
+                if (obj.event === 'delete') {
+                    common.modalConfirm("注：您确定要删除该项数据吗？", function (r) {
+                        if (r) {
+                            var index = parent.layer.load(0, {
+                                shade: [0.5, '#000'], //0.1透明度的背景
+                            });
+                            try {
+                                var cachedata = table.cache.currentTableId;
+                                for (var i = 0; i < cachedata.length; i++) {
+                                    if (id == cachedata[i].F_Id) {
+                                        cachedata.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                                table.reload('currentTableId', {
+                                    data: cachedata
+                                });
+                                entity = null;
+                                common.modalMsg("操作成功", "success");
+                            } catch (e) {
+                                alert(e);
+                            }
+                            parent.layer.close(index);
+                        }
+                        else {
+                            return false;
+                        }
+                    });
+                }
+                else if (obj.event === 'edit') {
+                    if (!module) {
+                        common.modalMsg("未选中模块", "warning");
+                        return false;
+                    }
+                    common.modalOpen({
+                        title: "编辑规则",
+                        url: "/SystemOrganize/DataPrivilegeRule/RuleForm?keyValue=" + id + "&module=" + module,
                         width: "750px",
                         height: "500px",
                     });
@@ -182,9 +230,6 @@
                     common.modalMsg("未添加规则", "warning");
                     return false;
                 }
-                // 单击之后提交按钮不可选,防止重复提交
-                $('.site-demo-active').addClass('layui-btn-disabled');
-                $('.site-demo-active').attr('disabled', 'disabled');
                 var postData = data.field;
                 postData.listData = JSON.stringify(cachedata);
                 common.submitForm({
@@ -205,23 +250,23 @@
             <fieldset class="table-search-fieldset">
                 <div class="layui-form layuimini-form" lay-filter="adminform">
                     <div class="layui-form-item">
-                        <div class="layui-inline layui-hide">
+                        <div class="layui-col-md4 layui-hide">
                             <label class="layui-form-label required">模块编号</label>
-                            <div class="layui-input-inline">
+                            <div class="layui-input-block">
                                 <select id="F_ModuleId" name="F_ModuleId" lay-filter="F_ModuleId" lay-verify="required" lay-search>
                                     <option value="">请选择</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="layui-inline layui-hide">
+                        <div class="layui-col-md4 layui-hide">
                             <label class="layui-form-label required">排序</label>
-                            <div class="layui-input-inline">
+                            <div class="layui-input-block">
                                 <input type="number" pattern="[0-9]*" id="F_SortCode" name="F_SortCode" lay-verify="required|number" oninput="if(value.length>8)value=value.slice(0,8)" autocomplete="off" class="layui-input">
                             </div>
                         </div>
-                        <div class="layui-inline layui-hide">
+                        <div class="layui-col-md4 layui-hide">
                             <label class="layui-form-label">选项</label>
-                            <div class="layui-input-inline">
+                            <div class="layui-input-block">
                                 <input type="checkbox" name="F_EnabledMark" id="F_EnabledMark" checked="" value="true" title="有效标识">
                             </div>
                         </div>
@@ -233,10 +278,14 @@
             </fieldset>
             <script type="text/html" id="toolbarDemo">
                 <div class="layui-btn-container" id="toolbar">
-                    <button id="NF-add" class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
-                    <button id="NF-edit" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                    <button id="NF-delete" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                    <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
+                    <button id="NF-edit" name="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                    <button id="NF-delete" name="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
                 </div>
+            </script>
+            <script type="text/html" id="currentTableBar">
+                <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+                <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
             </script>
             <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
         </div>

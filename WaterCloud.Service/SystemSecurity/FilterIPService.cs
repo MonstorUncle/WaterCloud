@@ -22,7 +22,7 @@ namespace WaterCloud.Service.SystemSecurity
 
         private string cacheKey = "watercloud_filterip_";// IP过滤
         //获取类名
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         public FilterIPService(IDbContext context) : base(context)
         {
         }
@@ -39,27 +39,19 @@ namespace WaterCloud.Service.SystemSecurity
         }
         public async Task<List<FilterIPEntity>> GetLookList(string keyword)
         {
-            var list = new List<FilterIPEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
-            {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
-            }
+            var query = repository.IQueryable().Where(u => u.F_DeleteMark == false);
             if (!string.IsNullOrEmpty(keyword))
             {
-                list = list.Where(t => t.F_StartIP.Contains(keyword)||t.F_EndIP.Contains(keyword)).ToList();
-
+                //此处需修改
+                query = query.Where(t => t.F_StartIP.Contains(keyword) || t.F_EndIP.Contains(keyword));
             }
-            return GetFieldsFilterData(list.Where(a => a.F_DeleteMark == false).OrderBy(t => t.F_CreatorTime).ToList(), className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u", "", query);
+            return query.OrderBy(t => t.F_CreatorTime).ToList();
         }
         public async Task<FilterIPEntity> GetLookForm(string keyValue)
         {
             var cachedata =await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata, className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
         public async Task<FilterIPEntity> GetForm(string keyValue)
         {
@@ -68,8 +60,12 @@ namespace WaterCloud.Service.SystemSecurity
         }
         public async Task DeleteForm(string keyValue)
         {
-            await repository.Delete(t => t.F_Id == keyValue);
-            await CacheHelper.Remove(cacheKey + keyValue);
+            var ids = keyValue.Split(",");
+            await repository.Delete(t => ids.Contains(t.F_Id));
+			foreach (var item in ids)
+			{
+                await CacheHelper.Remove(cacheKey + item);
+            }
             await CacheHelper.Remove(cacheKey + "list");
         }
         public async Task<bool> CheckIP(string ip)

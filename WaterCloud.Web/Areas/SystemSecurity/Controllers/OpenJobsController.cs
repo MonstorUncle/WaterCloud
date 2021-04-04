@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using WaterCloud.Domain.SystemSecurity;
 using WaterCloud.Service;
+using System.Linq;
 
 namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
 {
@@ -14,14 +15,14 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
     [Area("SystemSecurity")]
     public class OpenJobsController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public OpenJobsService _service { get; set; }
 
         //获取详情
         [HttpGet]
         public async Task<ActionResult> GetFormJson(string keyValue)
         {
-            var data = await _service.GetLookForm(keyValue);
+            var data = await _service.GetForm(keyValue);
             return Content(data.ToJson());
         }
         [HttpPost]
@@ -40,11 +41,11 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
             try
             {
                 await _service.SubmitForm(entity, keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
         [HttpPost]
@@ -55,11 +56,11 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
             try
             {
                 await _service.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
 
@@ -87,6 +88,17 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
             var data = await _service.GetLookList(pagination, keyword);
             return Success(pagination.records, data);
         }
+        [HttpGet]
+        [HandlerAjaxOnly]
+        public async Task<ActionResult> GetLogJson(string keyValue, string keyword)
+        {
+            var data = await _service.GetLogList(keyValue);
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                data = data.Where(a => a.F_Description.Contains(keyword)).ToList();
+            }
+            return Success(data.Count, data);
+        }
         /// <summary>
         /// 改变任务状态，启动/停止
         /// </summary>
@@ -96,11 +108,25 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
             try
             {
                 await _service.ChangeJobStatus(keyValue, status);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
+            }
+        }
+        [HttpPost]
+        [HandlerAjaxOnly]
+        public async Task<ActionResult> DeleteLogForm(string keyValue)
+        {
+            try
+            {
+                await _service.DeleteLogForm(keyValue);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
+            }
+            catch (Exception ex)
+            {
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
     }

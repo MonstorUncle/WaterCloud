@@ -43,8 +43,11 @@
 
             <script type="text/html" id="toolbarDemo">
                 <div class="layui-btn-container" id="toolbar">
-                    <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                    <button id="NF-details" name="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
                 </div>
+            </script>
+            <script type="text/html" id="currentTableBar">
+                <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
             </script>
             <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
         </div>
@@ -60,6 +63,7 @@
             //加载数据
             wcLoading.close();
             //权限控制(js是值传递)
+            currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
             toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
             commonTable.rendertable({
                 elem: '#currentTableId',
@@ -67,7 +71,9 @@
                 url: '/SystemSecurity/AppLog/GetGridJson',
                 sqlkey: 'FileName',//数据库主键
                 cols: [[
+                    { type: "radio", width: 50, fixed: 'left'},
                     { field: 'FileName', title: '文件名称', minWidth: 100, sort: true },
+                    { title: '操作', width: 90, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
                 ]]
             });
             //select验证
@@ -96,23 +102,22 @@
                 });
                 return false;
             });
-            var entity;
-            table.on('row(currentTableFilter)', function (obj) {
-                obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-                entity = obj;
-            });
+            //行点击事件监听，控制按钮显示
+            var oneList = ["NF-details"];//选择1条显示
+            commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
             /**
              * toolbar监听事件
              */
             table.on('toolbar(currentTableFilter)', function (obj) {
+                var data = table.checkStatus('currentTableId').data;
                 if (obj.event === 'details') {  // 监听删除操作
-                    if (entity == null) {
+                    if (data.length == 0) {
                         common.modalMsg("未选中数据", "warning");
                         return false;
                     }
                     var html = "";
                     //高度宽度超出就适应屏幕
-                    var _width = document.body.clientWidth >500 ? '500px' : document.body.clientWidth - 20 + 'px';
+                    var _width = document.body.clientWidth > 500 ? '500px' : document.body.clientWidth - 20 + 'px';
                     var _height = document.body.clientHeight > 500 ? '500px' : document.body.clientHeight - 20 + 'px';
                     if (common.currentWindow()) {
                         _width = common.currentWindow().document.body.clientWidth > 500 ? '500px' : common.currentWindow().document.body.clientWidth - 20 + 'px';
@@ -121,7 +126,7 @@
                     common.ajax({
                         url: "/SystemSecurity/AppLog/GetFormJson",
                         dataType: "json",
-                        data: { keyValue: entity.data.FileName },
+                        data: { keyValue: data[0].FileName },
                         async: false,
                         success: function (data) {
                             html = "<pre class='no-padding no-margin no-top-border' style='padding: 15px'><code class='html'>" + data.data + "</code></pre>";
@@ -147,6 +152,41 @@
                     } else {
                         _that.addClass('layui-hide');
                     }
+                }
+                return false;
+            });
+            //toolrow监听事件
+            table.on('tool(currentTableFilter)', function (obj) {
+                if (obj.event === 'details') {
+                    var html = "";
+                    //高度宽度超出就适应屏幕
+                    var _width = document.body.clientWidth > 500 ? '500px' : document.body.clientWidth - 20 + 'px';
+                    var _height = document.body.clientHeight > 500 ? '500px' : document.body.clientHeight - 20 + 'px';
+                    if (common.currentWindow()) {
+                        _width = common.currentWindow().document.body.clientWidth > 500 ? '500px' : common.currentWindow().document.body.clientWidth - 20 + 'px';
+                        _height = common.currentWindow().document.body.clientHeight > 500 ? '500px' : common.currentWindow().document.body.clientHeight - 20 + 'px';
+                    }
+                    common.ajax({
+                        url: "/SystemSecurity/AppLog/GetFormJson",
+                        dataType: "json",
+                        data: { keyValue: obj.data.FileName },
+                        async: false,
+                        success: function (data) {
+                            html = "<pre class='no-padding no-margin no-top-border' style='padding: 15px'><code class='html'>" + data.data + "</code></pre>";
+                            layer.open({
+                                type: 1,
+                                shade: 0.3,
+                                title: '查看日志',
+                                isOutAnim: true,//关闭动画
+                                fix: false,
+                                area: [_width, _height],
+                                content: html,
+                                success: function (layero, index) {
+                                    $(layero).addClass("scroll-wrapper");//苹果 iframe 滚动条失效解决方式
+                                },
+                            });
+                        }
+                    });
                 }
                 return false;
             });

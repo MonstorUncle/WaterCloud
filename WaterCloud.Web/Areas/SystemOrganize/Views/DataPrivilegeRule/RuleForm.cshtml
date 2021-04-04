@@ -2,215 +2,227 @@
     ViewBag.Title = "Form";
     Layout = "~/Views/Shared/_Form.cshtml";
 }
-    <script>
-        layui.use(['jquery', 'form', 'laydate', 'common', 'xmSelect', 'optimizeSelectOption'], function () {
-            var form = layui.form,
-                $ = layui.$,
-                common = layui.common,
-                xmSelect = layui.xmSelect;
-            var keyValue = $.request("keyValue");
-            var module = $.request("module");
-            var cout = 0;
-            $(function () {
-                initControl();
+<script>
+    layui.use(['jquery', 'form', 'laydate', 'common', 'xmSelect', 'optimizeSelectOption'], function () {
+        var form = layui.form,
+            $ = layui.$,
+            common = layui.common,
+            xmSelect = layui.xmSelect;
+        var keyValue = $.request("keyValue");
+        var module = $.request("module");
+        var cout = 0;
+        $(function () {
+            initControl();
+            if (!!keyValue) {
+                var tempdata = common.currentWindow().layui.table.cache.currentTableId;
+                var Filters = [];
+                for (var i = 0; i < tempdata.length; i++) {
+                    if (keyValue == tempdata[i].F_Id) {
+                        Filters = JSON.parse(tempdata[i].Filters);
+                        $('#Description').val(tempdata[i].Description);
+                        break;
+                    }
+                }
+                for (var i = 0; i < Filters.length; i++) {
+                    $('#NF-add').click();
+                    $('#fields' + i).val(Filters[i].Key);
+                    $('#symbol' + i).val(Filters[i].Contrast);
+                    $('#lookname' + i).val(Filters[i].Text);
+                    $('#values' + i).val(Filters[i].Value);
+                }
+                form.render();
+            }
+            else {
+                $('#NF-add').click();
+                form.render();
+            }
+            form.render();
+        });
+        wcLoading.close();
+        function initControl() {
+            $("#fields").bindSelect({
+                url: "/SystemManage/ModuleFields/GetSelectJson?moduleId=" + module,
+            });
+        }
+        $(document).on('click', '#NF-add', function () {
+            var target = $('#ruledata');
+            var html = $("#divInputTemplate").prop("outerHTML");
+            html = html.replace(/rulecontext/g, "rulecontext" + cout); // 替换多个
+            html = html.replace(/条件规则/g, "条件规则" + (cout + 1)); // 替换多个
+            html = html.replace(/fields/g, "fields" + cout); // 替换多个
+            html = html.replace(/symbol/g, "symbol" + cout); // 替换多个
+            html = html.replace(/lookname/g, "lookname" + cout); // 替换多个
+            html = html.replace(/condition/g, "condition" + cout); // 替换多个
+            html = html.replace(/divInputTemplate/g, "divInput" + cout);
+            html = html.replace(/values/g, "values" + cout);
+            html = html.replace(/searchCout/g, cout);
+            var obj = $(html);
+            obj.removeClass("layui-hide");
+            obj.appendTo(target);
+            cout++;
+            form.render();
+        });
+        //select验证
+        form.verify({
+            required: function (value, item) {
+                var msg = "必填项不能为空";
+                value = $.trim(value);
+                var isEmpty = !value || value.length < 1;
+                // 当前验证元素是select且为空时,将页面定位至layui渲染的select处，或自定义想定位的位置
+                if (item.tagName == 'SELECT' && isEmpty) {
+                    $("html").animate({
+                        scrollTop: $(item).siblings(".layui-form-select").offset().top - 74
+                    }, 50);
+                }
+                if (isEmpty) {
+                    return msg;
+                }
+            }
+        });
+        //监听提交
+        var lock = false;
+        form.on('submit(saveBtn)', function (data) {
+            if (!lock) {
+                var index = parent.layer.load(0, {
+                    shade: [0.5, '#000'], //0.1透明度的背景
+                });
+                var postData = {};
+                postData.Operation = data.field.Operation;
+                postData.Description = data.field.Description;
                 if (!!keyValue) {
-                    var tempdata = common.currentWindow().layui.table.cache.currentTableId;
-                    var Filters = [];
+                    postData.F_Id = keyValue;
+                }
+                else {
+                    postData.F_Id = uuid();
+                }
+                var Filters = [];
+                for (var i = 0; i < cout; i++) {
+                    var temp = {};
+                    temp["Key"] = $('#fields' + + i).val();
+                    temp["Contrast"] = $('#symbol' + + i).val();
+                    temp["Text"] = $('#lookname' + + i).val();
+                    temp["Value"] = $('#values' + + i).val();
+                    if (!temp["Value"]) {
+                        temp["Value"] = temp["Text"];
+                    }
+                    if (!!temp["Key"]) {
+                        Filters.push(temp);
+                    }
+                }
+                postData.Filters = JSON.stringify(Filters);
+                var tempdata = common.currentWindow().layui.table.cache.currentTableId;
+                if (!!keyValue) {
                     for (var i = 0; i < tempdata.length; i++) {
                         if (keyValue == tempdata[i].F_Id) {
-                            Filters = JSON.parse(tempdata[i].Filters);
-                            $('#Description').val(tempdata[i].Description);
+                            tempdata[i].Filters = postData.Filters;
+                            tempdata[i].Description = postData.Description;
                             break;
                         }
                     }
-                    for (var i = 0; i < Filters.length; i++) {
-                        $('#NF-add').click();
-                        $('#fields' + i).val(Filters[i].Key);
-                        $('#symbol' + i).val(Filters[i].Contrast);
-                        $('#lookname' + i).val(Filters[i].Text);
-                        $('#values' + i).val(Filters[i].Value);
-                    }
-                    form.render();
                 }
                 else {
-                    $('#NF-add').click();
-                    form.render();
+                    tempdata.push(postData);
                 }
-                form.render();
-            });
-            wcLoading.close();
-            function initControl() {
-                $("#fields").bindSelect({
-                    url: "/SystemManage/ModuleFields/GetSelectJson?moduleId=" + module,
+                common.modalMsg("操作成功", "success");
+                common.currentWindow().layui.table.reload('currentTableId', {
+                    data: tempdata
+                });
+                parent.layer.close(index);
+                common.modalClose();
+                lock = false;
+            }
+            return false;
+        });
+    });
+    function deleteRule(data) {
+        var obj = document.getElementById(data);//建议使用ID
+        if (obj != null) {
+            obj.parentNode.removeChild(obj);
+        }
+        layui.use(['jquery', 'form', 'laydate', 'common'], function () {
+            layui.form.render();
+        });
+    }
+    function search(data) {
+        var fields = $('#fields' + data).val();
+        if (fields != '{loginRole}' && fields != '{loginUser}' && fields != '{loginOrg}') {
+            return false;
+        }
+        $('#lookname' + data).val(null);
+        $('#values' + data).val(null);
+        layui.use(['jquery', 'form', 'common'], function () {
+            var form = layui.form,
+                $ = layui.$,
+                common = layui.common;
+            var parentform = window.name;
+            //不同弹窗
+            if (fields == '{loginRole}') {
+                common.modalOpen({
+                    title: "选择角色",
+                    url: "/SystemOrganize/Role/AddForm?parentform=" + parentform + "&name=" + "lookname" + data + "&value=" + "values" + data,
+                    width: "650px",
+                    height: "600px",
                 });
             }
-            $(document).on('click', '#NF-add', function () {
-                var target = $('#ruledata');
-                var html = $("#divInputTemplate").prop("outerHTML");
-                html = html.replace(/rulecontext/g, "rulecontext" + cout); // 替换多个
-                html = html.replace(/条件规则/g, "条件规则" + (cout+1)); // 替换多个
-                html = html.replace(/fields/g, "fields" + cout); // 替换多个
-                html = html.replace(/symbol/g, "symbol" + cout); // 替换多个
-                html = html.replace(/lookname/g, "lookname" + cout); // 替换多个
-                html = html.replace(/divInputTemplate/g, "divInput" + cout);
-                html = html.replace(/values/g, "values" + cout);
-                html = html.replace(/searchCout/g, cout);
-                var obj = $(html);
-                obj.removeClass("layui-hide");
-                obj.appendTo(target);
-                cout++;
-                form.render();
-            });
-            //select验证
-            form.verify({
-                required: function (value, item) {
-                    var msg = "必填项不能为空";
-                    value = $.trim(value);
-                    var isEmpty = !value || value.length < 1;
-                    // 当前验证元素是select且为空时,将页面定位至layui渲染的select处，或自定义想定位的位置
-                    if (item.tagName == 'SELECT' && isEmpty) {
-                        $("html").animate({
-                            scrollTop: $(item).siblings(".layui-form-select").offset().top - 74
-                        }, 50);
-                    }
-                    if (isEmpty) {
-                        return msg;
-                    }
-                }
-            });
-            //监听提交
-            var lock = false;
-            form.on('submit(saveBtn)', function (data) {
-                if (!lock) {
-                    var index = parent.layer.load(0, {
-                        shade: [0.5, '#000'], //0.1透明度的背景
-                    });
-                    var postData = {};
-                    postData.Operation = data.field.Operation;
-                    postData.Description = data.field.Description;
-                    if (!!keyValue) {
-                        postData.F_Id = keyValue;
-                    }
-                    else {
-                        postData.F_Id = uuid();
-                    }
-                    var Filters = [];
-                    for (var i = 0; i < cout; i++) {
-                        var temp = {};
-                        temp["Key"] = $('#fields' + + i).val();
-                        temp["Contrast"] = $('#symbol' + + i).val();
-                        temp["Text"] = $('#lookname' + + i).val();
-                        temp["Value"] = $('#values' + + i).val();
-                        if (!temp["Value"]) {
-                            temp["Value"] = temp["Text"];
-                        }
-                        if (!!temp["Key"]) {
-                            Filters.push(temp);
-                        }
-                    }
-                    postData.Filters = JSON.stringify(Filters);
-                    var tempdata = common.currentWindow().layui.table.cache.currentTableId;
-                    if (!!keyValue) {
-                        for (var i = 0; i < tempdata.length; i++) {
-                            if (keyValue == tempdata[i].F_Id) {
-                                tempdata[i].Filters = postData.Filters;
-                                tempdata[i].Description = postData.Description;
-                                break;
-                            }
-                        }
-                    }
-                    else {
-                        tempdata.push(postData);
-                    }
-                    common.modalMsg("操作成功", "success");
-                    common.currentWindow().layui.table.reload('currentTableId', {
-                        data: tempdata
-                    });
-                    parent.layer.close(index);
-                    common.modalClose();
-                    lock = false;
-                }
+            else if (fields == '{loginUser}') {
+                common.modalOpen({
+                    title: "选择用户",
+                    url: "/SystemOrganize/User/AddForm?parentform=" + parentform + "&name=" + "lookname" + data + "&value=" + "values" + data,
+                    width: "650px",
+                    height: "600px",
+                });
+            }
+            else if (fields == '{loginOrg}') {
+                common.modalOpen({
+                    title: "选择组织",
+                    url: "/SystemOrganize/Organize/AddForm?parentform=" + parentform + "&name=" + "lookname" + data + "&value=" + "values" + data,
+                    width: "650px",
+                    height: "600px",
+                });
+            }
+            else {
                 return false;
-            });
+            }
         });
-        function deleteRule(data) {
-            var obj = document.getElementById(data);//建议使用ID
-            if (obj != null) {
-                obj.parentNode.removeChild(obj);
-            }
-            layui.use(['jquery', 'form', 'laydate', 'common'], function () {
-                layui.form.render();
-            });
-        }
-        function search(data) {
-            var fields = $('#fields' + data).val();
-            if (fields != '{loginRole}' && fields != '{loginUser}' && fields != '{loginOrg}') {
-                return false;
-            }
-            $('#lookname' + data).val(null);
-            $('#values' + data).val(null);
-            layui.use(['jquery', 'form', 'common'], function () {
-                var form = layui.form,
-                    $ = layui.$,
-                    common = layui.common;
-                var parentform = window.name;
-                //不同弹窗
-                if (fields == '{loginRole}') {
-                    common.modalOpen({
-                        title: "选择角色",
-                        url: "/SystemOrganize/Role/AddForm?parentform=" + parentform+"&name=" + "lookname" + data + "&value=" + "values" + data,
-                        width: "650px",
-                        height: "600px",
-                    });
-                }
-                else if (fields == '{loginUser}') {
-                    common.modalOpen({
-                        title: "选择用户",
-                        url: "/SystemOrganize/User/AddForm?parentform=" + parentform +"&name=" + "lookname" + data + "&value=" + "values" + data,
-                        width: "650px",
-                        height: "600px",
-                    });
-                }
-                else if (fields == '{loginOrg}') {
-                    common.modalOpen({
-                        title: "选择组织",
-                        url: "/SystemOrganize/Organize/AddForm?parentform=" + parentform +"&name=" + "lookname" + data + "&value=" + "values" + data,
-                        width: "650px",
-                        height: "600px",
-                    });
-                }
-                else {
-                    return false;
-                }
-            });
-        }
-    </script>
+    }
+</script>
 
 <body>
     <div class="layui-input-item layui-hide" id="divInputTemplate">
         <label class="layui-form-label required">条件规则</label>
         <div class="layui-input-block" style="padding-right: 70px;">
-            @*<input type="text" id="rulecontext" name="rulecontext" class="layui-input" autocomplete="off" placeholder="请输入规则">*@
-            <select id="fields" name="fields" lay-verify="required" lay-search>
-                <option value="">请选择</option>
-                <option value="{loginRole}">{当前登录用户的角色}</option>
-                <option value="{loginUser}">{当前登录的用户}</option>
-                <option value="{loginOrg}">{当前登录用户的部门}</option>
-            </select>
-            <select id="symbol" name="symbol" lay-verify="required" lay-search>
-                <option value="">请选择</option>
-                <option value=">=">大于等于</option>
-                <option value="<=">小于等于</option>
-                <option value="==">等于</option>
-                <option value="!=">不等于</option>
-                <option value="contains">包含</option>
-                <option value="in">属于</option>
-                <option value="intersect">含有任意一个</option>
-            </select>
-            <input type="text" id="lookname" name="lookname" class="layui-input" lay-verify="required" maxlength="50" value="" placeholder="请输入值">
-            <input type="text" id="values" name="values" class="layui-input layui-hide">
+            <div class="layui-input-block" style="margin-left:0px">
+                <select id="condition" name="condition" lay-verify="required" disabled lay-search>
+                    <option value="and" selected>并且</option>
+                    <option value="or">或者</option>
+                </select>
+            </div>
+            <div class="layui-input-inline" style="width:145px">
+                <select id="fields" name="fields" lay-verify="required" lay-search>
+                    <option value="">请选择</option>
+                    <option value="{loginRole}">{当前登录用户的角色}</option>
+                    <option value="{loginUser}">{当前登录的用户}</option>
+                    <option value="{loginOrg}">{当前登录用户的部门}</option>
+                </select>
+            </div>
+            <div class="layui-input-inline" style="width:100px">
+                <select id="symbol" name="symbol" lay-verify="required" lay-search>
+                    <option value="">请选择</option>
+                    <option value=">=">大于等于</option>
+                    <option value="<=">小于等于</option>
+                    <option value="==">等于</option>
+                    <option value="!=">不等于</option>
+                    <option value="contains">包含</option>
+                    <option value="in">属于</option>
+                    <option value="intersect">含有任意一个</option>
+                </select>
+            </div>
+            <div class="layui-input-inline" style="width:180px">
+                <input type="text" id="lookname" name="lookname" class="layui-input" lay-verify="required" maxlength="50" value="" placeholder="请输入值">
+                <input type="text" id="values" name="values" class="layui-input layui-hide">
+            </div>
             <button class="layui-btn layui-btn-danger" style="position: absolute;top: 0;right: 6px;cursor: pointer;" onclick="deleteRule('divInputTemplate')"><i class="layui-icon">&#xe67e;</i></button>
-            <button class="layui-btn layui-btn-primary" style="position: absolute;top: 0;right: 6px;cursor: pointer;margin-top:75px" onclick="search(searchCout)">...</button>
+            <button class="layui-btn layui-btn-primary" style="position: absolute;top: 0;right: 6px;cursor: pointer;margin-top:40px" onclick="search(searchCout)">...</button>
         </div>
     </div>
     <div class="layuimini-container">

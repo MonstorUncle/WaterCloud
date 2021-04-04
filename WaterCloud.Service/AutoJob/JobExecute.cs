@@ -22,7 +22,7 @@ namespace WaterCloud.Service.AutoJob
 
         public JobExecute(ISchedulerFactory schedulerFactory, IJobFactory iocJobfactory)
         {
-            _scheduler = schedulerFactory.GetScheduler().Result;
+            _scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
             _scheduler.JobFactory = iocJobfactory;
             _schedulerFactory = schedulerFactory;
             _iocJobfactory = iocJobfactory;
@@ -35,6 +35,7 @@ namespace WaterCloud.Service.AutoJob
                 string jobId="";
                 JobDataMap jobData = null;
                 OpenJobEntity dbJobEntity = null;
+                DateTime now = DateTime.Now;
                 try
                 {
                     jobData = context.JobDetail.JobDataMap;
@@ -59,6 +60,7 @@ namespace WaterCloud.Service.AutoJob
                                         return;
                                     }
                                     #region 执行任务
+                                    _context.Session.BeginTransaction();
                                     //反射执行就行
                                     var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
                                     //反射取指定前后缀的dll
@@ -71,10 +73,38 @@ namespace WaterCloud.Service.AutoJob
                                     var obj = System.Activator.CreateInstance(implementType, _context);       // 创建实例(带参数)
                                     MethodInfo method = implementType.GetMethod("Start", new Type[] { });      // 获取方法信息
                                     object[] parameters = null;
-                                    method.Invoke(obj, parameters);                           // 调用方法，参数为空
+                                    var temp = (Task<AlwaysResult>)method.Invoke(obj, parameters);     // 调用方法，参数为空
                                     #endregion
                                     //需要同步，不然数据库连接会断开
-                                    autoJobService.UpdataLastRuntime(jobId).GetAwaiter().GetResult();
+                                    _context.Update<OpenJobEntity>(t => t.F_Id == jobId, a => new OpenJobEntity
+                                    {
+                                        F_LastRunTime = now
+                                    });
+                                    OpenJobLogEntity log = new OpenJobLogEntity();
+                                    log.F_Id = Utils.GuId();
+                                    log.F_JobId = jobId;
+                                    log.F_JobName = dbJobEntity.F_JobName;
+                                    log.F_CreatorTime = now;
+                                    if (temp.Result.state.ToString() == ResultType.success.ToString())
+                                    {
+                                        log.F_EnabledMark = true;
+                                        log.F_Description = "执行成功，" + temp.Result.message.ToString();
+                                    }
+                                    else
+                                    {
+                                        log.F_EnabledMark = false;
+                                        log.F_Description = "执行失败，" + temp.Result.message.ToString();
+                                    }
+                                    string HandleLogProvider = GlobalContext.SystemConfig.HandleLogProvider;
+                                    if (HandleLogProvider != Define.CACHEPROVIDER_REDIS)
+                                    {
+                                        _context.Insert(log);
+                                    }
+                                    else
+                                    {
+                                        await HandleLogHelper.HSetAsync(log.F_JobId, log.F_Id, log);
+                                    }
+                                    _context.Session.CommitTransaction();
                                 }
                             }
                         }

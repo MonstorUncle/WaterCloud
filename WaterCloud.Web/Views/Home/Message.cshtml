@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="../js/lay-module/dtree/dtree.css">
     <link rel="stylesheet" href="../js/lay-module/dtree/font/dtreefont.css">
     <script src="../js/framework-ui.js?v=@WaterCloud.Code.GlobalContext.GetVersion()"></script>
-    <script src="../lib/layui-v2.5.5/layui.js"></script>
-    <link rel="stylesheet" href="../lib/layui-v2.5.5/css/layui.css" media="all">
+    <script src="../lib/layui/layui.js"></script>
+    <link rel="stylesheet" href="../lib/layui/css/layui.css" media="all">
     <link rel="stylesheet" href="../css/public.css" media="all">
     <script src="../js/lay-config.js?v=@WaterCloud.Code.GlobalContext.GetVersion()" charset="utf-8"></script>
     <link href="../css/watercloud.css?v=@WaterCloud.Code.GlobalContext.GetVersion()" rel="stylesheet" />
@@ -318,8 +318,7 @@
             $('#messageClearBtn1').click(function () {
                 var thisObj = $(this);
                 common.ajax({
-                    url: "/InfoManage/Message/ReadAllMsgForm",
-                    param: { type: 0 },
+                    url: "/InfoManage/Message/ReadAllMsgForm?type=0",
                     type: "POST",
                     success: function () {
                         $('#message1').html("通知(0)");
@@ -330,8 +329,7 @@
             $('#messageClearBtn2').click(function () {
                 var thisObj = $(this);
                 common.ajax({
-                    url: "/InfoManage/Message/ReadAllMsgForm",
-                    param: { type: 1 },
+                    url: "/InfoManage/Message/ReadAllMsgForm?type=1",
                     type: "POST",
                     success: function () {
                         $('#message2').html("私信(0)");
@@ -343,8 +341,7 @@
             $('#messageClearBtn3').click(function () {
                 var thisObj = $(this);
                 common.ajax({
-                    url: "/InfoManage/Message/ReadAllMsgForm",
-                    param: { type: 2 },
+                    url: "/InfoManage/Message/ReadAllMsgForm?type=2",
                     type: "POST",
                     success: function () {
                         $('#message3').html("待办(0)");

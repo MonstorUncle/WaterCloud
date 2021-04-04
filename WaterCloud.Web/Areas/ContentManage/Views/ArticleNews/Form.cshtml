@@ -2,121 +2,7 @@
     ViewBag.Title = "Form";
     Layout = "~/Views/Shared/_Form.cshtml";
 }
-    <link href="~/css/stepcss.css" rel="stylesheet" />
-<script>
-    layui.use(['jquery', 'form', 'laydate', 'optimizeSelectOption', 'common', 'step'], function () {
-        var form = layui.form,
-            $ = layui.$,
-            common = layui.common,
-            laydate = layui.laydate;
-        upload = layui.upload,
-            step = layui.step;
-        var keyValue = $.request("keyValue");
-        //权限字段
-        common.authorizeFields('stepForm');
-        wcLoading.close();
-        //此处需修改
-        //类型为时间时
-        //laydate.render({
-        //elem: '#F_Birthday'
-        //, btns: ['clear', 'now']
-        //, trigger: 'click',
-        //format: 'yyyy-MM-dd',
-        //});
-        var postData = {};//分步骤表单，最终提交只能获取最后一个表单的数据，所以定义全局数组保存表单数据
-        step.render({
-            elem: '#stepForm',
-            filter: 'stepForm',
-            width: '100%', //设置容器宽度
-            stepWidth: '750px',
-            height: '600px',
-            stepItems: [{
-                title: '基本信息'
-            }, {
-                title: '详细描述'
-            }, {
-                title: 'SEO选项'
-            }]
-        });
-        form.on('submit(formStep)', function (data) {
-            postData = $.extend(postData, data.field);
-            step.next('#stepForm');
-            return false;
-        });
-
-        form.on('submit(formStep2)', function (data) {
-            postData = $.extend(postData, data.field);
-            postData["F_Description"] = UE.getEditor('F_Description').getContent();
-            step.next('#stepForm');
-            return false;
-        });
-
-        $('.pre').click(function () {
-            step.pre('#stepForm');
-        });
-
-        $('.next').click(function () {
-            step.next('#stepForm');
-        });
-        $(function () {
-            initControl();
-            if (!!keyValue) {
-                var newsdata = JSON.parse('@Html.Raw(ViewBag.Content)');
-                postData = newsdata;
-                common.val('stepForm', newsdata);
-                var Description = newsdata.F_Description;
-                if (!!newsdata.ImgUrl) {
-                    ImgUrlPic.src = newsdata.ImgUrl;
-                }
-                // editor准备好之后才可以使用
-                var editor = UE.getEditor("F_Description");
-                editor.ready(function () {
-                    editor.setContent(Description);
-                });
-                //减少请求数
-                //common.ajax({
-                //    url: '/ContentManage/ArticleNews/GetFormJson',
-                //    dataType: 'json',
-                //    data: { keyValue: keyValue },
-                //    async: false,
-                //    success: function (data) {
-                //    }
-                //});
-            }
-            form.render();
-        });
-
-        function initControl() {
-            //绑定数据源
-            //类型为下拉框时
-            $("#F_CategoryId").bindSelect({
-                url: "/ContentManage/ArticleCategory/GetListJson",
-                id: "F_Id",
-                text: "F_FullName",
-                search: true,
-            });
-        }
-        //监听提交
-        form.on('submit(saveBtn)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
-            postData = $.extend(postData, data.field);
-            if (!postData["F_IsTop"]) postData["F_IsTop"] = false;
-            if (!postData["F_IsHot"]) postData["F_IsHot"] = false;
-            if (!postData["F_IsRed"]) postData["F_IsRed"] = false;
-            if (!postData["F_EnabledMark"]) postData["F_EnabledMark"] = false;
-            common.submitForm({
-                url: '/ContentManage/ArticleNews/SubmitForm?keyValue=' + keyValue,
-                param: postData,
-                success: function () {
-                    common.reloadIframe("/ContentManage/ArticleNews/Index", 'data-search-btn');
-                }
-            })
-            return false;
-        });
-    });
-</script>
+<link href="~/css/stepcss.css" rel="stylesheet" />
 
 <body>
     <div class="layuimini-container">
@@ -145,21 +31,21 @@
                                     <input type="text" id="F_LinkUrl" name="F_LinkUrl" autocomplete="off" maxlength="255" class="layui-input" placeholder="填写后直接跳转到该网址">
                                 </div>
                             </div>
+
                             <div class="layui-form-item layui-hide">
                                 <label class="layui-form-label">封面图片</label>
                                 <div class="layui-input-block">
                                     <input type="text" class="layui-input" name="F_ImgUrl" id="F_ImgUrl" maxlength="255" readonly="readonly">
-                                    <button type="button" class="layui-btn" id="j_upload_img_btn">
-                                        <i class="layui-icon"></i>上传图片
-                                    </button>
-                                    <ul id="upload_img_wrap"></ul>
-                                    <textarea id="uploadEditor" style="display: none;"></textarea>
+                                    <button type="button" class="layui-btn" id="upload" style=" margin-top: 10px">上传图片</button>
                                 </div>
                             </div>
                             <div class="layui-form-item">
                                 <label class="layui-form-label"></label>
                                 <div class="layui-input-block">
-                                    <img id="F_ImgUrlPic" width="200" height="200" onclick="previewImg(this)" />
+                                    <div class="layui-upload-list">
+                                        <img id="F_ImgUrlPic" width="200" height="200" onclick="previewImg(this)" />
+                                        <p id="demoText"></p>
+                                    </div>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-hide">
@@ -197,7 +83,8 @@
                             <div class="layui-form-item layui-hide">
                                 <label class="layui-form-label required">内容描述</label>
                                 <div class="layui-input-block">
-                                    <textarea id="F_Description" name="F_Description" type="text/plain" style="width:100%;height:400px;"></textarea>
+                                    <textarea class=" layui-hide" id="F_Description" name="F_Description" lay-verify="required" type="text/plain" style="width:100%;height:400px;"></textarea>
+                                    <div id="editor"></div>
                                 </div>
                             </div>
                             <div class="layui-form-item">
@@ -269,75 +156,168 @@
         </div>
     </div>
 
-
-
-    <link href="~/lib/ueditor/themes/default/css/ueditor.css" rel="stylesheet" />
-    <script type="text/javascript" charset="utf-8" src="~/lib/ueditor/ueditor.config.js"></script>
-    <script type="text/javascript" charset="utf-8" src="~/lib/ueditor/ueditor.all.js"></script>
-    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
-    <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
-    <script type="text/javascript" charset="utf-8" src="~/lib/ueditor/lang/zh-cn/zh-cn.js"></script>
-
-    <script type="text/javascript">
-        // 加载 ueditor，传入的初始化参数可以覆盖掉 ueditor.config.js 中的配置
-        // 对于同一项目中使用不同的配置的 ueditor 场景非常有用
-        var ue = UE.getEditor('F_Description', {
-            initialFrameHeight: 250,
-            autoFloatEnabled: false, //取消悬浮
-            // , initialFrameWidth:796
-            zIndex: 0,
-            wordCount: false
-        });
-
-        // 实例化编辑器，这里注意配置项隐藏编辑器并禁用默认的基础功能。
-        var uploadEditor = UE.getEditor("uploadEditor", {
-            isShow: false,
-            focus: false,
-            enableAutoSave: false,
-            autoSyncData: false,
-            autoFloatEnabled: false,
-            wordCount: false,
-            sourceEditor: null,
-            scaleEnabled: true,
-            toolbars: [["insertimage", "attachment"]]
-        });
-    </script>
     <script>
-        $(function () {
-            // 监听多图上传和上传附件组件的插入动作
-            uploadEditor.ready(function () {
-                uploadEditor.addListener("beforeInsertImage", _beforeInsertImage);
-            });
-            // 自定义按钮绑定触发多图上传和上传附件对话框事件
-            document.getElementById('j_upload_img_btn').onclick = function () {
-                var dialog = uploadEditor.getDialog("insertimage");
-                dialog.title = '图片上传';
-                dialog.render();
-                dialog.open();
+        layui.use(['jquery', 'form', 'laydate', 'optimizeSelectOption', 'common', 'step', 'wangEditor', 'upload'], function () {
+            var form = layui.form,
+                $ = layui.$,
+                common = layui.common,
+                upload = layui.upload,
+                step = layui.step,
+                wangEditor = layui.wangEditor;
+            var editor = new wangEditor("#editor");
+            // 配置服务器端地址
+            editor.config.uploadImgServer = '/FileManage/Uploadfile/Upload';
+            editor.config.uploadImgMaxSize = 3 * 1024 * 1024;
+            editor.config.uploadImgMaxLength = 5;
+            editor.config.uploadImgParams = { filetype: 1, fileby: '新闻管理/编辑器'};
+            editor.config.showLinkImg = false;
+            editor.config.uploadImgHooks =
+            {
+                customInsert: function (insertImg, result, editor2) {
+                    uploadResult(result);
+                    if (!!result.data) {
+                        for (var i = 0; i < result.data.length; i++) {
+                            insertImg(result.data[i].src);
+                        };
+                    }
+                }
+            }
+            editor.config.onchange = function (newHtml) {
+                $("#F_Description").val(newHtml);
+            }
+            function uploadResult(res) {
+                if (res.code == 0) {
+                    layer.msg("上传图片成功", { icon: 1, time: 1000 });//使用layui的弹窗提示
+                } else {
+                    layer.msg("上传图片失败", { icon: 1, time: 1000 });
+                }
             };
+            editor.create();
+            //普通图片上传
+            var uploadInst = upload.render({
+                elem: '#upload'
+                , url: '/FileManage/Uploadfile/Upload' //改成您自己的上传接口
+                , size: 1024
+                , accept: 'file'
+                , data: { filetype: 1, fileby: '新闻管理' }
+                , choose: function (obj) {
+                    //预读本地文件示例，不支持ie8
+                    obj.preview(function (index, file, result) {
+                        $('#F_ImgUrlPic').attr('src', result); //图片链接（base64）
+                    });
+                }
+                , done: function (res) {
+                    //如果上传失败
+                    if (res.code > 0) {
+                        //失败状态，并实现重传
+                        var demoText = $('#demoText');
+                        demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                        demoText.find('.demo-reload').on('click', function () {
+                            uploadInst.upload();
+                        });
+                        common.modalMsg(res.msg, "warning");
+                        return false;
+                    }
+                    $('#F_ImgUrl').val(res.data[0].src);
+                }
+                , error: function () {
+                    //演示失败状态，并实现重传
+                    var demoText = $('#demoText');
+                    demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                    demoText.find('.demo-reload').on('click', function () {
+                        uploadInst.upload();
+                    });
+                }
+            });
+            var keyValue = $.request("keyValue");
+            //权限字段
+            common.authorizeFields('stepForm');
+            wcLoading.close();
+            var postData = {};//分步骤表单，最终提交只能获取最后一个表单的数据，所以定义全局数组保存表单数据
+            step.render({
+                elem: '#stepForm',
+                filter: 'stepForm',
+                width: '100%', //设置容器宽度
+                stepWidth: '750px',
+                height: '600px',
+                stepItems: [{
+                    title: '基本信息'
+                }, {
+                    title: '详细描述'
+                }, {
+                    title: 'SEO选项'
+                }]
+            });
+            form.on('submit(formStep)', function (data) {
+                postData = $.extend(postData, data.field);
+                step.next('#stepForm');
+                return false;
+            });
+            form.on('submit(formStep2)', function (data) {
+                postData = $.extend(postData, data.field);
+                step.next('#stepForm');
+                return false;
+            });
+            $('.pre').click(function () {
+                step.pre('#stepForm');
+            });
+            $('.next').click(function () {
+                step.next('#stepForm');
+            });
+            $(function () {
+                initControl();
+                if (!!keyValue) {
+                    common.ajax({
+                        url: '/ContentManage/ArticleNews/GetFormJson',
+                        dataType: 'json',
+                        data: { keyValue: keyValue },
+                        async: false,
+                        success: function (data) {
+                            common.val('stepForm', data);
+                            $('#F_ImgUrlPic').attr('src', data.F_ImgUrl); //图片链接
+                            editor.txt.text($("#F_Description").val());
+
+                        }
+                    });
+                }
+                form.render();
+            });
+            function initControl() {
+                //绑定数据源
+                //类型为下拉框时
+                $("#F_CategoryId").bindSelect({
+                    url: "/ContentManage/ArticleCategory/GetListJson",
+                    id: "F_Id",
+                    text: "F_FullName",
+                    search: true,
+                });
+            }
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                postData = $.extend(postData, data.field);
+                if (!postData["F_IsTop"]) postData["F_IsTop"] = false;
+                if (!postData["F_IsHot"]) postData["F_IsHot"] = false;
+                if (!postData["F_IsRed"]) postData["F_IsRed"] = false;
+                if (!postData["F_EnabledMark"]) postData["F_EnabledMark"] = false;
+                postData["F_Description"] = postData["F_Description"];
+                common.submitForm({
+                    url: '/ContentManage/ArticleNews/SubmitForm?keyValue=' + keyValue,
+                    param: postData,
+                    success: function () {
+                        common.reloadIframe("/ContentManage/ArticleNews/Index", 'data-search-btn');
+                    }
+                })
+                return false;
+            });
         });
-        // 多图上传动作
-        function _beforeInsertImage(t, result) {
-            var imageHtml = '';
-            $("#F_ImgUrl").val(result[0].src);
-            $("#F_ImgUrlPic").attr("src", result[0].src);
-            //for (var i in result) {
-            //    imageHtml += '<li><img src="' + result[i].src + '" alt="' + result[i].alt + '" height="150"></li>';
-            //}
-            //document.getElementById('upload_img_wrap').innerHTML = imageHtml;
-        }
         function previewImg(obj) {
             var img = new Image();
             img.src = obj.src;
             var height = img.height + 50; //获取图片高度
             var width = img.width; //获取图片宽度
-            if (height > 400) {
-                height = 400;
-            }
-            if (width > 400) {
-                width = 400;
-            }
-            var imgHtml = "<img src='" + obj.src + "' />";
+            if (height > 500) { height = 500; };
+            if (width > 500) { width = 500; };
+            var imgHtml = "<img src='" + obj.src + "' style=\"height: " + (height - 43) + "px; width: " + width + "px; line-height: 25px!important;\"/>";
             //弹出层
             layer.open({
                 type: 1,

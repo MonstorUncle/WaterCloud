@@ -31,12 +31,7 @@
                             common.modalMsg("文件不是图片,无法查看", "warning");
                         }
                         else {
-                            if (data.F_FileBy=="公司logo") {
-                                $('#demo1').attr('src', document.location.origin + "/icon/" + data.F_FilePath); //图片链接
-                            }
-                            else {
-                                $('#demo1').attr('src', document.location.origin + "/file/" + data.F_FilePath); //图片链接
-                            }
+                            $('#demo1').attr('src', data.F_FilePath); //图片链接
                         }
                         common.setReadOnly('adminform');
                     }

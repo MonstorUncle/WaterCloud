@@ -41,26 +41,19 @@
     }
 </style>
 <script>
-    layui.use(['jquery', 'form', 'laydate', 'optimizeSelectOption', 'common', 'step'], function () {
+    layui.use(['jquery', 'form', 'laydate', 'optimizeSelectOption', 'common', 'step','wangEditor'], function () {
         var form = layui.form,
             $ = layui.$,
             common = layui.common,
-            laydate = layui.laydate;
-        upload = layui.upload,
+            wangEditor = layui.wangEditor,
             step = layui.step;
+        var editor = new wangEditor("#editor");
+        
+        editor.create();
         var keyValue = $.request("keyValue");
         //权限字段
         common.authorizeFields('stepForm');
         wcLoading.close();
-        //此处需修改
-        //类型为时间时
-        //laydate.render({
-        //elem: '#F_Birthday'
-        //, btns: ['clear', 'now']
-        //, trigger: 'click',
-        //format: 'yyyy-MM-dd',
-        //});
-        var postData = {};//分步骤表单，最终提交只能获取最后一个表单的数据，所以定义全局数组保存表单数据
         step.render({
             elem: '#stepForm',
             filter: 'stepForm',
@@ -79,7 +72,6 @@
             step.next('#stepForm');
             return false;
         });
-
         form.on('submit(formStep2)', function (data) {
             step.next('#stepForm');
             return false;
@@ -87,44 +79,28 @@
         $('.pre').click(function () {
             step.pre('#stepForm');
         });
-
         $('.next').click(function () {
             step.next('#stepForm');
         });
         $(function () {
             initControl();
             if (!!keyValue) {
-                var newsdata = JSON.parse('@Html.Raw(ViewBag.Content)');
-                common.val('stepForm', newsdata);
-                var Description = newsdata.F_Description;
-                if (!!newsdata.ImgUrl) {
-                    ImgUrlPic.src = newsdata.ImgUrl;
-                }
-                // editor准备好之后才可以使用
-                var editor = UE.getEditor("F_Description");
-                editor.ready(function () {
-                    editor.setContent(Description);
+                common.ajax({
+                    url: '/ContentManage/ArticleNews/GetFormJson',
+                    dataType: 'json',
+                    data: { keyValue: keyValue },
+                    async: false,
+                    success: function (data) {
+                        common.val('stepForm', data);
+                        $('#F_ImgUrlPic').attr('src', data.F_ImgUrl); //图片链接
+                        editor.txt.text($("#F_Description").val());
+                        common.setReadOnly('adminform');
+                    }
                 });
-                //减少请求数
-                //common.ajax({
-                //    url: '/ContentManage/ArticleNews/GetFormJson',
-                //    dataType: 'json',
-                //    data: { keyValue: keyValue },
-                //    async: false,
-                //    success: function (data) {
-                //        common.val('stepForm', data);
-                //        var Description = data.F_Description;
-                //        if (!!data.ImgUrl) {
-                //            ImgUrlPic.src = data.ImgUrl;
-                //        }
-
-                //    }
-                //});
             }
             common.setReadOnly('stepForm');
             form.render();
         });
-
         function initControl() {
             //绑定数据源
             //类型为下拉框时
@@ -136,8 +112,30 @@
             });
         }
     });
+    function previewImg(obj) {
+        var img = new Image();
+        img.src = obj.src;
+        var height = img.height + 50; //获取图片高度
+        var width = img.width; //获取图片宽度
+        if (height > 500) { height = 500; };
+        if (width > 500) { width = 500; };
+        var imgHtml = "<img src='" + obj.src + "' style=\"height: " + (height - 43) + "px; width: " + width + "px; line-height: 25px!important;\"/>";
+        //弹出层
+        layer.open({
+            type: 1,
+            shade: 0.8,
+            offset: 'auto',
+            area: [width + 'px', height + 'px'],
+            shadeClose: true,//点击外围关闭弹窗
+            scrollbar: false,//不现实滚动条
+            title: "图片预览", //不显示标题
+            content: imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响
+            cancel: function () {
+                //layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });
+            }
+        });
+    }
 </script>
-
 <body>
     <div class="layuimini-container">
         <div class="layuimini-main">
@@ -174,7 +172,9 @@
                             <div class="layui-form-item">
                                 <label class="layui-form-label"></label>
                                 <div class="layui-input-block">
-                                    <img id="F_ImgUrlPic" width="200" height="200" onclick="previewImg(this)" />
+                                    <div class="layui-upload-list">
+                                        <img id="F_ImgUrlPic" width="200" height="200" onclick="previewImg(this)" />
+                                    </div>
                                 </div>
                             </div>
                             <div class="layui-form-item layui-hide">
@@ -212,7 +212,8 @@
                             <div class="layui-form-item layui-hide">
                                 <label class="layui-form-label">内容描述</label>
                                 <div class="layui-input-block">
-                                    <textarea id="F_Description" name="F_Description" type="text/plain" style="width:100%;height:400px;"></textarea>
+                                    <textarea  class=" layui-hide" id="F_Description" name="F_Description" type="text/plain" style="width:100%;height:400px;"></textarea>
+                                    <div id="editor"></div>
                                 </div>
                             </div>
                             <div class="layui-form-item">
@@ -280,51 +281,5 @@
             </div>
         </div>
     </div>
-    <script>
-        function previewImg(obj) {
-            var img = new Image();
-            img.src = obj.src;
-            var height = img.height + 50; //获取图片高度
-            var width = img.width; //获取图片宽度
-            if (height > 400) {
-                height = 400;
-            }
-            if (width > 400) {
-                width = 400;
-            }
-            var imgHtml = "<img src='" + obj.src + "' />";
-            //弹出层
-            layer.open({
-                type: 1,
-                shade: 0.8,
-                offset: 'auto',
-                area: [width + 'px', height + 'px'],
-                shadeClose: true,//点击外围关闭弹窗
-                scrollbar: false,//不现实滚动条
-                title: "图片预览", //不显示标题
-                content: imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响
-                cancel: function () {
-                    //layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });
-                }
-            });
-        }
-    </script>
 </body>
-<link href="~/lib/ueditor/themes/default/css/ueditor.css" rel="stylesheet" />
-<script type="text/javascript" charset="utf-8" src="~/lib/ueditor/ueditor.config.js"></script>
-<script type="text/javascript" charset="utf-8" src="~/lib/ueditor/ueditor.all.min.js"></script>
-<!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
-<!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
-<script type="text/javascript" charset="utf-8" src="~/lib/ueditor/lang/zh-cn/zh-cn.js"></script>
 
-<script type="text/javascript">
-    // 加载 ueditor，传入的初始化参数可以覆盖掉 ueditor.config.js 中的配置
-    // 对于同一项目中使用不同的配置的 ueditor 场景非常有用
-    var ue = UE.getEditor('F_Description', {
-        initialFrameHeight: 250,
-        autoFloatEnabled: false, //取消悬浮
-        // , initialFrameWidth:796
-        zIndex: 0,
-        wordCount: false
-    });
-</script>

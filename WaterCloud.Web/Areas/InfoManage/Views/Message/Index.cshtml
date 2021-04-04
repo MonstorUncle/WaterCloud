@@ -6,15 +6,15 @@
      <div class="layuimini-main">
          <fieldset class="table-search-fieldset layui-hide" id="searchField">
              <div>
-                 <form class="layui-form layui-form-pane" >
+                 <form class="layui-form layui-form-pane">
                      <div class="layui-form-item">
                          <div class="layui-inline">
                              <label class="layui-form-label">关键字:</label>
                              <div class="layui-input-inline">
-                                 <input type="text" id="txt_keyword" name="txt_keyword" autocomplete="off" class="layui-input" >
+                                 <input type="text" id="txt_keyword" name="txt_keyword" autocomplete="off" class="layui-input">
                              </div>
                          </div>
-                        <div class="layui-inline"> 
+                         <div class="layui-inline">
                              <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon">&#xe615;</i> 搜 索</button>
                          </div>
                      </div>
@@ -23,9 +23,12 @@
          </fieldset>
          <script type="text/html" id="toolbarDemo">
              <div class="layui-btn-container" id="toolbar">
-                 <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新建通知</button>
-                 <button id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                 <button id="NF-add" name="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新建通知</button>
+                 <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
              </div>
+         </script>
+         <script type="text/html" id="currentTableBar">
+             <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-info-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
          </script>
          <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
      </div>
@@ -36,25 +39,31 @@
              table = layui.table,
              commonTable = layui.commonTable,
              common = layui.common;
-         var entity;
          //权限控制(js是值传递)
+         currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
          toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
          commonTable.rendertable({
              elem: '#currentTableId',
              id: 'currentTableId',
-             url: '/InfoManage/Message/GetGridJson',             
-             cols: [[                 
+             url: '/InfoManage/Message/GetGridJson',  
+             filter: {
+                 clearFilter: false,
+                 //数据量大，data就不需要了
+                 items: ['column', 'condition', 'editCondition', 'excel']
+             },
+             cols: [[       
+                 { type: "checkbox", width: 50, fixed: 'left' },
                  {
-                     field: 'F_MessageType', title: '信息类型', width: 120, sort: true,
+                     field: 'F_MessageType', title: '信息类型', width: 120, sort: true, filter: true,
                      templet: function (d) {
                          return top.clients.dataItems["MessageType"][d.F_MessageType] == undefined ? "" : top.clients.dataItems["MessageType"][d.F_MessageType]
                      }
                  },
-                 { field: 'F_ToUserId', title: '收件人主键', width: 120, sort: true, hide: true },
-                 { field: 'F_ToUserName', title: '收件人', width: 120, sort: true },
-                 { field: 'F_MessageInfo', title: '内容', minWidth: 150, sort: true },
+                 { field: 'F_ToUserId', title: '收件人主键', width: 120, sort: true, hide: true, filter: true },
+                 { field: 'F_ToUserName', title: '收件人', width: 120, sort: true, filter: true },
+                 { field: 'F_MessageInfo', title: '内容', minWidth: 150, sort: true, filter: true },
                  {
-                     field: 'F_CreatorTime', title: '创建时间', width: 150, sort: true,
+                     field: 'F_CreatorTime', title: '创建时间', width: 150, sort: true, filter: { type: 'date[yyyy-MM-dd HH:mm]' },
                      templet: function (d) {
                          if (d.F_CreatorTime) {
                              var time = new Date(d.F_CreatorTime);
@@ -63,8 +72,9 @@
                          return '';
                      }
                  },
-                 { field: 'F_CreatorUserId', title: '创建用户主键', width: 120, sort: true, hide: true },
-                 { field: 'F_CreatorUserName', title: '创建用户', width: 120, sort: true },
+                 { field: 'F_CreatorUserId', title: '创建用户主键', width: 120, sort: true, hide: true, filter: true },
+                 { field: 'F_CreatorUserName', title: '创建用户', width: 120, sort: true, filter: true },
+                 { title: '操作', width: 90, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
              ]]
          });
          // 监听搜索操作
@@ -75,16 +85,15 @@
                  curr: 1,
                  where: { keyword: data.field.txt_keyword}
              });
-             entity = null;
              return false;
          });
          wcLoading.close();
-         table.on('row(currentTableFilter)', function (obj) {
-             obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-             entity = obj;
-         })
+         //行点击事件监听，控制按钮显示
+         var morerList = ["NF-delete"];//选中1条以上显示
+         commonTable.tableRowClick("checkbox", "currentTableFilter", "currentTableId", null, morerList);
          //toolbar监听事件
          table.on('toolbar(currentTableFilter)', function (obj) { 
+             var data = table.checkStatus('currentTableId').data;
              if (obj.event === 'add') {  // 监听操作
                  common.modalOpen({
                      title: "添加通知",
@@ -94,13 +103,17 @@
                  });
              }
              else if (obj.event === 'delete') {
-                 if (entity == null) {
+                 if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
+                 var ids = [];
+                 for (var i = 0; i < data.length; i++) {
+                     ids.push(data[i].F_Id);
+                 }
                  common.deleteForm({
                      url: "/InfoManage/Message/DeleteForm",
-                     param: { keyValue: entity.data.F_Id },
+                     param: { keyValue: ids.join(',') },
                      success: function () {
                          common.reload('data-search-btn');
                          entity = null;
@@ -116,6 +129,19 @@
                  }
              }
            return false;
-       });
+         });
+         //toolrow监听事件
+         table.on('tool(currentTableFilter)', function (obj) {
+             if (obj.event === 'delete') {
+                 common.deleteForm({
+                     url: "/InfoManage/Message/DeleteForm",
+                     param: { keyValue: obj.data.F_Id },
+                     success: function () {
+                         obj.del();
+                     }
+                 });
+             }
+             return false;
+         });
    });
 </script>

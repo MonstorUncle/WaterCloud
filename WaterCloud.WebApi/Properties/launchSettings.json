@@ -12,7 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api-doc",
+      "launchUrl": "http://localhost:5001/api-doc",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -21,7 +21,7 @@
     "WaterCloud.WebApi": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api-doc",
+      "launchUrl": "http://localhost:5001/api-doc",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

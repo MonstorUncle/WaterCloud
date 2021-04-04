@@ -21,7 +21,7 @@ namespace WaterCloud.Service.SystemManage
         /// </summary>
         private string cacheKey = "watercloud_itemsdata_";// 字典分类
         //获取类名
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         public ItemsTypeService(IDbContext context) : base(context)
         {
         }
@@ -32,22 +32,14 @@ namespace WaterCloud.Service.SystemManage
         }
         public async Task<List<ItemsEntity>> GetLookList()
         {
-            var list = new List<ItemsEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
-            {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
-            }
-            return GetFieldsFilterData(list.Where(a => a.F_DeleteMark == false).OrderBy(t => t.F_SortCode).ToList(), className.Substring(0, className.Length - 7));
+            var query = repository.IQueryable().Where(a => a.F_DeleteMark == false);
+            query = GetDataPrivilege("u","",query);
+            return query.OrderBy(t => t.F_SortCode).ToList();
         }
         public async Task<ItemsEntity> GetLookForm(string keyValue)
         {
             var cachedata =await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata, className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
 
         }
         public async Task<ItemsEntity> GetForm(string keyValue)

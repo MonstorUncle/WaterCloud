@@ -3,12 +3,11 @@
     Layout = "~/Views/Shared/_Index.cshtml";
 }
     <script>
-        layui.use(['jquery', 'form', 'table', 'common', 'treeTable', 'optimizeSelectOption', 'layer'], function () {
+        layui.use(['jquery', 'form', 'table', 'common', 'commonTable', 'optimizeSelectOption'], function () {
             var $ = layui.jquery,
                 form = layui.form,
                 table = layui.table,
-                layer = layui.layer,
-                treeTable = layui.treeTable,
+                commonTable = layui.commonTable,
                 common = layui.common;
             //加载数据
             wcLoading.close();
@@ -17,21 +16,12 @@
             var currentWindow = !parent[parentform] ? common.currentWindow() : parent[parentform];
             var name = $.request("name");
             var ids = $.request("ids");
-            var rendertree = common.rendertreetable({
+            var options = {
                 elem: '#currentTableId',
                 url: '/SystemOrganize/Organize/GetTreeGridJson',
-                height: 'full-60',
-                toolbar: false,//工具栏
-                search:false,
-                id: 'currentTableId',
-                tree: {
-                    iconIndex: 1,           // 折叠图标显示在第几列
-                    isPidData: true,        // 是否是id、pid形式数据
-                    idName: 'F_Id',  // id字段名称
-                    pidName: 'F_ParentId',     // pid字段名称
-                    arrowType: 'arrow2',
-                    getIcon: 'ew-tree-icon-style2'
-                },
+                where: {ids:ids},
+                treeIdName: 'F_Id',  // id字段名称
+                treePidName: 'F_ParentId',     // pid字段名称
                 cols: [[
                     { type: 'checkbox' },
                     { field: 'F_FullName', title: '名称', width: 250 },
@@ -53,15 +43,11 @@
                         }
                     }
                 ]],
-                done: function () {
-                    rendertree.expandAll();
-                    if (!!ids) {
-                        rendertree.setChecked(ids.split(','));
-                    }
-                }
-            });
+            };
+            commonTable.rendertreetable(options);   
+            commonTable.tableRowClick("checkbox", "currentTableFilter", "currentTableId");
             // 监听行双击事件
-            treeTable.on('rowDouble(currentTableId)', function (obj) {
+            table.on('rowDouble(currentTableFilter)', function (obj) {
                 var pvalue = obj.data.F_Id;
                 var pname = obj.data.F_FullName;
                 var pcode = obj.data.F_EnCode;
@@ -80,20 +66,22 @@
             });
             // 监听搜索操作
             form.on('submit(data-search-btn)', function (data) {
-                queryJson = data.field.txt_keyword;
-                common.reloadtreetable(rendertree, {
-                    where: { keyword: queryJson },
-                });
+                //执行搜索重载
+                options.where = { ids: (!!ids ? ids : ""), keyword: data.field.txt_keyword };
+                commonTable.rendertreetable(options);  
                 return false;
             });
             // 监听清除操作
             form.on('submit(data-clear-btn)', function (data) {
-                rendertree.removeAllChecked();
+                ids = "";
+                //执行搜索重载
+                options.where = { ids: (!!ids ? ids : ""), keyword: data.field.txt_keyword };
+                commonTable.rendertreetable(options);   
                 return false;
             });
             // 监听提交操作
             form.on('submit(saveBtn)', function (data) {
-                var checkStatus = rendertree.checkStatus(false);;
+                var checkStatus = table.checkStatus('currentTableId').data;
                 var pvalue = [];
                 var pname = [];
                 var pcode = [];

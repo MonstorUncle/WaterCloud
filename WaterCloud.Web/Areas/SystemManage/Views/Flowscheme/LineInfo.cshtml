@@ -5,22 +5,36 @@
 <div class="layui-input-item layui-hide" id="divInputTemplate">
     <label class="layui-form-label required">条件规则</label>
     <div class="layui-input-block" style="padding-right: 70px;">
-        <select id="ComparesFieldName" name="ComparesFieldName" lay-verify="required" lay-search>
-            <option value="" selected>请选择</option>
-        </select>
-        <select id="ComparesOperation" name="ComparesOperation" lay-verify="required" lay-search>
-            <option value="" selected>请选择</option>
-            <option value=">">></option>
-            <option value=">=">>=</option>
-            <option value="<"><</option>
-            <option value="<="><=</option>
-            <option value="=">=</option>
-            <option value="!=">!=</option>
-        </select>
-        <input type="text" id="ComparesName" name="ComparesName" class="layui-input" lay-verify="required" value="" placeholder="请输入值">
-        <input type="text" id="ComparesValue" name="ComparesValue" lay-verify="required" class="layui-input layui-hide">
+        <div class="layui-input-block" style="margin-left:0px">
+            <select id="ComparesCondition" name="ComparesCondition" lay-verify="required" lay-search>
+                <option value="and" selected>并且</option>
+                <option value="or">或者</option>
+            </select>
+        </div>
+        <div class="layui-input-inline" style="width:145px">
+            <select id="ComparesFieldName" name="ComparesFieldName" lay-verify="required" lay-search>
+                <option value="" selected>请选择</option>
+            </select>
+        </div>
+        <div class="layui-input-inline" style="width:100px">
+            <select id="ComparesOperation" name="ComparesOperation" lay-verify="required" lay-search>
+                <option value="" selected>请选择</option>
+                <option value=">">></option>
+                <option value=">=">>=</option>
+                <option value="<"><</option>
+                <option value="<="><=</option>
+                <option value="=">=</option>
+                <option value="!=">!=</option>
+                <option value="in">in</option>
+                <option value="not in">not in</option>
+            </select>
+        </div>
+        <div class="layui-input-inline" style="width:180px">
+            <input type="text" id="ComparesName" name="ComparesName" class="layui-input" lay-verify="required" value="" placeholder="请输入值">
+            <input type="text" id="ComparesValue" name="ComparesValue" lay-verify="required" class="layui-input layui-hide">
+        </div>
         <button class="layui-btn layui-btn-danger" style="position: absolute;top: 0;right: 6px;cursor: pointer;" onclick="deleteRule('divInputTemplate')"><i class="layui-icon">&#xe67e;</i></button>
-        <button class="layui-btn layui-btn-primary" style="position: absolute;top: 0;right: 6px;cursor: pointer;margin-top:75px" onclick="search(searchCout)">...</button>
+        <button class="layui-btn layui-btn-primary" style="position: absolute;top: 0;right: 6px;cursor: pointer;margin-top:40px" onclick="search(searchCout)">...</button>
     </div>
 </div>
 <div class="layuimini-container">
@@ -57,7 +71,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">连线条件</label>
                 <div class="layui-input-block" style="padding-right: 70px;">
-                    <button id="NF-add" class="layui-btn" ><i class="layui-icon">&#xe654;</i></button>
+                    <button id="NF-add" class="layui-btn"><i class="layui-icon">&#xe654;</i></button>
                 </div>
             </div>
             <div id="ruledata">
@@ -94,6 +108,7 @@
             ComparesFieldName0: "",
             ComparesValue0: "",
             ComparesName0: "",
+            ComparesCondition0: "and",
         };
         var cout = 0;
         $(document).on('click', '#NF-add', function () {
@@ -104,6 +119,7 @@
             html = html.replace(/ComparesOperation/g, "ComparesOperation" + cout); // 替换多个
             html = html.replace(/ComparesValue/g, "ComparesValue" + cout); // 替换多个
             html = html.replace(/ComparesName/g, "ComparesName" + cout); // 替换多个
+            html = html.replace(/ComparesCondition/g, "ComparesCondition" + cout); // 替换多个
             html = html.replace(/divInputTemplate/g, "divInput" + cout);
             html = html.replace(/searchCout/g, cout);
             var obj = $(html);
@@ -120,6 +136,7 @@
                 tmp['ComparesFieldName' + i] = line.Compares[i].FieldName;
                 tmp['ComparesValue' + i] = line.Compares[i].Value;
                 tmp['ComparesName' + i] = line.Compares[i].Name;
+                tmp['ComparesCondition' + i] = line.Compares[i].Condition;
             }
         }
         else {
@@ -168,6 +185,7 @@
                 var Operation = $('#ComparesOperation' + i).val();
                 var Value = $('#ComparesValue' + i).val();
                 var Name = $('#ComparesName' + i).val();
+                var Condition = $('#ComparesCondition' + i).val();
                 if (!Value) {
                     Value = Name;
                 }
@@ -176,6 +194,7 @@
                     Operation: Operation,
                     Value: Value,
                     Name: Name,
+                    Condition: Condition,
                 };
                 result.Compares.push(temp);
             }
@@ -207,7 +226,7 @@
             if (fields == '申请人') {
                 common.modalOpen({
                     title: "选择用户",
-                    url: "/SystemOrganize/User/AddForm?parentform=" + parentform +"&name=" + "ComparesName" + data + "&value=" + "ComparesValue" + data,
+                    url: "/SystemOrganize/User/AddForm?parentform=" + parentform + "&name=" + "ComparesName" + data + "&value=" + "ComparesValue" + data,
                     width: "650px",
                     height: "600px",
                 });
@@ -215,7 +234,7 @@
             else if (fields == '所属部门') {
                 common.modalOpen({
                     title: "选择组织",
-                    url: "/SystemOrganize/Organize/AddForm?parentform=" + parentform +"&name=" + "ComparesName" + data + "&value=" + "ComparesValue" + data,
+                    url: "/SystemOrganize/Organize/AddForm?parentform=" + parentform + "&name=" + "ComparesName" + data + "&value=" + "ComparesValue" + data,
                     width: "650px",
                     height: "600px",
                 });

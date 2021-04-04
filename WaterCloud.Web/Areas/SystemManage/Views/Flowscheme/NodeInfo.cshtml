@@ -158,17 +158,10 @@
                 { field: 'F_Account', title: '账户', width: 120, sort: true },
                 { field: 'F_RealName', title: '姓名', width: 120, sort: true },
                 {
-                    field: 'F_OrganizeId', title: '公司', width: 120, sort: true,
-                    templet: function (d) {
-                        return top.clients.organize[d.F_OrganizeId] == null ? "" : top.clients.organize[d.F_OrganizeId].fullname;
-                    }
+                    field: 'F_CompanyName', title: '公司名称', width: 120, sort: true
                 },
                 {
-                    field: 'F_DepartmentId', title: '部门', width: 120, sort: true,
-                    templet: function (d) {
-                        return top.clients.organize[d.F_DepartmentId] == null ? "" : top.clients.organize[d.F_DepartmentId].fullname;
-
-                    }
+                    field: 'F_DepartmentName', title: '部门名称', width: 120, sort: true
                 },
                 {
                     field: 'F_EnabledMark', title: '状态', width: 100, sort: true,
@@ -201,10 +194,7 @@
                     }
                 },
                 {
-                    field: 'F_OrganizeId', title: '归属公司', width: 120, sort: true,
-                    templet: function (d) {
-                        return top.clients.organize[d.F_OrganizeId] == undefined ? "" : top.clients.organize[d.F_OrganizeId].fullname;
-                    }
+                    field: 'F_CompanyName', title: '归属公司', width: 120, sort: true
                 },
                 {
                     field: 'F_EnabledMark', title: '状态', width: 100, sort: true,

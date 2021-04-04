@@ -117,5 +117,7 @@ namespace WaterCloud.Domain.SystemManage
         /// </summary>
         /// <returns></returns>
         public string F_DbName { get; set; }
+        [NotMapped]
+        public string F_OrganizeName { get; set; }
     }
 }

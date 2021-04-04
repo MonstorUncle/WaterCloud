@@ -2,97 +2,202 @@
     ViewBag.Title = "Form";
     Layout = "~/Views/Shared/_Form.cshtml";
 }
-    <script>
-        var entity = {};
-        layui.use(['jquery', 'form', 'laydate', 'common', 'optimizeSelectOption'], function () {
-            var form = layui.form,
-                $ = layui.$,
-                common = layui.common;
-            //权限字段
-            common.authorizeFields('adminform');
-            if (!!entity && !!entity.TableColumn) {
-                $('#F_EnCode').prop('disabled', true);
-                $('#F_FullName').prop('disabled', true);
-                $('#F_EnCode').val(entity.TableColumn);
-                $('#F_FullName').val(entity.Remark);
-            }
-            else {
-                $('#F_FullName').parent().parent().remove();
-                $('#F_NewName').parent().parent().find("label").html("名称");
-            }
-            form.render();
-            wcLoading.close();
-            //监听提交
-            var lock = false;
-            form.on('submit(saveBtn)', function (data) {
-                if (!lock) {
-                    lock = true;
-                    var index = parent.layer.load(0, {
-                        shade: [0.5, '#000'], //0.1透明度的背景
-                    });
-                    var postData = {};
-                    postData.TableColumn = data.field.F_EnCode;
-                    postData.Remark = data.field.F_NewName;
-                    if (!!entity) {
-                        postData.F_Id = entity.F_Id;
-                    }
-                    else {
-                        postData.F_Id = uuid();
-                    }
-                    var tempdata = common.currentWindow().layui.table.cache.currentTableId;
-                    if (!!entity) {
-                        for (var i = 0; i < tempdata.length; i++) {
-                            if (entity.F_Id == tempdata[i].F_Id) {
-                                tempdata[i].TableColumn = postData.TableColumn;
-                                tempdata[i].Remark = postData.Remark;
-                                break;
-                            }
-                        }
-                    }
-                    else {
-                        for (var i = 0; i < tempdata.length; i++) {
-                            if (tempdata[i].TableColumn == postData.TableColumn) {
-                                common.modalMsg("操作失败,编号重复", "error");
-                                lock = false;
-                                return false;
-                            }
-                        }
-                        tempdata.push(postData);
-                    }
-                    common.modalMsg("操作成功", "success");
-                    common.currentWindow().layui.table.reload('currentTableId', {
-                        data: tempdata
-                    });
-                    parent.layer.close(index);
-                    common.modalClose();
-                }
+<script>
+    var entity = {};
+    layui.use(['jquery', 'form', 'laydate', 'common', 'optimizeSelectOption'], function () {
+        var form = layui.form,
+            $ = layui.$,
+            common = layui.common;
+        //权限字段
+        common.authorizeFields('adminform');
+        common.val('adminform', entity);
+        form.render();
+        wcLoading.close();
+        //监听提交
+        var lock = false;
+        form.on('select(Templet)', function (data) {
+            if (!$('#field').val()) {
+                common.modalMsg("请先输入字段", "warning");
                 return false;
-            });
+            }
+            var str = '';
+            str += 'function (d) {';
+            if (data.value == 4) {
+                str += 'if (d.' + $('#field').val() + ' == true) {';
+                str += 'return "<span class=\'layui-btn ayui-btn-normal layui-btn-xs\'>是</span>";';
+                str += '} else {';
+                str += 'return "<span class=\'layui-btn layui-btn-warm layui-btn-xs\'>否</span>";';
+            } else {
+                str += 'if (d.' + $('#field').val() + ') {';
+                str += 'var time = new Date(d.' + $('#field').val() + ');';
+                str += 'if (d.' + $('#field').val() + ') {';
+                str += 'var time = new Date(d.' + $('#field').val() + ');';
+                str += 'return time.Format("';
+                switch (data.value) {
+                    case "0":
+                        str += 'yyyy-MM-dd hh:mm:ss';
+                        break;
+                    case "1":
+                        str += 'yyyy-MM-dd hh:mm';
+                        break;
+                    case "2":
+                        str += 'yyyy-MM-dd hh';
+                        break;
+                    case "3":
+                        str += 'yyyy-MM-dd';
+                        break;
+                    default:
+                }
+                str += '");';
+                str += '}';
+                str += 'return \'\';';
+
+            }
+            str += '}';
+            $('#templet').val(str);
+            form.render();
         });
-        function initForm(data) {
-            entity = data;           
-        }
-    </script>
+        form.on('select(FilterType)', function (data) {
+            $('#filterType').val(data.value);
+            form.render();
+        });
+        form.on('submit(saveBtn)', function (data) {
+            if (!lock) {
+                lock = true;
+                var index = parent.layer.load(0, {
+                    shade: [0.5, '#000'], //0.1透明度的背景
+                });
+                var postData = {};
+                postData.field = data.field.field;
+                postData.title = data.field.title;
+                postData.width = data.field.width;
+                postData.templet = data.field.templet;
+                postData.filterType = data.field.filterType;
+                postData.value = data.field.value;
+                postData.isAotuWidth = !data.field.isAotuWidth || data.field.isAotuWidth != "true" ? false : true;
+                postData.isFilter = !data.field.isFilter || data.field.isFilter != "true" ? false : true;
+                postData.isSorted = !data.field.isSorted || data.field.isSorted != "true" ? false : true;
+                postData.isShow = !data.field.isShow || data.field.isShow != "true" ? false : true;
+                if (!!entity && !!entity.F_Id) {
+                    postData.F_Id = entity.F_Id;
+                }
+                else {
+                    postData.F_Id = uuid();
+                }
+                var tempdata = common.currentWindow().layui.table.cache.currentTableId;
+                if (!!entity && !!entity.F_Id) {
+                    for (var i = 0; i < tempdata.length; i++) {
+                        if (entity.F_Id == tempdata[i].F_Id) {
+                            tempdata[i].field = postData.field;
+                            tempdata[i].title = postData.title;
+                            tempdata[i].width = postData.width;
+                            tempdata[i].isAotuWidth = postData.isAotuWidth;
+                            tempdata[i].isFilter = postData.isFilter;
+                            tempdata[i].isSorted = postData.isSorted;
+                            tempdata[i].isShow = postData.isShow;
+                            tempdata[i].filterType = postData.filterType;
+                            tempdata[i].templet = postData.templet;
+                            tempdata[i].value = postData.value;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    for (var i = 0; i < tempdata.length; i++) {
+                        if (tempdata[i].field == postData.field) {
+                            common.modalMsg("操作失败,编号重复", "error");
+                            lock = false;
+                            return false;
+                        }
+                    }
+                    tempdata.push(postData);
+                }
+                common.modalMsg("操作成功", "success");
+                common.currentWindow().layui.table.reload('currentTableId', {
+                    data: tempdata
+                });
+                parent.layer.close(index);
+                common.modalClose();
+            }
+            return false;
+        });
+    });
+    function initForm(data) {
+        entity = data;
+    }
+</script>
 <body>
     <div class="layuimini-container">
         <div class="layuimini-main">
             <div class="layui-form layuimini-form " lay-filter="adminform">
                 <div class="layui-form-item layui-hide">
-                    <label class="layui-form-label">编号</label>
+                    <label class="layui-form-label required">编号</label>
                     <div class="layui-input-block">
-                        <input type="text" id="F_EnCode" maxlength="50" name="F_EnCode" class="layui-input ">
+                        <input type="text" id="field" maxlength="50" name="field" class="layui-input ">
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">
-                    <label class="layui-form-label">名称</label>
+                    <label class="layui-form-label required">名称</label>
                     <div class="layui-input-block">
-                        <input type="text" id="F_FullName" maxlength="50" name="F_FullName" class="layui-input">
+                        <input type="text" id="title" maxlength="50" name="title" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">
-                    <label class="layui-form-label required">新名称</label>
+                    <label class="layui-form-label required">宽度</label>
                     <div class="layui-input-block">
-                        <input type="text" id="F_NewName" maxlength="50" name="F_NewName" lay-verify="required" class="layui-input">
+                        <input type="number" pattern="[0-9]*" id="width" name="width" lay-verify="required|number" oninput="if(value.length>8)value=value.slice(0,8)" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">选项</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="isAotuWidth" id="isAotuWidth" checked="" value="true" title="补全列宽">
+                        <input type="checkbox" name="isSorted" id="isSorted" checked="" value="true" title="排序">
+                        <input type="checkbox" name="isFilter" id="isFilter" checked="" value="true" title="过滤">
+                        <input type="checkbox" name="isShow" id="isShow" checked="" value="true" title="显示">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">初始值</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="value" maxlength="50" name="value" placeholder="可空" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">过滤类型</label>
+                    <div class="layui-input-block">
+                        <select id="filterTypeSelect" name="filterTypeSelect" lay-filter="FilterType" lay-search>
+                            <option value="" selected>请选择</option>
+                            <option value="date[yyyy-MM-dd hh:mm:ss]">日期时分秒</option>
+                            <option value="date[yyyy-MM-dd hh:mm]">日期时分</option>
+                            <option value="date[yyyy-MM-dd hh:mm]">日期时</option>
+                            <option value="date[yyyy-MM-dd]">日期</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">过滤类型内容</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="filterType" name="filterType" placeholder="请输入过滤类型内容" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text layui-hide">
+                    <label class="layui-form-label">模板</label>
+                    <div class="layui-input-block">
+                        <select id="templetSelect" name="templetSelect" lay-filter="Templet">
+                            <option value="" selected>请选择</option>
+                            <option value="0">日期时分秒</option>
+                            <option value="1">日期时分</option>
+                            <option value="2">日期时</option>
+                            <option value="3">日期</option>
+                            <option value="4">是否</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text layui-hide">
+                    <label class="layui-form-label">模板内容</label>
+                    <div class="layui-input-block">
+                        <textarea id="templet" name="templet" class="layui-textarea" placeholder="请输入模板内容"></textarea>
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">

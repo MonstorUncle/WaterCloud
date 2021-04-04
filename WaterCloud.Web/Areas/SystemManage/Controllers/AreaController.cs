@@ -19,7 +19,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
     [Area("SystemManage")]
     public class AreaController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public AreaService _areaService { get; set; }
         [HttpGet]
         [HandlerAjaxOnly]
@@ -109,26 +109,27 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
             try
             {
                 await _areaService.SubmitForm(areaEntity, keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
         [HttpPost]
         [HandlerAjaxOnly]
+        [Authorize("SystemManage:Area:Delete")]
         [ServiceFilter(typeof(HandlerAuthorizeAttribute))]
         public async Task<ActionResult> DeleteForm(string keyValue)
         {
             try
             {
                 await _areaService.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
     }

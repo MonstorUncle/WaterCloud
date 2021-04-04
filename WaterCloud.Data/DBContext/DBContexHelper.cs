@@ -30,7 +30,7 @@ namespace WaterCloud.DataBase
                 case Define.DBTYPE_ORACLE:
                     var con = new OracleContext(new OracleConnectionFactory(ConnectStr));
                     con.Session.CommandTimeout = int.Parse(DBCommandTimeout);
-                    con.ConvertToUppercase = false;
+                    con.ConvertToUppercase = true;
                     context = con;
                     break;
                 default:

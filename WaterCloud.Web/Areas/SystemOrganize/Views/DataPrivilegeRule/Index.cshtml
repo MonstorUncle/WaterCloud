@@ -23,10 +23,14 @@
          </fieldset>
          <script type="text/html" id="toolbarDemo">
              <div class="layui-btn-container" id="toolbar">
-                 <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
-                 <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                 <button id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                 <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
+                 <button id="NF-edit" name="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                 <button id="NF-delete" name="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
              </div>
+         </script>
+         <script type="text/html" id="currentTableBar">
+             <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+             <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
          </script>
          <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
      </div>
@@ -39,17 +43,22 @@
              common = layui.common;
          wcLoading.close();
          //权限控制(js是值传递)
+         currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
          toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
          commonTable.rendertable({
              elem: '#currentTableId',
              id: 'currentTableId',
              url: '/SystemOrganize/DataPrivilegeRule/GetGridJson',
+             filter: {
+                 clearFilter: false
+             },
              cols: [[
-                 { field: 'F_ModuleCode', title: '模块编号', width: 120 },
-                 { field: 'F_PrivilegeRules', title: '权限规则', width: 200 },
-                 { field: 'F_SortCode', title: '排序号', width: 120 },
+                 { type: "radio", width: 50, fixed: 'left' },
+                 { field: 'F_ModuleCode', title: '模块编号', width: 120, sort: true, filter: true },
+                 { field: 'F_PrivilegeRules', title: '权限规则', width: 200, sort: true, filter: true },
+                 { field: 'F_SortCode', title: '排序号', width: 120, sort: true, filter: true },
                  {
-                     field: 'F_EnabledMark', title: '状态', width: 80,
+                     field: 'F_EnabledMark', title: '状态', width: 80, sort: true, filter: true,
                      templet: function (d) {
                          if (d.F_EnabledMark == true) {
                              return "<span class='layui-btn layui-btn-normal layui-btn-xs'>有效</span>";
@@ -59,7 +68,7 @@
                      }
                  }, 
                  {
-                     field: 'F_CreatorTime', title: '创建时间', width: 120, sort: true,
+                     field: 'F_CreatorTime', title: '创建时间', width: 120, sort: true, filter: { type: 'date[yyyy-MM-dd]' },
                      templet: function (d) {
                          if (d.F_CreatorTime) {
                              var time = new Date(d.F_CreatorTime);
@@ -68,7 +77,8 @@
                          return '';
                      }
                  },
-                 { field: 'F_Description', title: '备注', minWidth: 150 }
+                 { field: 'F_Description', title: '备注', minWidth: 150, sort: true, filter: true },
+                 { title: '操作', width: 130, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
              ]]
          });
          // 监听搜索操作
@@ -79,16 +89,15 @@
                  curr: 1,
                  where: { keyword: data.field.txt_keyword}
              });
-             entity = null;
              return false;
          });
-         var entity;
-         table.on('row(currentTableFilter)', function (obj) {
-             obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-             entity = obj;
-         })
+         //行点击事件监听，控制按钮显示
+         var oneList = ["NF-edit", "NF-delete"];//选择1条显示
+         commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
          //toolbar监听事件
          table.on('toolbar(currentTableFilter)', function (obj) { 
+             var data = table.checkStatus('currentTableId').data;
+             var id = data.length > 0 ? data[0].F_Id : null;
              if (obj.event === 'add') {  // 监听添加操作
                  common.openNewTabByIframe({
                      title: "新增规则",
@@ -96,35 +105,27 @@
                  });
              } 
              else if (obj.event === 'delete') {
-                 if (entity == null) {
+                 if (id == null) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
                  common.deleteForm({
                      url: "/SystemOrganize/DataPrivilegeRule/DeleteForm",
-                     param: { keyValue: entity.data.F_Id },
+                     param: { keyValue: id },
                      success: function () {
                          common.reload('data-search-btn');
                    }
                });
            }
            else if (obj.event === 'edit') {
-               if (entity == null) {
+                 if (id == null) {
                    common.modalMsg("未选中数据", "warning");
                    return false;
                  }
                  common.openNewTabByIframe({
                      title: "修改规则",
-                     href: "/SystemOrganize/DataPrivilegeRule/Form?keyValue=" + entity.data.F_Id,
+                     href: "/SystemOrganize/DataPrivilegeRule/Form?keyValue=" + id,
                  });
-             }
-             else if (obj.event === 'TABLE_SEARCH') {
-                 var _that = $("#searchField");
-                 if (_that.hasClass("layui-hide")) {
-                     _that.removeClass('layui-hide');
-                 } else {
-                     _that.addClass('layui-hide');
-                 }
              }
              else if (obj.event === 'TABLE_SEARCH') {
                  var _that = $("#searchField");
@@ -135,6 +136,26 @@
                  }
              }
            return false;
-       });
+         });
+         //toolrow监听事件
+         table.on('tool(currentTableFilter)', function (obj) {
+             var id = obj.data.F_Id;
+             if (obj.event === 'delete') {
+                 common.deleteForm({
+                     url: "/SystemOrganize/DataPrivilegeRule/DeleteForm",
+                     param: { keyValue: id },
+                     success: function () {
+                         obj.del();
+                     }
+                 });
+             }
+             else if (obj.event === 'edit') {
+                 common.openNewTabByIframe({
+                     title: "修改规则",
+                     href: "/SystemOrganize/DataPrivilegeRule/Form?keyValue=" + id,
+                 });
+             }
+             return false;
+         });
    });
 </script>

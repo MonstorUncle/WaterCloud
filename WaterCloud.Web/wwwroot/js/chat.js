@@ -1,23 +1,25 @@
 ﻿"use strict";
-
+//const connection = new signalR.HubConnectionBuilder().withUrl("https://watercloud.vip/chatHub")
 const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub")
     .configureLogging(signalR.LogLevel.Information).build();
 
 connection.serverTimeoutInMilliseconds = 24e4;
 connection.keepAliveIntervalInMilliseconds = 12e4;
-
 connection.start().then(function () {
-    console.log("连接成功");
+    //传入token值
+    connection.invoke("SendLogin", "").catch(err => console.error("发送失败：" + err.toString()));
+    console.log("signalr连接成功");
 }).catch(function (ex) {
-    console.log("连接失败" + ex);
+    console.log("signalr连接失败" + ex);
     //SignalR JavaScript 客户端不会自动重新连接，必须编写代码将手动重新连接你的客户端
     setTimeout(start(), 5000);
 
 });
 
+
 function start() {
     try {
-        signalr_connection.start();
+        connection.start();
         console.log("connected");
     } catch (err) {
         console.log(err);

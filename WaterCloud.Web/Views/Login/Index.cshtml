@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <link rel="icon" href="@ViewBag.LogoIcon">
-    <link rel="stylesheet" href="~/lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="~/lib/layui/css/layui.css" media="all">
     <link rel="stylesheet" href="~/css/login.css" media="all">
 </head>
 <body>
@@ -57,9 +57,9 @@
     </div>
     <script src="~/lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
     <script src="~/js/cookie/jquery.cookie.js"></script>
+    <script src="~/js/md5/base64.js"></script>
     <script src="~/js/md5/jquery.md5.js"></script>
-    <script src="~/lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
-    <script src="~/lib/jq-module/jquery.particleground.min.js" charset="utf-8"></script>
+    <script src="~/lib/layui/layui.js" charset="utf-8"></script>
     <script src="~/js/login.js?v=@WaterCloud.Code.GlobalContext.GetVersion()"></script>
     <script src="~/js/framework-ui.js?v=@WaterCloud.Code.GlobalContext.GetVersion()"></script>
     <script>
@@ -111,7 +111,7 @@
                 if ($.cookie("remember_user")) {
                     $("#remember_user").prop("checked", true);
                     $("#username").val($.cookie("username"));
-                    $("#password").val($.cookie("password"));
+                    $("#password").val(Base64.decode($.cookie("password")));
                 }
             });
             function saveUserInfo() {
@@ -124,7 +124,7 @@
                     $.cookie("username", user_name, {
                         expires: 7
                     }); // 存储一个带7天期限的 cookie
-                    $.cookie("password", user_password, {
+                    $.cookie("password", Base64.encode(user_password), {
                         expires: 7
                     }); // 存储一个带7天期限的 cookie
                 } else {

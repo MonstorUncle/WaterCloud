@@ -19,7 +19,7 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
     [Area("SystemOrganize")]
     public class OrganizeController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public OrganizeService _service { get; set; }
 
         [HttpGet]
@@ -85,13 +85,25 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
         }
         [HttpGet]
         [HandlerAjaxOnly]
-        public async Task<ActionResult> GetTreeGridJson(string keyword)
+        public async Task<ActionResult> GetTreeGridJson(string keyword,string ids)
         {
             var data =await _service.GetLookList();
             if (!string.IsNullOrEmpty(keyword))
             {
                 data = data.TreeWhere(t => t.F_FullName.Contains(keyword));
             }
+			if (!string.IsNullOrEmpty(ids))
+			{
+                var str = ids.Split(',');
+				foreach (var item in str)
+				{
+                    if (data.Where(a => a.F_Id == item).Count() > 0)
+                    {
+                        var temp = data.Find(a => a.F_Id == item);
+                        temp.LAY_CHECKED = true;
+                    }
+				}
+			}
             return Success(data.Count, data);
         }
         [HttpGet]
@@ -116,11 +128,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                     organizeEntity.F_Layers =(await _service.GetForm(organizeEntity.F_ParentId)).F_Layers + 1;
                 }
                 await _service.SubmitForm(organizeEntity, keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
         [HttpPost]
@@ -131,11 +143,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
             try
             {
                 await _service.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
     }

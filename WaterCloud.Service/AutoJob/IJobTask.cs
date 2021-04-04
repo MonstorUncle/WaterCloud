@@ -5,6 +5,7 @@ namespace WaterCloud.Service.AutoJob
 {
     public interface IJobTask
     {
-        Task<AjaxResult> Start();
+        //执行方法
+        Task<AlwaysResult> Start();
     }
 }

@@ -19,7 +19,7 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
     [Area("SystemOrganize")]
     public class RoleController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public RoleService _service { get; set; }
 
         [HttpGet]
@@ -53,20 +53,17 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
             }
             return Success(data.Count, data);
         }
-        [HttpGet]
         [HandlerAjaxOnly]
-        public async Task<ActionResult> GetGridJson(Pagination pagination, string keyword)
+        [IgnoreAntiforgeryToken]
+        public async Task<ActionResult> GetGridJson(SoulPage<RoleExtend> pagination, string keyword)
         {
-            pagination.order = "asc";
-            pagination.sort = "F_EnCode";
-            //导出全部页使用
-            if (pagination.rows == 0 && pagination.page == 0)
+            if (string.IsNullOrEmpty(pagination.field))
             {
-                pagination.rows = 99999999;
-                pagination.page = 1;
+                pagination.field = "F_CreatorTime";
+                pagination.order = "desc";
             }
-            var data =await _service.GetLookList(pagination,keyword);
-            return Success(pagination.records,data);
+            var data = await _service.GetLookList(pagination, keyword);
+            return Content(pagination.setData(data).ToJson());
         }
         [HttpGet]
         [HandlerAjaxOnly]
@@ -86,11 +83,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
             try
             {
                 await _service.SubmitForm(roleEntity,string.IsNullOrEmpty(permissionbuttonIds) ?new string[0]: permissionbuttonIds.Split(','), string.IsNullOrEmpty(permissionfieldsIds) ? new string[0] : permissionfieldsIds.Split(','), keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
         [HttpPost]
@@ -105,11 +102,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                     return Error("操作失败，不能删除用户当前角色");
                 }
                 await _service.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
     }

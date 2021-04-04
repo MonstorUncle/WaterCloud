@@ -118,9 +118,6 @@
             return false;
         });
         form.on('submit(formStep3)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
                 var postData = role;
                 var params = dtree.getCheckbarNodesParam("demoTree2");
                 var note = [];

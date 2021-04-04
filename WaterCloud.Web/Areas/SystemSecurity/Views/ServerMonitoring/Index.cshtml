@@ -229,11 +229,32 @@
                 series: [
                     {
                         name: 'CPU使用率', type: 'line',
-                        data: cpuData
+                        data: cpuData,
+                        lineStyle: {
+                            normal: {
+                                width: 2
+                            }
+                        },
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 10,
+                        showAllSymbol: true,
+                        color: '#2499F8',
                     },
                     {
                         name: 'ARM使用率', type: 'line',
-                        data: armData
+                        data: armData,
+                        lineStyle: {
+                            normal: {
+                                width: 2
+                            }
+                        },
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 10,
+                        showAllSymbol: true,
+                        color: '#F90',
+
                     }
                 ]
             };

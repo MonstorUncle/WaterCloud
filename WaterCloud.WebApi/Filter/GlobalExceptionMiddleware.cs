@@ -34,7 +34,7 @@ namespace WaterCloud.WebApi
         {
             var code = HttpStatusCode.OK;
             LogHelper.WriteWithTime(exception);
-            var result = JsonConvert.SerializeObject(new AjaxResult
+            var result = JsonConvert.SerializeObject(new AlwaysResult
             {
                 state = ResultType.error.ToString(),
                 message = exception.Message

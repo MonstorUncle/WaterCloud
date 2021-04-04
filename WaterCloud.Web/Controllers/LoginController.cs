@@ -38,7 +38,7 @@ namespace WaterCloud.Web.Controllers
                     ViewBag.Password = GlobalContext.SystemConfig.SysemUserPwd;
                 }
                 ViewBag.ProjectName = systemset.F_ProjectName;
-                ViewBag.LogoIcon = "../icon/" + systemset.F_Logo;
+                ViewBag.LogoIcon = ".." + systemset.F_Logo;
                 return View();
             }
             catch (Exception)
@@ -86,22 +86,22 @@ namespace WaterCloud.Web.Controllers
             {
                 if (_setService.currentuser.UserId == null)
                 {
-                    return Content(new AjaxResult { state = ResultType.error.ToString() }.ToJson());
+                    return Content(new AlwaysResult { state = ResultType.error.ToString() }.ToJson());
                 }
                 //登录检测      
                 if ((await OperatorProvider.Provider.IsOnLine("pc_")).stateCode<=0)
                 {
                     await OperatorProvider.Provider.EmptyCurrent("pc_");
-                    return Content(new AjaxResult { state = ResultType.error.ToString() }.ToJson());
+                    return Content(new AlwaysResult { state = ResultType.error.ToString() }.ToJson());
                 }
                 else
                 {
-                    return Content(new AjaxResult { state = ResultType.success.ToString() }.ToJson());
+                    return Content(new AlwaysResult { state = ResultType.success.ToString() }.ToJson());
                 }
             }
             catch (Exception)
             {
-                return Content(new AjaxResult { state = ResultType.error.ToString() }.ToJson());
+                return Content(new AlwaysResult { state = ResultType.error.ToString() }.ToJson());
             }
 
         }
@@ -140,7 +140,14 @@ namespace WaterCloud.Web.Controllers
                 operatorModel.DepartmentId = userEntity.F_DepartmentId;
                 operatorModel.RoleId = userEntity.F_RoleId;
                 operatorModel.LoginIPAddress = WebHelper.Ip;
-                operatorModel.LoginIPAddressName = "本地局域网";//Net.GetLocation(operatorModel.LoginIPAddress);
+                if (GlobalContext.SystemConfig.LocalLAN != false)
+                {
+                    operatorModel.LoginIPAddressName = "本地局域网";
+                }
+                else
+                {
+                    operatorModel.LoginIPAddressName = WebHelper.GetIpLocation(operatorModel.LoginIPAddress);
+                }
                 operatorModel.LoginTime = DateTime.Now;
                 operatorModel.DdUserId = userEntity.F_DingTalkUserId;
                 operatorModel.WxOpenId = userEntity.F_WxOpenId;
@@ -153,7 +160,7 @@ namespace WaterCloud.Web.Controllers
                 SystemSetEntity setEntity = await _setService.GetForm(userEntity.F_OrganizeId);
                 operatorModel.DbString = setEntity.F_DbString;
                 operatorModel.DBProvider = setEntity.F_DBProvider;
-                if (userEntity.F_Account == "admin")
+                if (userEntity.F_Account == GlobalContext.SystemConfig.SysemUserCode)
                 {
                     operatorModel.IsSystem = true;
                 }
@@ -163,12 +170,16 @@ namespace WaterCloud.Web.Controllers
                 }
                 //缓存保存用户信息
                 await OperatorProvider.Provider.AddLoginUser(operatorModel, "","pc_");
+                //防重复token
+                string token = Utils.GuId();
+                HttpContext.Response.Cookies.Append("pc_" + GlobalContext.SystemConfig.TokenName, token);
+                await CacheHelper.Set("pc_" + GlobalContext.SystemConfig.TokenName + "_" + operatorModel.UserId + "_" + operatorModel.LoginTime, token, GlobalContext.SystemConfig.LoginExpire, true);
                 logEntity.F_Account = userEntity.F_Account;
                 logEntity.F_NickName = userEntity.F_RealName;
                 logEntity.F_Result = true;
                 logEntity.F_Description = "登录成功";
                 await _logService.WriteDbLog(logEntity);
-                return Content(new AjaxResult { state = ResultType.success.ToString(), message = "登录成功。"}.ToJson());
+                return Content(new AlwaysResult { state = ResultType.success.ToString(), message = "登录成功。"}.ToJson());
             }
             catch (Exception ex)
             {
@@ -177,7 +188,7 @@ namespace WaterCloud.Web.Controllers
                 logEntity.F_Result = false;
                 logEntity.F_Description = "登录失败，" + ex.Message;
                 await _logService.WriteDbLog(logEntity);
-                return Content(new AjaxResult { state = ResultType.error.ToString(), message = ex.Message }.ToJson());
+                return Content(new AlwaysResult { state = ResultType.error.ToString(), message = ex.Message }.ToJson());
             }
         }
         private async Task<bool> CheckIP()

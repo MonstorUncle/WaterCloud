@@ -36,17 +36,10 @@
                     { field: 'F_Account', title: '账户', width: 150, sort: true },
                     { field: 'F_RealName', title: '姓名', width: 120, sort: true },
                     {
-                        field: 'F_OrganizeId', title: '公司', width: 150, sort: true,
-                        templet: function (d) {
-                            return top.clients.organize[d.F_OrganizeId] == null ? "" : top.clients.organize[d.F_OrganizeId].fullname;
-                        }
+                        field: 'F_CompanyName', title: '公司名称', width: 150, sort: true
                     },
                     {
-                        field: 'F_DepartmentId', title: '部门', width: 200, sort: true,
-                        templet: function (d) {
-                            return top.clients.organize[d.F_DepartmentId] == null ? "" : top.clients.organize[d.F_DepartmentId].fullname;
-
-                        }
+                        field: 'F_DepartmentName', title: '部门名称', width: 200, sort: true
                     },
                     {
                         field: 'F_EnabledMark', title: '状态', width: 80, sort: true,
@@ -60,6 +53,7 @@
                     },
                 ]]
             });
+            commonTable.tableRowClick("checkbox", "currentTableFilter", "currentTableId");
             // 监听双击事件
             table.on('rowDouble(currentTableFilter)', function (obj) {
                 var pvalue = obj.data.F_Id;

@@ -1,4 +1,4 @@
-/*******************************************************************************
+﻿/*******************************************************************************
  * Copyright © 2020 WaterCloud.Framework 版权所有
  * Author: WaterCloud
  * Description: WaterCloud快速开发平台
@@ -33,9 +33,9 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         [HandlerAjaxOnly]
         public async Task<ActionResult> SubmitForm(string permissionIds)
         {
-            string[] temp = string.IsNullOrEmpty(permissionIds)?null:permissionIds.Split(',');
+            string[] temp = string.IsNullOrEmpty(permissionIds) ? null : permissionIds.Split(',');
             await _moduleService.SubmitForm(temp);
-            return Content(new AjaxResult { state = ResultType.success.ToString(), message = "操作成功" }.ToJson());
+            return Content(new AlwaysResult { state = ResultType.success.ToString(), message = "操作成功" }.ToJson());
         }
     }
 }

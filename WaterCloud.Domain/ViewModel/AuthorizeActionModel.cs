@@ -16,5 +16,6 @@ namespace WaterCloud.Domain.ViewModel
     {
         public string F_Id { set; get; }
         public string F_UrlAddress { set; get; }
+        public string F_Authorize { get; set; }
     }
 }

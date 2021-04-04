@@ -18,7 +18,7 @@ namespace WaterCloud.Service.SystemManage
     public class ModuleButtonService : DataFilterService<ModuleButtonEntity>, IDenpendency
     {
         //获取类名
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         /// <summary>
         /// 缓存操作类
         /// </summary>
@@ -39,28 +39,25 @@ namespace WaterCloud.Service.SystemManage
             }
             return list.Where(a => a.F_DeleteMark == false).OrderBy(t => t.F_SortCode).ToList();
         }
-        public async Task<List<ModuleButtonEntity>> GetLookList(string moduleId = "")
+        public async Task<List<ModuleButtonEntity>> GetLookList(string moduleId = "", string keyword = "")
         {
-            var list = new List<ModuleButtonEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
-            {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
-            }
+            var query = repository.IQueryable().Where(a => a.F_DeleteMark == false);
             if (!string.IsNullOrEmpty(moduleId))
             {
-                list = list.Where(t => t.F_ModuleId == moduleId).ToList();
+                query = query.Where(t => t.F_ModuleId == moduleId);
             }
-            return GetFieldsFilterData(list.Where(a => a.F_DeleteMark == false).OrderBy(t => t.F_SortCode).ToList(), className.Substring(0, className.Length - 7));
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                //此处需修改
+                query = query.Where(t => t.F_FullName.Contains(keyword) || t.F_EnCode.Contains(keyword));
+            }
+            query = GetDataPrivilege("u", "", query);
+            return query.OrderBy(t => t.F_SortCode).ToList();
         }
         public async Task<ModuleButtonEntity> GetLookForm(string keyValue)
         {
             var cachedata =await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata, className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
         public async Task<ModuleButtonEntity> GetForm(string keyValue)
         {
@@ -93,6 +90,10 @@ namespace WaterCloud.Service.SystemManage
 
         public async Task SubmitForm(ModuleButtonEntity moduleButtonEntity, string keyValue)
         {
+            if (!string.IsNullOrEmpty(moduleButtonEntity.F_Authorize))
+            {
+                moduleButtonEntity.F_Authorize = moduleButtonEntity.F_Authorize.ToLower();
+            }
             if (!string.IsNullOrEmpty(keyValue))
             {
                 moduleButtonEntity.Modify(keyValue);

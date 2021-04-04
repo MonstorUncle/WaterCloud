@@ -77,5 +77,7 @@ namespace WaterCloud.Domain.FileManage
         /// </summary>
         /// <returns></returns>
         public string F_CreatorUserName { get; set; }
+        [NotMapped]
+        public string F_OrganizeName { get; set; }
     }
 }

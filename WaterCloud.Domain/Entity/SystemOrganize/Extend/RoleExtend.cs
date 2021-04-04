@@ -18,5 +18,6 @@ namespace WaterCloud.Domain.SystemOrganize
         /// </summary>
         /// <returns></returns>
         public string F_Remark { get; set; }
+        public string F_CompanyName { get; set; }
     }
 }

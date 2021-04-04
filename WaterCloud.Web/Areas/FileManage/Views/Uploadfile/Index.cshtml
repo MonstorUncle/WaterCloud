@@ -23,9 +23,13 @@
          </fieldset>
          <script type="text/html" id="toolbarDemo">
              <div class="layui-btn-container" id="toolbar">
-                 <button id="NF-download" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="download"><i class="layui-icon">&#xe601;</i>下载</button>
-                 <button id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                 <button id="NF-download" name="NF-download" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="download"><i class="layui-icon">&#xe601;</i>下载</button>
+                 <button id="NF-details" name="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
              </div>
+         </script>
+         <script type="text/html" id="currentTableBar">
+             <a id="NF-download" authorize class="layui-btn layui-btn-sm" lay-event="download"><i class="layui-icon">&#xe601;</i></a>
+             <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
          </script>
          <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
      </div>
@@ -36,19 +40,24 @@
              table = layui.table,
              commonTable = layui.commonTable,
              common = layui.common;
-         var entity;
          //权限控制(js是值传递)
+         currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
          toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
          commonTable.rendertable({
              elem: '#currentTableId',
              id: 'currentTableId',
-             url: '/FileManage/Uploadfile/GetGridJson',             
+             url: '/FileManage/Uploadfile/GetGridJson',      
+             filter: {
+                 clearFilter: false,
+                 //数据量大，data就不需要了
+                 items: ['column', 'condition', 'editCondition', 'excel']
+             },
              cols: [[                 
-                 //此处需修改
-                 { field: 'F_FilePath', title: '文件路径', width: 120, sort: true, hide: true },
-                 { field: 'F_FileName', title: '文件名称', width: 180, sort: true },
+                 { type: "radio", width: 50, fixed: 'left' },
+                 { field: 'F_FilePath', title: '文件路径', width: 120, sort: true, hide: true, filter: true },
+                 { field: 'F_FileName', title: '文件名称', width: 180, sort: true, filter: true },
                  {
-                     field: 'F_FileType', title: '文件类型', width: 120, sort: true,
+                     field: 'F_FileType', title: '文件类型', width: 120, sort: true, filter: true,
                      templet: function (d) {
                          if (d.F_FileType == 0) {
                              return "文件";
@@ -57,17 +66,14 @@
                          }
                      }
                  },
-                 { field: 'F_FileSize', title: '文件大小', width: 100, sort: true, hide: true },
-                 { field: 'F_FileExtension', title: '文件扩展名', width: 120, sort: true, hide: true },
-                 { field: 'F_FileBy', title: '文件所属', width: 120, sort: true },
+                 { field: 'F_FileSize', title: '文件大小', width: 100, sort: true, hide: true, filter: true },
+                 { field: 'F_FileExtension', title: '文件扩展名', width: 120, sort: true, hide: true, filter: true },
+                 { field: 'F_FileBy', title: '文件所属', width: 120, sort: true, filter: true },
                  {
-                     field: 'F_OrganizeId', title: '所属部门', width: 120, sort: true,
-                     templet: function (d) {
-                         return top.clients.organize[d.F_OrganizeId] == null ? "" : top.clients.organize[d.F_OrganizeId].fullname;
-                     }
+                     field: 'F_OrganizeName', title: '所属部门', width: 120, sort: true, filter: true
                  },
                  {
-                     field: 'F_EnabledMark', title: '状态', width: 80,
+                     field: 'F_EnabledMark', title: '状态', width: 80, filter: true,
                      templet: function (d) {
                          if (d.F_EnabledMark == true) {
                              return "<span class='layui-btn layui-btn-normal layui-btn-xs'>有效</span>";
@@ -77,7 +83,7 @@
                      }
                  }, 
                  {
-                     field: 'F_CreatorTime', title: '创建时间', width: 120, sort: true,
+                     field: 'F_CreatorTime', title: '创建时间', width: 120, sort: true, filter: { type: 'date[yyyy-MM-dd]' },
                      templet: function (d) {
                          if (d.F_CreatorTime) {
                              var time = new Date(d.F_CreatorTime);
@@ -86,8 +92,9 @@
                          return '';
                      }
                  },
-                 { field: 'F_CreatorUserName', title: '创建用户', width: 120, sort: true },
-                 { field: 'F_Description', title: '文件备注', minWidth: 150, sort: true },
+                 { field: 'F_CreatorUserName', title: '创建用户', width: 120, sort: true, filter: true },
+                 { field: 'F_Description', title: '文件备注', minWidth: 150, sort: true, filter: true },
+                 { title: '操作', width: 130, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
              ]]
          });
          // 监听搜索操作
@@ -98,31 +105,30 @@
                  curr: 1,
                  where: { keyword: data.field.txt_keyword}
              });
-             entity = null;
              return false;
          });
          wcLoading.close();
-         table.on('row(currentTableFilter)', function (obj) {
-             obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-             entity = obj;
-         })
+         //行点击事件监听，控制按钮显示
+         var oneList = ["NF-download", "NF-details"];//选择1条显示
+         commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
          //toolbar监听事件
          table.on('toolbar(currentTableFilter)', function (obj) {
+             var data = table.checkStatus('currentTableId').data;
              if (obj.event === 'download') {
-                 if (entity == null) {
+                 if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
-                 window.open('/FileManage/Uploadfile/Download?keyValue=' + entity.data.F_Id);
+                 window.open('/FileManage/Uploadfile/Download?keyValue=' + data[0].F_Id);
              }
              else if (obj.event === 'details') {
-               if (entity == null) {
+                 if (data.length == 0) {
                    common.modalMsg("未选中数据", "warning");
                    return false;
                }
                common.modalOpen({
                   title: "查看文件",
-                   url: "/FileManage/Uploadfile/Details?keyValue=" + entity.data.F_Id,
+                   url: "/FileManage/Uploadfile/Details?keyValue=" + data[0].F_Id,
                    width: "500px",
                    height: "500px",
                   btn: []
@@ -137,6 +143,22 @@
                  }
              }
            return false;
-       });
+         });
+         //toolrow监听事件
+         table.on('tool(currentTableFilter)', function (obj) {
+             if (obj.event === 'download') {
+                 window.open('/FileManage/Uploadfile/Download?keyValue=' + obj.data.F_Id);
+             }
+             else if (obj.event === 'details') {
+                 common.modalOpen({
+                     title: "查看文件",
+                     url: "/FileManage/Uploadfile/Details?keyValue=" + obj.data.F_Id,
+                     width: "500px",
+                     height: "500px",
+                     btn: []
+                 });
+             }
+             return false;
+         });
    });
 </script>

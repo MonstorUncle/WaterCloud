@@ -2,7 +2,7 @@
     ViewBag.Title = "Form";
     Layout = "~/Views/Shared/_Form.cshtml";
 }
-<link href="~/js/lay-module/flow/GooFlow.css" rel="stylesheet" />
+<link href="~/js/lay-module/flow/WaterFlow.css" rel="stylesheet" />
 @*<link href="/css/formpreview.css" rel="stylesheet" />*@
 <link href="~/css/stepcss.css" rel="stylesheet" />
 <style>
@@ -57,7 +57,7 @@
 <script>
     //只读参数
     var readonly = true;
-    layui.use(['form', 'layer', 'element', 'jquery', 'table', 'gooflow', 'flowlayout', 'common', 'step', 'formPreview', 'optimizeSelectOption'], function () {
+    layui.use(['form', 'layer', 'element', 'jquery', 'table', 'waterflow', 'flowlayout', 'common', 'step', 'formPreview', 'optimizeSelectOption'], function () {
         var form = layui.form,
             element = layui.element,
             layer = layui.layer,
@@ -153,7 +153,6 @@
                     layer.msg("开始节点与结束节点不能设置");
                     return false;
                 }
-
                 top.layer.open({
                     type: 2,
                     area: ['550px', '550px'], //宽高
@@ -187,7 +186,7 @@
                 valueList = $("#valueList").val().split(',');
                 top.layer.open({
                     type: 2,
-                    area: ['550px', '550px'], //宽高
+                    area: ['650px', '500px'], //宽高
                     maxmin: true, //开启最大化最小化按钮
                     title: '连线设置【' + object.name + '】',
                     content: '/SystemManage/Flowscheme/LineInfo',
@@ -206,6 +205,38 @@
                             var iframeWin = layero.find('iframe')[0].contentWindow; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
                             var linedata = iframeWin.getVal();
                             flowDesignPanel.SetLineEx(object.id, linedata);
+                            top.layer.close(index);
+                        }
+                    },
+                    cancel: function (index) {
+                        layer.close(index);
+                    }
+                });
+                return;
+            },
+            OpenArea: function (object) {
+                FlowDesignObject = object; //为NodeInfo窗口提供调用
+                top.layer.open({
+                    type: 2,
+                    area: ['450px', '350px'], //宽高
+                    maxmin: true, //开启最大化最小化按钮
+                    title: '区域设置【' + object.name + '】',
+                    content: '/SystemManage/Flowscheme/AreaInfo',
+                    btn: ['确定', '取消'],
+                    success: function (layero, index) {
+                        //子界面定义一个窗口方法initForm，里面调用common.val给参数赋值
+                        if (layero.find('iframe')[0].contentWindow.initForm) {
+                            var data = {};
+                            data.FlowDesignObject = FlowDesignObject;
+                            data.valueList = valueList;
+                            layero.find('iframe')[0].contentWindow.initForm(data);
+                        }
+                    },
+                    yes: function (index, layero) {
+                        if (layero.find('iframe')[0].contentWindow.initForm) {
+                            var iframeWin = layero.find('iframe')[0].contentWindow; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                            var areadata = iframeWin.getVal();
+                            flowDesignPanel.SetAreaEx(object.id, areadata);
                             top.layer.close(index);
                         }
                     },
@@ -260,9 +291,6 @@
             if (content == -1) {
                 return false; //阻止表单跳转。
             }
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
             var schemecontent = {
                 F_SchemeContent: JSON.stringify(content)
             }

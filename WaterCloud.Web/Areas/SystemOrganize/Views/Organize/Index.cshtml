@@ -1,33 +1,36 @@
-﻿@{
+@{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Index.cshtml";
 }
 <script>
-    layui.use(['jquery', 'form', 'table', 'common', 'treeTable', 'optimizeSelectOption', 'layer'], function () {
+    layui.use(['jquery', 'form', 'table', 'common', 'commonTable', 'optimizeSelectOption'], function () {
         var $ = layui.jquery,
             form = layui.form,
             table = layui.table,
-            layer = layui.layer,
-            treeTable = layui.treeTable,
+            commonTable = layui.commonTable,
             common = layui.common;
         //加载数据
         wcLoading.close();
         //权限控制(js是值传递)
+        currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
         toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
-        var rendertree = common.rendertreetable({
+        var options = {
             elem: '#currentTableId',
-            url: '/SystemOrganize/Organize/GetTreeGridJson' ,
+            url: '/SystemOrganize/Organize/GetTreeGridJson',
+            treeIdName: 'F_Id',  // id字段名称
+            treePidName: 'F_ParentId',     // pid字段名称
             cols: [[
-                { field: 'F_FullName', title: '名称', width: 250 },
-                { field: 'F_EnCode', title: '编号', width: 200 },
+                { type: "radio", width: 50, fixed: 'left' },
+                { field: 'F_FullName', title: '名称', width: 250, filter: true },
+                { field: 'F_EnCode', title: '编号', width: 200, filter: true },
                 {
-                    field: 'F_CategoryId', title: '分类', width: 120,
+                    field: 'F_CategoryId', title: '分类', width: 120, filter: true,
                     templet: function (d) {
                         return top.clients.dataItems["OrganizeCategory"][d.F_CategoryId] == null ? "" : top.clients.dataItems["OrganizeCategory"][d.F_CategoryId];
                     }
                 },
                 {
-                    field: 'F_EnabledMark', title: '状态', width: 80,
+                    field: 'F_EnabledMark', title: '状态', width: 80, filter: true,
                     templet: function (d) {
                         if (d.F_EnabledMark == true) {
                             return "<span class='layui-btn layui-btn-normal layui-btn-xs'>有效</span>";
@@ -35,9 +38,9 @@
                             return "<span class='layui-btn layui-btn-warm layui-btn-xs'>无效</span>";
                         }
                     }
-                }, 
+                },
                 {
-                    field: 'F_CreatorTime', title: '创建时间', width: 120,
+                    field: 'F_CreatorTime', title: '创建时间', width: 120,filter: { type: 'date[yyyy-MM-dd]' },
                     templet: function (d) {
                         if (d.F_CreatorTime) {
                             var time = new Date(d.F_CreatorTime);
@@ -46,34 +49,30 @@
                         return '';
                     }
                 },
-                { field: 'F_Description', title: '备注', minWidth: 150 },
+                { field: 'F_Description', title: '备注', minWidth: 150, filter: true },
+                { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
             ]],
-            done: function () {
-                //展开全部
-                rendertree.expandAll(); 
-            }
-        });
-            
+        };
+        commonTable.rendertreetable(options);         
         // 监听搜索操作
         form.on('submit(data-search-btn)', function (data) {
             queryJson = data.field.txt_keyword;
-            common.reloadtreetable(rendertree, {
-                where: { keyword: queryJson },
-            }); 
+            options.where = { keyword: queryJson };
+            commonTable.rendertreetable(options); 
             duty = null;
             return false;
         });
-        var duty;
-        treeTable.on('row(currentTableId)', function (obj) {
-            obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-            duty = obj;
-        })
+        //行点击事件监听，控制按钮显示
+        var oneList = ["NF-edit", "NF-details", "NF-delete"];//选择1条显示
+        commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
         /**
          * toolbar监听事件
          */
-        treeTable.on('toolbar(currentTableId)', function (obj) {
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            var data = table.checkStatus('currentTableId').data;
+            var keyValue = data.length > 0 ? data[0].F_Id : null;
+            var duty = data.length > 0 ? data[0] : null;
             if (obj.event === 'add') {  // 监听操作
-                keyValue = !!duty ? duty.data.F_Id : null;
                 common.modalOpen({
                     title: "添加机构",
                     url: "/SystemOrganize/Organize/Form?event=add&keyValue=" + keyValue,
@@ -88,7 +87,7 @@
                 }
                 common.deleteForm({
                     url: "/SystemOrganize/Organize/DeleteForm",
-                    param: { keyValue: duty.data.F_Id },
+                    param: { keyValue: keyValue },
                     success: function () {
                         common.reload('data-search-btn');
                     }
@@ -101,7 +100,7 @@
                 }
                 common.modalOpen({
                     title: "编辑机构",
-                    url: "/SystemOrganize/Organize/Form?event=edit&keyValue=" + duty.data.F_Id,
+                    url: "/SystemOrganize/Organize/Form?event=edit&keyValue=" + keyValue,
                     width: "450px",
                     height: "520px",
                 });
@@ -113,7 +112,7 @@
                 }
                 common.modalOpen({
                     title: "查看机构",
-                    url: "/SystemOrganize/Organize/Details?keyValue=" + duty.data.F_Id,
+                    url: "/SystemOrganize/Organize/Details?keyValue=" + keyValue,
                     width: "450px",
                     height: "520px",
                     btn: []
@@ -126,6 +125,36 @@
                 } else {
                     _that.addClass('layui-hide');
                 }
+            }
+            return false;
+        });
+        table.on('tool(currentTableFilter)', function (obj) {
+            var keyValue = obj.data.F_Id;
+            if (obj.event === 'delete') {
+                common.deleteForm({
+                    url: "/SystemOrganize/Organize/DeleteForm",
+                    param: { keyValue: keyValue },
+                    success: function () {
+                        obj.del();
+                    }
+                });
+            }
+            else if (obj.event === 'edit') {
+                common.modalOpen({
+                    title: "编辑机构",
+                    url: "/SystemOrganize/Organize/Form?event=edit&keyValue=" + keyValue,
+                    width: "450px",
+                    height: "520px",
+                });
+            }
+            else if (obj.event === 'details') {
+                common.modalOpen({
+                    title: "查看机构",
+                    url: "/SystemOrganize/Organize/Details?keyValue=" + keyValue,
+                    width: "450px",
+                    height: "520px",
+                    btn: []
+                });
             }
             return false;
         });
@@ -154,13 +183,17 @@
 
         <script type="text/html" id="toolbarDemo">
             <div class="layui-btn-container" id="toolbar">
-                <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
-                <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                <button id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
+                <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                <button id="NF-details" name="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
             </div>
         </script>
-
+        <script type="text/html" id="currentTableBar">
+            <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+            <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
+            <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
+        </script>
         <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
 
     </div>

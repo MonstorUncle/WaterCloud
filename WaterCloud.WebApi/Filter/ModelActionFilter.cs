@@ -25,7 +25,7 @@ namespace WaterCloud.WebApi
                 {
                     message = message.Substring(0, message.Length - 1);
                 }
-                context.Result = new JsonResult(new AjaxResult { state = ResultType.error.ToString(), message = message });
+                context.Result = new JsonResult(new AlwaysResult { state = ResultType.error.ToString(), message = message });
             } 
         }
     }

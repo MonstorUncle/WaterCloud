@@ -78,15 +78,21 @@
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">
-                    <label class="layui-form-label required">连接</label>
+                    <label class="layui-form-label">连接</label>
                     <div class="layui-input-block">
-                        <input type="text" id="F_UrlAddress" name="F_UrlAddress" lay-verify="required" class="layui-input ">
+                        <input type="text" id="F_UrlAddress" name="F_UrlAddress" class="layui-input ">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">权限</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="F_Authorize" name="F_Authorize" maxlength="100" class="layui-input ">
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">
                     <label class="layui-form-label">显示顺序</label>
                     <div class="layui-input-block">
-                        <input  type="number" pattern="[0-9]*" id="F_SortCode" name="F_SortCode" lay-verify="required" class="layui-input ">
+                        <input type="number" pattern="[0-9]*" id="F_SortCode" name="F_SortCode" lay-verify="required" class="layui-input ">
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">

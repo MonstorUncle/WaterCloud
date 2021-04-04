@@ -1,0 +1,93 @@
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<script>
+    layui.use(['jquery', 'form', 'common', 'commonTable', 'optimizeSelectOption'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            common = layui.common,
+            commonTable = layui.commonTable;
+        var keyValue = $.request("keyValue");
+        wcLoading.close();
+        commonTable.rendertable({
+            elem: '#currentTableId',
+            url: '/SystemSecurity/OpenJobs/GetLogJson?keyValue=' + keyValue,
+            toolbar: false,
+            search: false,
+            page: false,
+            height: 'full-110',
+            cols: [[
+                { field: 'F_JobName', title: '任务名称', width: 150, sort: true },
+                { field: 'F_Description', title: '任务说明', minWwidth: 120, sort: true },
+                {
+                    field: 'F_EnabledMark', title: '执行结果', width: 120, sort: true,
+                    templet: function (d) {
+                        if (d.F_EnabledMark == true) {
+                            return "<span class='layui-btn layui-btn-normal layui-btn-xs'>成功</span>";
+                        } else {
+                            return "<span class='layui-btn layui-btn-warm layui-btn-xs'>失败</span>";
+                        }
+                    }
+                },
+                {
+                    field: 'F_CreatorTime', title: '执行时间', width: 160, sort: true,
+                    templet: function (d) {
+                        if (d.F_CreatorTime) {
+                            var time = new Date(d.F_CreatorTime);
+                            return time.Format("yyyy-MM-dd hh:mm:ss");
+                        }
+                        return '';
+                    }
+                }
+            ]],
+        });
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            //执行搜索重载
+            commonTable.reloadtable({
+                elem: 'currentTableId',
+                page: false,
+                curr: 1,
+                where: { keyword: data.field.txt_keyword }
+            });
+            return false;
+        });
+        form.on('submit(data-delete-btn)', function (data) {
+            //执行搜索重载
+            common.deleteForm({
+                url: "/SystemSecurity/OpenJobs/DeleteLogForm",
+                param: { keyValue: keyValue },
+                success: function () {
+                    common.reload('data-search-btn');
+                }
+            });
+            return false;
+        });
+    });
+</script>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <fieldset class="table-search-fieldset">
+            @*<legend>搜索信息</legend>*@
+            <div>
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">关键字:</label>
+                            <div class="layui-input-inline">
+                                <input type="text" id="txt_keyword" name="txt_keyword" autocomplete="off" class="layui-input" placeholder="">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon">&#xe615;</i> 搜 索</button>
+                            <button type="submit" class="layui-btn layui-btn-danger" lay-submit lay-filter="data-delete-btn"><i class="layui-icon">&#xe640;</i> 清 除</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+    </div>
+</div>

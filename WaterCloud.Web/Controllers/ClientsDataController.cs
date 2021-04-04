@@ -38,9 +38,6 @@ namespace WaterCloud.Web.Controllers
         public RoleAuthorizeService _roleAuthorizeService { get; set; }
         public ItemsDataService _itemsDetailService { get; set; }
         public ItemsTypeService _itemsService { get; set; }
-        public OrganizeService _organizeService { get; set; }
-        public RoleService _roleService { get; set; }
-        public DutyService _dutyService { get; set; }
         public SystemSetService _setService { get; set; }
         public MessageService _msgService { get; set; }
         /// <summary>
@@ -54,11 +51,6 @@ namespace WaterCloud.Web.Controllers
             var data = new
             {
                 dataItems =await this.GetDataItemList(),
-                organize = await this.GetOrganizeList(),
-                company = await this.GetCompanyList(),
-                role = await this.GetRoleList(),
-                duty = await this.GetDutyList(),
-                user = await this.GetUserList(),
                 authorizeButton = await this.GetMenuButtonListNew(),
                 moduleFields = await this.GetMenuFields(),
                 authorizeFields = await this.GetMenuFieldsListNew(),
@@ -94,7 +86,7 @@ namespace WaterCloud.Web.Controllers
         private async Task<object> GetMenuFields()
         {
             var roleId = _userService.currentuser.RoleId;
-            if (_userService.currentuser.UserCode=="admin")
+            if (roleId == null && _userService.currentuser.IsSystem)
             {
                 roleId = "admin";
             }
@@ -205,7 +197,7 @@ namespace WaterCloud.Web.Controllers
             {
                 return Content("");
             }
-            var data =await _userService.GetForm(currentuser.UserId);
+            var data =await _userService.GetFormExtend(currentuser.UserId);
             var msglist= await _msgService.GetUnReadListJson();
             data.MsgCout = msglist.Count();
             return Content(data.ToJson());
@@ -258,11 +250,12 @@ namespace WaterCloud.Web.Controllers
             StringBuilder sbJson = new StringBuilder();
             InitEntity init = new InitEntity();
             init.homeInfo = new HomeInfoEntity();
+            init.homeInfo.href = GlobalContext.SystemConfig.HomePage;
             init.logoInfo = new LogoInfoEntity();
             var systemset =await _setService.GetForm(currentuser.CompanyId);
             //修改主页及logo参数
             init.logoInfo.title = systemset.F_LogoCode;
-            init.logoInfo.image = "../icon/"+systemset.F_Logo;
+            init.logoInfo.image = ".."+systemset.F_Logo;
             init.menuInfo = new List<MenuInfoEntity>();
             init.menuInfo = ToMenuJsonNew(await _roleAuthorizeService.GetMenuList(roleId), "0");
             sbJson.Append(init.ToJson());
@@ -336,101 +329,6 @@ namespace WaterCloud.Web.Controllers
             }
 
             return dictionaryItem;
-        }
-        /// <summary>
-        /// 组织信息
-        /// </summary>
-        /// <returns></returns>
-        private async Task<object> GetOrganizeList()
-        {
-            var data =await _organizeService.GetList();
-            Dictionary<string, object> dictionary = new Dictionary<string, object>();
-            foreach (OrganizeEntity item in data)
-            {
-                var fieldItem = new
-                {
-                    encode = item.F_EnCode,
-                    fullname = item.F_FullName
-                };
-                dictionary.Add(item.F_Id, fieldItem);
-            }
-            return dictionary;
-        }
-        /// <summary>
-        /// 公司信息
-        /// </summary>
-        /// <returns></returns>
-        private async Task<object> GetCompanyList()
-        {
-            var data = await _setService.GetList();
-            Dictionary<string, object> dictionary = new Dictionary<string, object>();
-            foreach (SystemSetEntity item in data)
-            {
-                var fieldItem = new
-                {
-                    encode = item.F_Id,
-                    fullname = item.F_CompanyName
-                };
-                dictionary.Add(item.F_Id, fieldItem);
-            }
-            return dictionary;
-        }
-        /// <summary>
-        /// 角色信息
-        /// </summary>
-        /// <returns></returns>
-        private async Task<object> GetRoleList()
-        {
-            var data =await _roleService.GetList();
-            Dictionary<string, object> dictionary = new Dictionary<string, object>();
-            foreach (RoleEntity item in data)
-            {
-                var fieldItem = new
-                {
-                    encode = item.F_EnCode,
-                    fullname = item.F_FullName
-                };
-                dictionary.Add(item.F_Id, fieldItem);
-            }
-            return dictionary;
-        }
-        /// <summary>
-        /// 岗位信息
-        /// </summary>
-        /// <returns></returns>
-        private async Task<object> GetDutyList()
-        {
-            var data =await _dutyService.GetList();
-            Dictionary<string, object> dictionary = new Dictionary<string, object>();
-            foreach (RoleEntity item in data)
-            {
-                var fieldItem = new
-                {
-                    encode = item.F_Id,
-                    fullname = item.F_FullName
-                };
-                dictionary.Add(item.F_Id, fieldItem);
-            }
-            return dictionary;
-        }
-        /// <summary>
-        /// 用户信息
-        /// </summary>
-        /// <returns></returns>
-        private async Task<object> GetUserList()
-        {
-            var data =await _userService.GetUserList("");
-            Dictionary<string, object> dictionary = new Dictionary<string, object>();
-            foreach (UserEntity item in data)
-            {
-                var fieldItem = new
-                {
-                    encode = item.F_Account,
-                    fullname = item.F_RealName
-                };
-                dictionary.Add(item.F_Id, fieldItem);
-            }
-            return dictionary;
         }
         /// <summary>
         /// 菜单按钮信息

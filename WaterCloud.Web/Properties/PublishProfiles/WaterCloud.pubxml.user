@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+此文件由 Web 项目的发布/打包过程使用。可以通过编辑此 MSBuild 文件
+自定义此过程的行为。为了解与此相关的更多内容，请访问 https://go.microsoft.com/fwlink/?LinkID=208121。 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\Administrator\Desktop\WebSite</_PublishTargetUrl>
+    <History>True|2021-04-04T08:56:21.5854155Z;True|2021-03-23T16:09:14.4947522+08:00;True|2021-03-18T12:55:07.4993238+08:00;True|2021-03-18T12:36:33.3199696+08:00;True|2021-03-18T11:18:46.0865891+08:00;True|2021-03-15T13:37:41.7848541+08:00;True|2021-03-10T15:45:48.6389408+08:00;</History>
+  </PropertyGroup>
+</Project>

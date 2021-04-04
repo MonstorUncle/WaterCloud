@@ -6,6 +6,7 @@ using WaterCloud.Code;
 using Chloe;
 using WaterCloud.Domain.SystemManage;
 using Serenity.Data;
+using WaterCloud.Domain.SystemOrganize;
 
 namespace WaterCloud.Service.SystemManage
 {
@@ -17,7 +18,7 @@ namespace WaterCloud.Service.SystemManage
     public class FormService : DataFilterService<FormEntity>, IDenpendency
     {
         private string cacheKey = "watercloud_formdata_";
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         public FormService(IDbContext context) : base(context)
         {
         }
@@ -33,39 +34,59 @@ namespace WaterCloud.Service.SystemManage
             return cachedata.Where(t => t.F_DeleteMark == false).OrderByDescending(t => t.F_CreatorTime).ToList();
         }
 
-        public async Task<List<FormEntity>> GetLookList(string keyword = "")
+        public async Task<List<FormEntity>> GetLookList(string ItemId="", string keyword = "")
         {
-            var list =new List<FormEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
+            var query = GetQuery().Where(u => u.F_DeleteMark == false);
+            if (!string.IsNullOrEmpty(ItemId))
             {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
+                query = query.Where(u => u.F_OrganizeId == ItemId || u.F_OrganizeId == null || u.F_OrganizeId == "");
             }
             if (!string.IsNullOrEmpty(keyword))
             {
-                //此处需修改
-                list = list.Where(u => u.F_Name.Contains(keyword) || u.F_Description.Contains(keyword)).ToList();
+                query = query.Where(u => u.F_Name.Contains(keyword) || u.F_Description.Contains(keyword));
             }
-            return GetFieldsFilterData(list.Where(t => t.F_DeleteMark == false).OrderByDescending(t => t.F_CreatorTime).ToList(),className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u", "", query);
+            return query.Where(t => t.F_DeleteMark == false).OrderByDesc(t => t.F_CreatorTime).ToList();
         }
 
         public async Task<List<FormEntity>> GetLookList(Pagination pagination,string keyword = "")
         {
             //获取数据权限
-            var list = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
+            var query = GetQuery().Where(u => u.F_DeleteMark == false);
             if (!string.IsNullOrEmpty(keyword))
             {
                 //此处需修改
-                list = list.Where(u => u.F_Name.Contains(keyword) || u.F_Description.Contains(keyword));
+                query = query.Where(u => u.F_Name.Contains(keyword) || u.F_Description.Contains(keyword));
             }
-            list = list.Where(u => u.F_DeleteMark==false);
-            return GetFieldsFilterData(await repository.OrderList(list, pagination),className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u", "", query);
+            return await repository.OrderList(query, pagination);
         }
-
+        private IQuery<FormEntity> GetQuery()
+        {
+            var query = repository.IQueryable()
+                .LeftJoin<OrganizeEntity>((a, b) => a.F_OrganizeId == b.F_Id)
+                .Select((a, b) => new FormEntity
+                {
+                    F_Id = a.F_Id,
+                    F_OrganizeName = b.F_FullName,
+                    F_CreatorTime = a.F_CreatorTime,
+                    F_CreatorUserId = a.F_CreatorUserId,
+                    F_Description = a.F_Description,
+                    F_EnabledMark = a.F_EnabledMark,
+                    F_OrganizeId = a.F_OrganizeId,
+                    F_Content=a.F_Content,
+                    F_ContentData=a.F_ContentData,
+                    F_ContentParse=a.F_ContentParse,
+                    F_DbName=a.F_DbName,
+                    F_DeleteMark=a.F_DeleteMark,
+                    F_Fields=a.F_Fields,    
+                    F_FrmType=a.F_FrmType,
+                    F_Name=a.F_Name,
+                    F_SortCode=a.F_SortCode,    
+                    F_WebId=a.F_WebId,  
+                });
+            return query;
+        }
         public async Task<FormEntity> GetForm(string keyValue)
         {
             var cachedata = await repository.CheckCache(cacheKey, keyValue);
@@ -76,7 +97,7 @@ namespace WaterCloud.Service.SystemManage
         public async Task<FormEntity> GetLookForm(string keyValue)
         {
             var cachedata = await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata,className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
 
         #region 提交数据

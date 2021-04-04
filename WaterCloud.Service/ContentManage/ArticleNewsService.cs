@@ -20,7 +20,7 @@ namespace WaterCloud.Service.ContentManage
 
         }
         private string cacheKey = "watercloud_cms_articlenewsdata_";
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         #region 获取数据
         public async Task<List<ArticleNewsEntity>> GetList(string keyword = "")
         {
@@ -33,8 +33,20 @@ namespace WaterCloud.Service.ContentManage
             return cachedata.Where(t => t.F_DeleteMark == false).OrderByDescending(t => t.F_CreatorTime).ToList();
         }
 
-        public async Task<List<ArticleNewsEntity>> GetLookList(Pagination pagination,string keyword = "", string CategoryId="")
+        public async Task<List<ArticleNewsEntity>> GetLookList(SoulPage<ArticleNewsEntity> pagination, string keyword = "", string CategoryId="")
         {
+            //反格式化显示只能用"等于"，其他不支持
+            Dictionary<string, Dictionary<string, string>> dic = new Dictionary<string, Dictionary<string, string>>();
+            Dictionary<string, string> enabledTemp = new Dictionary<string, string>();
+            enabledTemp.Add("有效", "1");
+            enabledTemp.Add("无效", "0");
+            dic.Add("F_EnabledMark", enabledTemp);
+            Dictionary<string, string> isTrue = new Dictionary<string, string>();
+            enabledTemp.Add("是", "1");
+            enabledTemp.Add("否", "0");
+            dic.Add("F_IsTop", isTrue);
+            dic.Add("F_IsHot", isTrue);
+            pagination = ChangeSoulData(dic, pagination);
             //获取新闻列表
             var query = repository.IQueryable(a => a.F_EnabledMark == true)
             .LeftJoin<ArticleCategoryEntity>((a, b) => a.F_CategoryId == b.F_Id && b.F_EnabledMark == true)
@@ -76,11 +88,10 @@ namespace WaterCloud.Service.ContentManage
             {
                 query = query.Where(a => a.F_CategoryId.Contains(CategoryId));
             }
-            //获取数据权限
-            var list = GetDataPrivilege<ArticleNewsEntity>("u", className.Substring(0, className.Length - 7), query);
-            
-            list = list.Where(u => u.F_DeleteMark==false);
-            return GetFieldsFilterData(await repository.OrderList(list, pagination),className.Substring(0, className.Length - 7));
+            query = query.Where(u => u.F_DeleteMark == false);
+            //权限过滤
+            query = GetDataPrivilege<ArticleNewsEntity>("u", "",query);           
+            return await repository.OrderList(query, pagination);
         }
         /// <summary>
         /// 获取新闻详情
@@ -126,7 +137,7 @@ namespace WaterCloud.Service.ContentManage
                 query = query.Where(a => a.F_Id == keyValue);
             }
             //字段权限处理
-            return GetFieldsFilterData(query.FirstOrDefault(), className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(query.FirstOrDefault());
         }
         #endregion
 

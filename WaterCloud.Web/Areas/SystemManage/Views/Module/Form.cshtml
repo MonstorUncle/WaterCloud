@@ -50,9 +50,6 @@
         }
         //监听提交
         form.on('submit(saveBtn)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
             var postData = data.field;
             if (!postData["F_EnabledMark"]) postData["F_EnabledMark"] = false;
             if (!postData["F_IsMenu"]) postData["F_IsMenu"] = false;
@@ -121,7 +118,7 @@
                 <div class="layui-form-item layui-hide">
                     <label class="layui-form-label required">上级</label>
                     <div class="layui-input-block">
-                        <select id="F_ParentId" name="F_ParentId"  lay-verify="required"  lay-search>
+                        <select id="F_ParentId" name="F_ParentId" lay-verify="required" lay-search>
                             <option value="0" selected>父节点</option>
                         </select>
                     </div>
@@ -145,6 +142,12 @@
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">权限</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="F_Authorize" name="F_Authorize" maxlength="100" class="layui-input ">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
                     <label class="layui-form-label required">目标</label>
                     <div class="layui-input-block">
                         <select id="F_Target" name="F_Target" lay-verify="required">
@@ -161,7 +164,7 @@
                     <div class="layui-input-block" style="padding-right: 70px;">
                         <input type="text" id="F_Icon" name="F_Icon" class="layui-input layui-hide">
                         <input type="text" id="iconPicker" @*value="fa fa-file-image-o"*@ lay-filter="iconPicker" class="hide">
-                        <button class="layui-btn layui-btn-warm"  onclick="clearIcon()" style="position: absolute;top: 0;right: 6px;cursor: pointer;" >清除图标</button>
+                        <button class="layui-btn layui-btn-warm" onclick="clearIcon()" style="position: absolute;top: 0;right: 6px;cursor: pointer;">清除图标</button>
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">

@@ -279,6 +279,15 @@ layui.define(["jquery", "miniMenu", "element", "miniTab", "miniTheme"], function
                 }
             });
             /**
+            * 主页
+            */
+            $('body').on('click', '[data-tohome]', function () {
+                miniTab.openNewTabByIframe({
+                    title: "主页",
+                    href: sessionStorage.getItem('layuiminiHomeHref')
+                });
+            });
+            /**
              * 消息
              */
             $('body').on('click', '[data-notice]', function () {

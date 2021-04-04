@@ -14,9 +14,6 @@
         wcLoading.close();
         //监听提交
         form.on('submit(saveBtn)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
             var postData = data.field;
             common.submitForm({
                 url: "/InfoManage/Message/SubmitForm",

@@ -19,7 +19,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
     [Area("SystemManage")]
     public class ItemsTypeController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public ItemsTypeService _service { get; set; }
         [HttpGet]
         [HandlerAjaxOnly]
@@ -78,7 +78,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                 //treeModel.self = item;
                 treeList.Add(treeModel);
             }
-            return ResultDTree(treeList.TreeList());
+            return DTreeResult(treeList.TreeList());
         }
         [HttpGet]
         [HandlerAjaxOnly]
@@ -113,11 +113,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                     itemsEntity.F_Layers =(await _service.GetForm(itemsEntity.F_ParentId)).F_Layers + 1;
                 }
                 await _service.SubmitForm(itemsEntity, keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
         [HttpPost]
@@ -127,11 +127,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
             try
             {
                 await _service.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
     }

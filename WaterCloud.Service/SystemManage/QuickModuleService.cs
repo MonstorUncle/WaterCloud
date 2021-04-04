@@ -20,7 +20,7 @@ namespace WaterCloud.Service.SystemManage
     public class QuickModuleService:DataFilterService<QuickModuleEntity> ,IDenpendency
     {
         /// <summary>
-        /// 
+        /// »º´æ²Ù×÷Àà
         /// </summary>
 
         private string cacheKey = "watercloud_quickmoduledata_";
@@ -33,15 +33,15 @@ namespace WaterCloud.Service.SystemManage
             List<ModuleEntity> quicks = new List<ModuleEntity>();
             var user = await uniwork.FindEntity<UserEntity>(userId);
             var roleId = user.F_RoleId;
-            if (user.F_Account == "admin" || user.F_IsAdmin == true)
+            if (user.F_Account == GlobalContext.SystemConfig.SysemUserCode || user.F_IsAdmin == true)
             {
                 roleId = "admin";
             }
             var rolelist = roleId.Split(',');
-            var modulelist = uniwork.IQueryable<RoleAuthorizeEntity>(a => roleId.Contains(a.F_ObjectId) && a.F_ItemType == 1).Select(a => a.F_ItemId).ToList();
+            var modulelist = uniwork.IQueryable<RoleAuthorizeEntity>(a => roleId.Contains(a.F_ObjectId) && a.F_ItemType == 1).InnerJoin<ModuleEntity>((a,b)=> a.F_ItemId == b.F_Id && b.F_IsMenu == true).Select((a, b) => a.F_ItemId).ToList();
             if (roleId == "admin")
             {
-                modulelist = uniwork.IQueryable<ModuleEntity>(a => a.F_EnabledMark == true).Select(a => a.F_Id).ToList();
+                modulelist = uniwork.IQueryable<ModuleEntity>(a => a.F_EnabledMark == true && a.F_IsMenu == true && a.F_DeleteMark == false).Select(a => a.F_Id).ToList();
             }
             modulelist = modulelist.Distinct().ToList();
             quicks = uniwork.IQueryable<ModuleEntity>(a => (modulelist.Contains(a.F_Id) || a.F_IsPublic == true) && a.F_IsMenu == true && a.F_EnabledMark == true && a.F_UrlAddress != null)
@@ -72,15 +72,15 @@ namespace WaterCloud.Service.SystemManage
             {
                 var user = await uniwork.FindEntity<UserEntity>(userId);
                 var roleId = user.F_RoleId;
-                if (user.F_Account == "admin" || user.F_IsAdmin == true)
+                if (user.F_Account == GlobalContext.SystemConfig.SysemUserCode || user.F_IsAdmin == true)
                 {
                     roleId = "admin";
                 }
                 var rolelist = roleId.Split(',');
-                var modulelist = uniwork.IQueryable<RoleAuthorizeEntity>(a => rolelist.Contains(a.F_ObjectId) && a.F_ItemType == 1).Select(a => a.F_ItemId).ToList();
+                var modulelist = uniwork.IQueryable<RoleAuthorizeEntity>(a => roleId.Contains(a.F_ObjectId) && a.F_ItemType == 1).InnerJoin<ModuleEntity>((a, b) => a.F_ItemId == b.F_Id && b.F_IsMenu == true).Select((a, b) => a.F_ItemId).ToList();
                 if (roleId == "admin")
                 {
-                    modulelist = uniwork.IQueryable<ModuleEntity>(a => a.F_EnabledMark == true).Select(a => a.F_Id).ToList();
+                    modulelist = uniwork.IQueryable<ModuleEntity>(a => a.F_EnabledMark == true && a.F_IsMenu == true && a.F_DeleteMark == false).Select(a => a.F_Id).ToList();
                 }
                 var temp = uniwork.IQueryable<ModuleEntity>(a => a.F_IsPublic == true && a.F_IsMenu == true && a.F_EnabledMark == true && a.F_DeleteMark == false).Select(a => a.F_Id).ToList();
                 modulelist.AddRange(temp);
@@ -121,7 +121,10 @@ namespace WaterCloud.Service.SystemManage
                             icon = module.F_Icon
                         });
                     }
-
+					else
+					{
+                        await repository.Delete(a => a.F_Id == item.F_Id);
+                    }
                 }
             }
             if (quicks.Count > 0)

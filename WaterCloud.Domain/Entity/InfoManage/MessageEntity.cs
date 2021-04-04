@@ -80,5 +80,7 @@ namespace WaterCloud.Domain.InfoManage
         /// </summary>
         /// <returns></returns>
         public bool? F_ClickRead { get; set; }
+        [NotMapped]
+        public string companyId { get; set; }
     }
 }

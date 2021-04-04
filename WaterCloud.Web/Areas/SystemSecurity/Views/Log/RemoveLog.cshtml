@@ -12,9 +12,6 @@
             wcLoading.close();
             //监听提交
             form.on('submit(clear)', function (data) {
-                // 单击之后提交按钮不可选,防止重复提交
-                $('.site-demo-active').addClass('layui-btn-disabled');
-                $('.site-demo-active').attr('disabled', 'disabled');
                 common.submitForm({
                     loading: "正在备份数据...",
                     url: "/SystemSecurity/Log/SubmitRemoveLog",

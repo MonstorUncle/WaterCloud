@@ -90,7 +90,7 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                 }
                 treeList.Add(tree);
             }
-            return ResultDTree(treeList.TreeList());
+            return DTreeResult(treeList.TreeList());
         }
         [HttpPost]
         [IgnoreAntiforgeryToken]
@@ -169,7 +169,7 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                 }
                 treeList.Add(tree);
             }
-            return ResultDTree(treeList.TreeList());
+            return DTreeResult(treeList.TreeList());
         }
     }
 }

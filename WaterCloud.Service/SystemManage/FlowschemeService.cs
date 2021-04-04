@@ -16,7 +16,7 @@ namespace WaterCloud.Service.SystemManage
     public class FlowschemeService : DataFilterService<FlowschemeEntity>, IDenpendency
     {
         private string cacheKey = "watercloud_flowschemedata_";
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         public FlowschemeService(IDbContext context) : base(context)
         {
         }
@@ -24,45 +24,44 @@ namespace WaterCloud.Service.SystemManage
         public async Task<List<FlowschemeEntity>> GetList(string keyword = "")
         {
             var cachedata = await repository.CheckCacheList(cacheKey + "list");
+
             if (!string.IsNullOrEmpty(keyword))
             {
-                //此处需修改
                 cachedata = cachedata.Where(t => t.F_SchemeCode.Contains(keyword) || t.F_SchemeName.Contains(keyword)).ToList();
             }
-            return cachedata.Where(t => t.F_DeleteMark == false).OrderByDescending(t => t.F_CreatorTime).ToList();
+            var list = currentuser.DepartmentId.Split(',');
+            if (list.Count() > 0)
+            {
+                return cachedata.Where(t => t.F_DeleteMark == false && (t.F_OrganizeId == "" || t.F_OrganizeId == null || list.Contains(t.F_OrganizeId))).OrderByDescending(t => t.F_CreatorTime).ToList();
+            }
+            return cachedata.Where(t => t.F_DeleteMark == false && t.F_OrganizeId == "" || t.F_OrganizeId == null).OrderByDescending(t => t.F_CreatorTime).ToList();
         }
 
-        public async Task<List<FlowschemeEntity>> GetLookList(string keyword = "")
+        public async Task<List<FlowschemeEntity>> GetLookList(string ItemId = "", string keyword = "")
         {
-            var list =new List<FlowschemeEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
+            var query = repository.IQueryable().Where(t => t.F_DeleteMark == false);
+            if (!string.IsNullOrEmpty(ItemId))
             {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
+                query = query.Where(u => u.F_OrganizeId == ItemId || u.F_OrganizeId == null || u.F_OrganizeId == "");
             }
             if (!string.IsNullOrEmpty(keyword))
             {
-                //此处需修改
-                list = list.Where(u => u.F_SchemeCode.Contains(keyword) || u.F_SchemeName.Contains(keyword)).ToList();
+                query = query.Where(u => u.F_SchemeCode.Contains(keyword) || u.F_SchemeName.Contains(keyword));
             }
-            return GetFieldsFilterData(list.Where(t => t.F_DeleteMark == false).OrderByDescending(t => t.F_CreatorTime).ToList(),className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u","", query);
+            return query.OrderByDesc(t => t.F_CreatorTime).ToList();
         }
 
         public async Task<List<FlowschemeEntity>> GetLookList(Pagination pagination,string keyword = "")
         {
-            //获取数据权限
-            var list = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
+            var query = repository.IQueryable().Where(t => t.F_DeleteMark == false);
             if (!string.IsNullOrEmpty(keyword))
             {
                 //此处需修改
-                list = list.Where(u => u.F_SchemeCode.Contains(keyword) || u.F_SchemeName.Contains(keyword));
+                query = query.Where(u => u.F_SchemeCode.Contains(keyword) || u.F_SchemeName.Contains(keyword));
             }
-            list = list.Where(u => u.F_DeleteMark==false);
-            return GetFieldsFilterData(await repository.OrderList(list, pagination),className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u","", query);
+            return await repository.OrderList(query, pagination);
         }
 
         public async Task<FlowschemeEntity> GetForm(string keyValue)
@@ -75,7 +74,7 @@ namespace WaterCloud.Service.SystemManage
         public async Task<FlowschemeEntity> GetLookForm(string keyValue)
         {
             var cachedata = await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata,className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
 
         #region 提交数据

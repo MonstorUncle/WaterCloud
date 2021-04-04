@@ -28,11 +28,29 @@ namespace WaterCloud.DataBase
                 left = Expression.Property(param, property);
                 if (property.PropertyType == typeof(int))
                 {
-                    right = Expression.Constant(int.Parse(filterObj.Value));
+                    int i;
+                    try
+                    {
+                        i = int.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = -999;
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<int>))
                 {
-                    right = Expression.Constant(int.Parse(filterObj.Value), typeof(int?));
+                    int i;
+                    try
+                    {
+                        i = int.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = -999;
+                    }
+                    right = Expression.Constant(i, typeof(int?));
                 }
                 else if (property.PropertyType == typeof(DateTime))
                 {
@@ -60,11 +78,21 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(bool))
                 {
-                    right = Expression.Constant(filterObj.Value.Equals("1"));
+                    bool i = false;
+                    if (filterObj.Value.ToString().ToLower() == "1" || filterObj.Value.ToString().ToLower() == "true")
+                    {
+                        i = true;
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<bool>))
                 {
-                    right = Expression.Constant(filterObj.Value.Equals("1"), typeof(bool?));
+                    bool i = false;
+                    if (filterObj.Value.ToString().ToLower() == "1" || filterObj.Value.ToString().ToLower() == "true")
+                    {
+                        i = true;
+                    }
+                    right = Expression.Constant(i, typeof(bool?));
                 }
                 else if (property.PropertyType == typeof(Guid?))
                 {
@@ -231,11 +259,29 @@ namespace WaterCloud.DataBase
                 left = Expression.Property(param, property);
                 if (property.PropertyType == typeof(int))
                 {
-                    right = Expression.Constant(int.Parse(filterObj.value));
+                    int i;
+                    try
+                    {
+                        i = int.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = -999;
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<int>))
                 {
-                    right = Expression.Constant(int.Parse(filterObj.value), typeof(int?));
+                    int i;
+					try
+					{
+                        i = int.Parse(filterObj.value);
+                    }
+					catch (Exception)
+					{
+                        i = -999;
+					}
+                    right = Expression.Constant(i, typeof(int?));
                 }
                 else if (property.PropertyType == typeof(DateTime))
                 {
@@ -261,11 +307,21 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(bool))
                 {
-                    right = Expression.Constant(filterObj.value.Equals("1"));
+                    bool i = false;
+					if (filterObj.value.ToString().ToLower()=="1"|| filterObj.value.ToString().ToLower() == "true")
+					{
+                        i = true;
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<bool>))
                 {
-                    right = Expression.Constant(filterObj.value.Equals("1"), typeof(bool?));
+                    bool i = false;
+                    if (filterObj.value.ToString().ToLower() == "1" || filterObj.value.ToString().ToLower() == "true")
+                    {
+                        i = true;
+                    }
+                    right = Expression.Constant(i, typeof(bool?));
                 }
                 else if (property.PropertyType == typeof(Guid))
                 {
@@ -296,38 +352,94 @@ namespace WaterCloud.DataBase
                     filter = Expression.NotEqual(left, right);
                     break;
                 case "gt":
-                    filter = Expression.GreaterThan(left, right);
+					try
+					{
+                        filter = Expression.GreaterThan(left, right);
+                    }
+					catch (Exception)
+					{
+                        filter = Expression.NotEqual(left, right);
+                    }
                     break;
                 case "ge":
-                    filter = Expression.GreaterThanOrEqual(left, right);
+                    try
+                    {
+                        filter = Expression.GreaterThanOrEqual(left, right);
+                    }
+                    catch (Exception)
+                    {
+                        filter = Expression.Equal(left, right);
+                    }
                     break;
                 case "lt":
-                    filter = Expression.LessThan(left, right);
+                    try
+                    {
+                        filter = Expression.LessThan(left, right);
+                    }
+                    catch (Exception)
+                    {
+                        filter = Expression.NotEqual(left, right);
+                    }
                     break;
                 case "le":
-                    filter = Expression.LessThanOrEqual(left, right);
+                    try
+                    {
+                        filter = Expression.LessThanOrEqual(left, right);
+                    }
+                    catch (Exception)
+                    {
+                        filter = Expression.Equal(left, right);
+                    }
                     break;
                 case "contain":
-                    filter = Expression.Call(left, typeof(string).GetMethod("Contains", new Type[] { typeof(string) }),
-                        Expression.Constant(filterObj.value));
+                    try
+                    {
+                        filter = Expression.Call(left, typeof(string).GetMethod("Contains", new Type[] { typeof(string) }),
+                                    Expression.Constant(filterObj.value));
+                    }
+                    catch (Exception)
+                    {
+                        filter = Expression.Equal(left, right);
+                    }
                     break;
                 case "notContain":
-                    filter = Expression.Not(Expression.Call(left, typeof(string).GetMethod("Contains", new Type[] { typeof(string) }),
-                        Expression.Constant(filterObj.value)));
+                    try
+                    {
+                        filter = Expression.Not(Expression.Call(left, typeof(string).GetMethod("Contains", new Type[] { typeof(string) }),
+                                    Expression.Constant(filterObj.value)));
+                    }
+                    catch (Exception)
+                    {
+                        filter = Expression.NotEqual(left, right);
+                    }
                     break;
                 case "start":
-                    filter = Expression.Call(left, typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) }),
-                        Expression.Constant(filterObj.value));
+                    try
+                    {
+                        filter = Expression.Call(left, typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) }),
+                                Expression.Constant(filterObj.value));
+                    }
+                    catch (Exception)
+                    {
+                        filter = Expression.Equal(left, right);
+                    }
                     break;
                 case "end":
-                    filter = Expression.Call(left, typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) }),
-                        Expression.Constant(filterObj.value));
+                    try
+                    {
+                        filter = Expression.Call(left, typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) }),
+                                    Expression.Constant(filterObj.value));
+                    }
+                    catch (Exception)
+                    {
+                        filter = Expression.Equal(left, right);
+                    }
                     break;
                 case "null":
-                    filter = Expression.Call(typeof(string).GetMethod("IsNullOrEmpty"), left);
+                    filter = Expression.Equal(left, Expression.Constant(null));
                     break;
                 case "notNull":
-                    filter = Expression.Not(Expression.Call(typeof(string).GetMethod("IsNullOrEmpty"), left));
+                    filter = Expression.NotEqual(left, Expression.Constant(null));
                     break;
                 default: break;
             }

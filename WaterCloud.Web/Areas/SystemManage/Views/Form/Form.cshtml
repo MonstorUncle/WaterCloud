@@ -109,6 +109,7 @@
             element = layui.element;
         var formDesigner = layui.formDesigner;
         var keyValue = $.request("keyValue");
+        var ItemId = $.request("ItemId");
         step.render({
             elem: '#adminform',
             filter: 'adminform',
@@ -126,6 +127,9 @@
         common.authorizeFields('adminform');
         $(function () {
             initControl();
+            if (!!ItemId) {
+                $('#F_OrganizeId').val(ItemId);
+            }
             if (!!keyValue) {
                 common.ajax({
                     url: '/SystemManage/Form/GetFormJson',
@@ -138,14 +142,17 @@
                             $("#frmPreview").load(document.location.origin + '/form/' + data.F_WebId + '.html');
                             $('#commonform').addClass('layui-hide');
                             $('#frmPreview').removeClass('layui-hide');
+                            $('#frmPreview').parent().removeClass('layui-hide');
                         }
                         else {
                             $('#commonform').removeClass('layui-hide');
                             $('#frmPreview').addClass('layui-hide');
+                            $('#frmPreview').parent().addClass('layui-hide');
                             //表单设计器
                             formDesigner.render({
                                 data: JSON.parse(data.F_Content),
-                                elem: '#formdesigner'
+                                elem: '#formdesigner',
+                                headerHide:false
                             });
                         }
                     }
@@ -157,10 +164,11 @@
                     success: function (result) {
                         formDesigner.render({
                             data: result,
-                            elem: '#formdesigner'
+                            elem: '#formdesigner',
+                            headerHide: false
                         });
                     }
-                }); 
+                });
             }
             form.render();
         });
@@ -208,20 +216,23 @@
             if (postData.F_FrmType != 0) {
                 $('#commonform').addClass('layui-hide');
                 $('#frmPreview').removeClass('layui-hide');
+                $('#frmPreview').parent().removeClass('layui-hide');
             }
             else {
                 $('#commonform').removeClass('layui-hide');
                 $('#frmPreview').addClass('layui-hide');
+                $('#frmPreview').parent().addClass('layui-hide');
             }
             step.next('#adminform');
             return false;
         });
         //监听提交
-        $(document).on('click','#saveBtn', function () {
+        $(document).on('click', '#saveBtn', function () {
             //解析表单数据
             var formeditor = '';
             if (postData.F_FrmType != 1) {
                 //获取表单设计器里的内容
+                $('#generateSetValue').click();
                 formeditor = document.getElementById('generate-code-view').value;
                 if (!formeditor) {
                     common.modalMsg("请编辑设计器", "warning");
@@ -229,9 +240,6 @@
                 }
                 postData.F_Content = formeditor;
             }
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
             if (!postData["F_EnabledMark"]) postData["F_EnabledMark"] = false;
             common.submitForm({
                 url: '/SystemManage/Form/SubmitForm?keyValue=' + keyValue,

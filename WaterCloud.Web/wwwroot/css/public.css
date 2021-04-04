@@ -24,24 +24,13 @@ body {
     top: 6px;
     right: 5px;
 }
-/**必填红点 */
-.layuimini-form > .layui-form-item > .layui-inline> .required:after {
-    content: '*';
-    color: red;
-    position: absolute;
-    margin-left: 4px;
-    font-weight: bold;
-    line-height: 1.8em;
-    top: 6px;
-    right: 5px;
-}
 
 .layuimini-form > .layui-form-item > .layui-form-label {
-    width: 70px !important;
+    width: 120px !important;
 }
 
 .layuimini-form > .layui-form-item > .layui-input-block {
-    margin-left: 110px !important;
+    margin-left: 150px !important;
 }
 
     .layuimini-form > .layui-form-item > .layui-input-block > tip {
@@ -61,10 +50,6 @@ body {
 }
 
 /**自定义滚动条样式 */
-/*chrome滚动条*/
-::-webkit-scrollbar-track-piece {
-    -webkit-border-radius: 0;
-}
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px

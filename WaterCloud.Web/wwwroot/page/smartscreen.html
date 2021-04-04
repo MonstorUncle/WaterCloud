@@ -1,0 +1,1047 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>智慧大屏-水之云出品</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="../lib/layui/css/layui.css" media="all">
+    <script src="../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="../css/smartscreen.css">
+
+</head>
+<script>
+    window.onload = function () {
+        $(".loading").fadeOut();
+    }
+    /****/
+    $(document).ready(function () {
+        var whei = $(window).width()
+        $("html").css({ fontSize: whei / 20 })
+        $(window).resize(function () {
+            var whei = $(window).width()
+            $("html").css({ fontSize: whei / 20 })
+        });
+    });
+</script>
+
+<body>
+    <div class="loading">
+        <div class="loadbox"><img src="../picture/loading.gif"> 页面加载中...</div>
+    </div>
+    <div class="head">
+        <h1>智慧大屏-水之云出品</h1>
+        <div class="weather"><span id="showTime"></span></div>
+    </div>
+    <div class="mainbox">
+        <div class="layui-row">
+            <div class="layui-col-md4">
+                <div class="boxall">
+                    <div class="alltitle">模块A</div>
+                    <div class="allnav" id="echart1"></div>
+                    <div class="boxfoot"></div>
+                </div>
+                <div class="boxall">
+                    <div class="alltitle">模块B</div>
+                    <div class="allnav" id="echart5"></div>
+                    <div class="boxfoot"></div>
+                </div>
+                <div class="boxall">
+                    <div class="alltitle">模块C</div>
+                    <div class="allnav" id="echart6"></div>
+                    <div class="boxfoot"></div>
+                </div>
+            </div>
+            <div class="layui-col-md4">
+                <div class="bar">
+                    <div class="barbox">
+                        <ul class="clearfix">
+                            <li class="pulll_left counter" id="allPlanNum">12581189</li>
+                            <li class="pulll_left counter" id="allDoneNum">3912410</li>
+                        </ul>
+                    </div>
+                    <div class="barbox2">
+                        <ul class="clearfix">
+                            <li class="pulll_left">计划数量</li>
+                            <li class="pulll_left">实际数量</li>
+                        </ul>
+                    </div>
+                    <div class="map">
+                        <div class="map1"><img src="../picture/lbx.png"></div>
+                        <div class="map2"><img src="../picture/jt.png"></div>
+                        <div class="map3"><img src="../picture/map.png"></div>
+                    </div>
+                </div>
+                <div class="boxall">
+                    <div class="alltitle">模块D</div>
+                    <div class="allnav" id="echart4"></div>
+                    <div class="boxfoot"></div>
+                </div>
+            </div>
+            <div class="layui-col-md4">
+                <div class="boxall">
+                    <div class="alltitle">模块E</div>
+                    <div class="allnav" id="echart2"></div>
+                    <div class="boxfoot"></div>
+                </div>
+                <div class="boxall">
+                    <div class="alltitle">模块F</div>
+                    <div class="allnav" id="echart3"></div>
+                    <div class="boxfoot"></div>
+                </div>
+                <div class="boxall">
+                    <div class="alltitle">模块G</div>
+                    <div class="allnav" id="echart"></div>
+                    <div class="boxfoot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="back"></div>
+    <script src="../lib/layui/layui.js" charset="utf-8"></script>
+    <script src="../js/lay-config.js" charset="utf-8"></script>
+    <script src="../js/framework-ui.js"></script>
+    <script>
+        var t = null;
+        var type = !$.request("type") ? 0 : $.request("type");
+        if (type == 0) {
+            $(".layuimini-site-mobile").remove();
+        }
+        else {
+            var data = JSON.parse(sessionStorage.getItem("WC_BoardList"));
+            setInterval(function () {
+                console.log("定时器调用");
+                getData();
+                reloadData();
+            }, data.refleshSecond * 1000);
+            if (data.viewType == "true" && data.viewList.length > 1) {
+                setTimeout(function () {
+                    for (var i = 0; i < data.viewList.length; i++) {
+                        if (window.location.host.indexOf(data.viewList[i]) > -1) {
+                            var href = i + 1 == data.viewList.length ? data.viewList[0] : data.viewList[i + 1];
+                            window.location.href = href.indexOf("?") != -1 ? href + "&type=" + type : href + "?type=" + type;
+                        }
+                    }
+                }, data.skipSecond * 1000);//開始运行
+            }
+
+        }
+        var fontSize = '16';
+        var color = ['#F35331', '#2499F8', '#3DF098', '#33B734'];
+        var yearPlanData = [];
+        var yearOrderData = [];
+        var differenceData = [];
+        var visibityData = [];
+        var xAxisData = [];
+        t = setTimeout(time, 1000);//開始运行
+        function time() {
+            clearTimeout(t);//清除定时器
+            dt = new Date();
+            var y = dt.getFullYear();
+            var mt = dt.getMonth() + 1;
+            var day = dt.getDate();
+            var h = dt.getHours();//获取时
+            var m = dt.getMinutes();//获取分
+            var s = dt.getSeconds();//获取秒
+            document.getElementById("showTime").innerHTML = y + "年" + mt + "月" + day + "-" + h + "时" + m + "分" + s + "秒";
+            t = setTimeout(time, 1000); //设定定时器，循环运行
+        }
+        function openSetting() {
+            if (type == 1) {
+                layui.use(['jquery', 'common'], function () {
+                    var $ = layui.jquery,
+                        common = layui.common;
+                    common.modalOpen({
+                        title: "看板配置",
+                        url: "/BoardHome/BoardSetting?type=" + type,
+                        width: "600px",
+                        height: "550px",
+                    });
+                });
+            }
+        }
+        function orderPlanStatus() {
+            layui.use(['echarts'], function () {
+                var echarts = layui.echarts;
+                myChart = echarts.init(document.getElementById('echart1'));
+                option = {
+                    title: { show: false },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: function (params) {
+                            return params[0].name + '<br/>'
+                                + params[0].seriesName + ' : ' + params[0].value + '<br/>'
+                                + params[1].seriesName + ' : ' + params[1].value + '<br/>'
+                        },
+                        textStyle: {
+                            color: '#FFF',
+                            fontSize: fontSize
+                        }
+                    },
+                    toolbox: { show: false },
+                    legend: {
+                        top: 'top',
+                        textStyle: {
+                            color: '#B7E2FF',
+                            fontSize: '16',
+                            fontFamily: '微软雅黑'
+                        },
+                        data: ['A', 'B']
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLabel: {
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                        data: xAxisData
+                    },
+                    yAxis: {
+                        inverse: false,
+                        splitArea: { show: false },
+                        axisLine: { show: false },
+                        axisTick: { show: false },
+                        axisLabel: {
+                            textStyle: {
+                                color: '#B7E1FF',
+                                fontSize: fontSize,
+                                fontFamily: 'Arial',
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: '#09F'
+                            }
+                        }
+                    },
+                    grid: {
+                        left: '20',
+                        top: '30',
+                        right: '20',
+                        bottom: '10',
+                        containLabel: true
+                    },
+                    series: [{
+                        name: 'A',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 10,
+                        showAllSymbol: true,
+                        color: color[1],
+                        data: yearPlanData
+                    },
+                    {
+                        name: 'B',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 10,
+                        showAllSymbol: true,
+                        color: '#F90',
+                        itemStyle: {
+                            normal: {
+                                lineStyle: {
+                                    width: 2
+                                }
+                            }
+                        },
+                        data: yearOrderData
+                    },
+                    {
+                        name: '不可见',
+                        type: 'bar',
+                        stack: '1',
+                        barWidth: 1,
+                        itemStyle: {
+                            normal: {
+                                color: 'rgba(0,0,0,0)'
+                            },
+                            emphasis: {
+                                color: 'rgba(0,0,0,0)'
+                            }
+                        },
+                        data: visibityData
+                    },
+                    {
+                        name: '变化',
+                        type: 'bar',
+                        stack: '1',
+                        barWidth: 1,
+                        color: '#B7E1FF',
+                        data: differenceData
+                    }
+                    ]
+                }
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+        function badMaterialStatus() {
+            layui.use(['echarts'], function () {
+                var echarts = layui.echarts
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('echart2'));
+                option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            lineStyle: {
+                                color: '#dddc6b'
+                            }
+                        }
+                    },
+                    legend: {
+                        top: '0%',
+                        data: ['A', 'B'],
+                        textStyle: {
+                            color: 'rgba(255,255,255,.5)',
+                            fontSize: fontSize,
+                        }
+                    },
+                    grid: {
+                        left: '20',
+                        top: '30',
+                        right: '20',
+                        bottom: '10',
+                        containLabel: true
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        boundaryGap: false,
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLabel: {
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                        data: xAxisData
+
+                    }, {
+                        axisPointer: { show: false },
+                        axisLine: { show: false },
+                        position: 'bottom',
+                        offset: 20,
+
+
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        axisTick: { show: false },
+                        axisLine: {
+                            lineStyle: {
+                                color: 'rgba(255,255,255,.1)'
+                            }
+                        },
+                        axisLabel: {
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: 'rgba(255,255,255,.1)'
+                            }
+                        }
+                    }],
+                    series: [
+                        {
+                            name: 'A',
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'circle',
+                            symbolSize: 5,
+                            showSymbol: false,
+                            lineStyle: {
+
+                                normal: {
+                                    color: '#0184d5',
+                                    width: 2
+                                }
+                            },
+                            areaStyle: {
+                                normal: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: 'rgba(1, 132, 213, 0.4)'
+                                    }, {
+                                        offset: 0.8,
+                                        color: 'rgba(1, 132, 213, 0.1)'
+                                    }], false),
+                                    shadowColor: 'rgba(0, 0, 0, 0.1)',
+                                }
+                            },
+                            itemStyle: {
+                                normal: {
+                                    color: '#0184d5',
+                                    borderColor: 'rgba(221, 220, 107, .1)',
+                                    borderWidth: 12
+                                }
+                            },
+                            data: [80, 90, 100, 80, 90, 80, 90, 100, 80, 90, 100, 85]
+
+                        },
+                        {
+                            name: 'B',
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'circle',
+                            symbolSize: 5,
+                            showSymbol: false,
+                            lineStyle: {
+
+                                normal: {
+                                    color: '#00d887',
+                                    width: 2
+                                }
+                            },
+                            areaStyle: {
+                                normal: {
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                        offset: 0,
+                                        color: 'rgba(0, 216, 135, 0.4)'
+                                    }, {
+                                        offset: 0.8,
+                                        color: 'rgba(0, 216, 135, 0.1)'
+                                    }], false),
+                                    shadowColor: 'rgba(0, 0, 0, 0.1)',
+                                }
+                            },
+                            itemStyle: {
+                                normal: {
+                                    color: '#00d887',
+                                    borderColor: 'rgba(221, 220, 107, .1)',
+                                    borderWidth: 12
+                                }
+                            },
+                            data: [20, 10, 0, 20, 10, 20, 10, 0, 20, 10, 0, 15]
+
+                        },
+
+                    ]
+
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+        function eqpPlanStatus() {
+            layui.use(['echarts'], function () {
+                var echarts = layui.echarts
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('echart3'));
+                option = {
+                    //  backgroundColor: '#00265f',
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        top: '0%',
+                        data: ['A', 'B', 'C'],
+                        textStyle: {
+                            color: 'rgba(255,255,255,.5)',
+                            fontSize: fontSize,
+                        }
+                    },
+                    grid: {
+                        left: '20',
+                        top: '30',
+                        right: '20',
+                        bottom: '10',
+                        containLabel: true
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        data: xAxisData,
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLabel: {
+                            interval: 1,
+                            // rotate:50,
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        axisLabel: {
+                            //formatter: '{value} %'
+                            show: true,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1	)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                            }
+                        }
+                    }],
+                    series: [{
+                        name: 'A',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 5,
+                        showSymbol: false,
+                        data: [1500, 1200, 600, 200, 300, 300, 900, 600, 200, 300, 300, 900],
+                        barWidth: '35%', //柱子宽度
+                        itemStyle: {
+                            normal: {
+                                color: '#2f89cf',
+                                opacity: 1,
+                                barBorderRadius: 5,
+                            }
+                        }
+                    }, {
+                        name: 'B',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 5,
+                        showSymbol: false,
+                        data: [1400, 1100, 550, 200, 230, 300, 880, 600, 180, 200, 300, 760],
+                        barWidth: '35%', //柱子宽度
+                        // barGap: 1, //柱子之间间距
+                        itemStyle: {
+                            normal: {
+                                color: '#27d08a',
+                                opacity: 1,
+                                barBorderRadius: 5,
+                            }
+                        }
+                    }, {
+                        name: 'C',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 5,
+                        showSymbol: false,
+                        data: [1350, 1000, 550, 180, 220, 300, 850, 500, 150, 190, 280, 760],
+                        barWidth: '35%', //柱子宽度
+                        // barGap: 1, //柱子之间间距
+                        itemStyle: {
+                            normal: {
+                                color: '#ffeb7b',
+                                opacity: 1,
+                                barBorderRadius: 5,
+                            }
+                        }
+                    }
+                    ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+        function eqpUseStatus() {
+            layui.use(['echarts'], function () {
+                var echarts = layui.echarts
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('echart'));
+                var dataStyle = {
+                    normal: {
+                        label: {
+                            show: false
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        //shadowBlur: 40,
+                        //shadowColor: 'rgba(40, 40, 40, 1)',
+                    }
+                };
+                var placeHolderStyle = {
+                    normal: {
+                        color: 'rgba(255,255,255,.05)',
+                        label: { show: false, },
+                        labelLine: { show: false }
+                    },
+                    emphasis: {
+                        color: 'rgba(0,0,0,0)'
+                    }
+                };
+                option = {
+                    color: ['#0f63d6', '#0f78d6', '#0f8cd6', '#0fa0d6', '#0fb4d6'],
+                    tooltip: {
+                        show: true,
+                        formatter: "{a} : {c} "
+                    },
+                    legend: {
+                        itemWidth: 10,
+                        itemHeight: 10,
+                        itemGap: 12,
+                        bottom: '3%',
+
+                        data: ['A', 'B', 'C'],
+                        textStyle: {
+                            color: 'rgba(255,255,255,.6)',
+                            fontSize: fontSize,
+                        }
+                    },
+                    series: [
+                        {
+                            name: 'A',
+                            type: 'pie',
+                            clockWise: false,
+                            center: ['50%', '42%'],
+                            radius: ['59%', '70%'],
+                            itemStyle: dataStyle,
+                            hoverAnimation: false,
+                            data: [{
+                                value: 75.61,
+                                name: '01'
+                            }, {
+                                value: 100 - 75.61,
+                                name: 'invisible',
+                                tooltip: { show: false },
+                                itemStyle: placeHolderStyle
+                            }]
+                        },
+                        {
+                            name: 'B',
+                            type: 'pie',
+                            clockWise: false,
+                            center: ['50%', '42%'],
+                            radius: ['49%', '60%'],
+                            itemStyle: dataStyle,
+                            hoverAnimation: false,
+                            data: [{
+                                value: 75.43,
+                                name: '02'
+                            }, {
+                                value: 100 - 75.43,
+                                name: 'invisible',
+                                tooltip: { show: false },
+                                itemStyle: placeHolderStyle
+                            }]
+                        },
+                        {
+                            name: 'C',
+                            type: 'pie',
+                            clockWise: false,
+                            hoverAnimation: false,
+                            center: ['50%', '42%'],
+                            radius: ['39%', '50%'],
+                            itemStyle: dataStyle,
+                            data: [{
+                                value: 70.53,
+                                name: '03'
+                            }, {
+                                value: 100 - 70.53,
+                                name: 'invisible',
+                                tooltip: { show: false },
+                                itemStyle: placeHolderStyle
+                            }]
+                        }]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+        function inStorageStatus() {
+            layui.use(['echarts'], function () {
+                var echarts = layui.echarts
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('echart4'));
+                option = {
+                    //  backgroundColor: '#00265f',
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    legend: {
+                        top: '0%',
+                        data: ['A', 'B'],
+                        textStyle: {
+                            color: 'rgba(255,255,255,.5)',
+                            fontSize: fontSize,
+                        }
+                    },
+                    grid: {
+                        left: '20',
+                        top: '30',
+                        right: '20',
+                        bottom: '10',
+                        containLabel: true
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        data: xAxisData,
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLabel: {
+                            interval: 1,
+                            // rotate:50,
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        axisLabel: {
+                            //formatter: '{value} %'
+                            show: true,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                        axisTick: {
+                            show: false,
+                        },
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1	)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                            }
+                        }
+                    }],
+                    series: [{
+                        name: 'A',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 5,
+                        showSymbol: false,
+                        data: [1500, 1200, 600, 200, 300, 300, 900, 600, 200, 300, 300, 900],
+                        barWidth: '35%', //柱子宽度
+                        itemStyle: {
+                            normal: {
+                                color: '#2f89cf',
+                                opacity: 1,
+                                barBorderRadius: 5,
+                            }
+                        }
+                    }, {
+                        name: 'B',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 5,
+                        showSymbol: false,
+                        data: [1400, 1100, 550, 200, 230, 300, 880, 600, 180, 200, 300, 760],
+                        barWidth: '35%', //柱子宽度
+                        // barGap: 1, //柱子之间间距
+                        itemStyle: {
+                            normal: {
+                                color: '#27d08a',
+                                opacity: 1,
+                                barBorderRadius: 5,
+                            }
+                        }
+                    }
+                    ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+        function outMaterialStatus() {
+            layui.use(['echarts'], function () {
+                var echarts = layui.echarts
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('echart5'));
+
+                var option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '20',
+                        top: '10',
+                        right: '20',
+                        bottom: '10',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'value',
+                        splitLine: { show: false },
+                        boundaryGap: false,
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisLabel: {
+                            interval: 0,
+                            // rotate:50,
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                    },
+                    yAxis: {
+                        inverse: true,
+                        type: 'category',
+                        data: ['数据3', '数据2', '数据4', '数据1', '数据5'],
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisLabel: {
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                    },
+                    series: [
+                        {
+                            name: '模板',
+                            type: 'bar',
+                            data: [2300, 1500, 990, 800, 500],
+                            barWidth: '35%', //柱子宽度
+                            itemStyle: {
+                                normal: {
+                                    color: '#27d08a',
+                                    opacity: 1,
+                                    barBorderRadius: 5,
+                                }
+                            }
+                        }
+                    ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+        function inMaterialStatus() {
+            layui.use(['echarts'], function () {
+                var echarts = layui.echarts
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('echart6'));
+                var option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '20',
+                        top: '10',
+                        right: '20',
+                        bottom: '10',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: false,
+                        splitLine: { show: false },
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisLabel: {
+                            interval: 0,
+                            // rotate:50,
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                    },
+                    yAxis: {
+                        inverse: true,
+                        type: 'category',
+                        data: ['数据4', '数据5', '数据3', '数据1', '数据2'],
+                        axisLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255,.1)",
+                                width: 1,
+                                type: "solid"
+                            },
+                        },
+                        axisLabel: {
+                            show: true,
+                            splitNumber: 15,
+                            textStyle: {
+                                color: "rgba(255,255,255,.6)",
+                                fontSize: fontSize,
+                            },
+                        },
+                    },
+                    series: [
+                        {
+                            name: '模板',
+                            type: 'bar',
+                            data: [2300, 1500, 990, 800, 500],
+                            barWidth: '35%', //柱子宽度
+                            itemStyle: {
+                                normal: {
+                                    color: '#2f89cf',
+                                    opacity: 1,
+                                    barBorderRadius: 5,
+                                }
+                            }
+                        }
+                    ]
+                };
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            });
+        }
+        function getData() {
+            yearPlanData = [];
+            yearOrderData = [];
+            differenceData = [];
+            visibityData = [];
+            xAxisData = [];
+            var plannum = 0;
+            var donenum = 0;
+            for (var i = 0; i < 12; i++) {
+                yearPlanData.push(Math.round(Math.random() * 900) + 100);
+                yearOrderData.push(Math.round(Math.random() * yearPlanData[i]));
+                differenceData.push(yearPlanData[i] - yearOrderData[i]);
+                visibityData.push(yearOrderData[i]);
+                plannum += yearPlanData[i];
+                donenum += yearOrderData[i];
+                xAxisData.push((i + 1).toString() + "月");
+            }
+            $('#allPlanNum').html(plannum);
+            $('#allDoneNum').html(donenum);
+        }
+        function reloadData() {
+            orderPlanStatus();
+            badMaterialStatus();
+            eqpPlanStatus();
+            outMaterialStatus();
+            inStorageStatus();
+            inMaterialStatus();
+            eqpUseStatus();
+        }
+        $(function () {
+            getData();
+            reloadData();
+        })
+    </script>
+</body>
+</html>

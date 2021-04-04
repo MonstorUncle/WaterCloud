@@ -106,12 +106,6 @@
         }
         //监听提交
         form.on('submit(saveBtn)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
-                var index = layer.load(1, {
-                    shade: [0.5, '#000'] //0.1透明度的背景
-                });
                 var postData = data.field;
                 var StartIP = data.field.F_StartIP;
                 var EndIP = data.field.F_EndIP;
@@ -134,7 +128,6 @@
                         common.parentreload("data-search-btn");
                     }
                 })
-                layer.close(index);
             return false;
         });
     });

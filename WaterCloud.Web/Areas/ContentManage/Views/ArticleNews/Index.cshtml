@@ -31,17 +31,17 @@
         </fieldset>
         <script type="text/html" id="toolbarDemo">
             <div class="layui-btn-container" id="toolbar">
-                <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
-                <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                <button id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
+                <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                <button id="NF-details" name="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
             </div>
         </script>
         <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
         <script type="text/html" id="currentTableBar">
-            <a id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm" lay-event="edit">修改</a>
-            <a id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete">删除</a>
-            <a id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details">查看</a>
+            <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+            <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
+            <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
         </script>
     </div>
 </div>
@@ -61,15 +61,29 @@
             elem: '#currentTableId',
             id: 'currentTableId',
             url: '/ContentManage/ArticleNews/GetGridJson',
+            filter: {
+                clearFilter: false,
+            },
             cols: [[
-                { type: "checkbox", width: 50, fixed: 'left' },
-                //此处需修改
-                { field: 'F_CategoryName', title: '新闻类别', width: 120 },
-                { field: 'F_Title', title: '标题', width: 160 },
-                { field: 'F_Zhaiyao', title: '摘要', width: 220 },
-                { field: 'F_SortCode', title: '排序', width: 80 },
+                { type: "checkbox", width: 50, fixed: 'left'  },
+                { field: 'F_CategoryName', title: '新闻类别', width: 120, filter: true },
+                { field: 'F_Title', title: '标题', width: 160, filter: true },
                 {
-                    field: 'F_IsTop', title: '置顶', width: 80,
+                    field: ' F_ImgUrl ', title: '封面', width: 60,
+                    templet: function (d) {
+                        if (!!d.F_ImgUrl) {
+                            return '<img src="' + d.F_ImgUrl + '" style="height: 25px; width: 25px; line- height: 25 px!important;" onclick="previewImg(this)">'
+
+                        }
+                        else {
+                            return '';
+                        }
+                    }
+                },
+                { field: 'F_Zhaiyao', title: '摘要', minWidth: 220, filter: true },
+                { field: 'F_SortCode', title: '排序', width: 80, filter: true },
+                {
+                    field: 'F_IsTop', title: '置顶', width: 80, filter: true,
                     templet: function (d) {
                         if (d.F_IsTop == true) {
                             return "<span class='layui-btn layui-btn-normal layui-btn-xs'>是</span>";
@@ -79,7 +93,7 @@
                     }
                 },
                 {
-                    field: 'F_IsHot', title: '热门', width: 80,
+                    field: 'F_IsHot', title: '热门', width: 80, filter: true,
                     templet: function (d) {
                         if (d.F_IsHot == true) {
                             return "<span class='layui-btn layui-btn-normal layui-btn-xs'>是</span>";
@@ -88,11 +102,11 @@
                         }
                     }
                 },
-                { field: 'F_Click', title: '点击次数', width: 100 },
-                { field: 'F_Source', title: '来源', width: 120 },
-                { field: 'F_Author', title: '作者', width: 120 },
+                { field: 'F_Click', title: '点击次数', width: 120, filter: true },
+                { field: 'F_Source', title: '来源', width: 120, filter: true },
+                { field: 'F_Author', title: '作者', width: 120, filter: true },
                 {
-                    field: 'F_CreatorTime', title: '创建时间', width: 100,
+                    field: 'F_CreatorTime', title: '创建时间', width: 160, filter: { type: 'date[yyyy-MM-dd HH:mm:ss]' },
                     templet: function (d) {
                         if (d.F_CreatorTime) {
                             var time = new Date(d.F_CreatorTime);
@@ -101,8 +115,8 @@
                         return '';
                     }
                 },
-                { field: 'F_CreatorUserId', title: '创建人', width: 120, hide: true },
-                { title: '操作', minWidth: 180, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
+                { field: 'F_CreatorUserId', title: '创建人', width: 120, filter: true, hide: true },
+                { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right'  }
             ]]
         });
         $(function () {
@@ -129,26 +143,14 @@
             });
             return false;
         });
-        $(document).on("click", ".layui-table-body table.layui-table tbody tr", function () {
-            var index = $(this).attr('data-index');
-            var tableBox = $(this).parents('.layui-table-box');
-            //存在固定列
-            if (tableBox.find(".layui-table-fixed.layui-table-fixed-l").length > 0) {
-                tableDiv = tableBox.find(".layui-table-fixed.layui-table-fixed-l");
-            } else {
-                tableDiv = tableBox.find(".layui-table-body.layui-table-main");
-            }
-            var checkCell = tableDiv.find("tr[data-index=" + index + "]").find("td div.laytable-cell-checkbox div.layui-form-checkbox I");
-            if (checkCell.length > 0) {
-                checkCell.click();
-            }
-        });
-        //对td的单击事件进行拦截停止，防止事件冒泡再次触发上述的单击事件（Table的单击行事件不会拦截，依然有效）
-        $(document).on("click", "td div.laytable-cell-checkbox div.layui-form-checkbox", function (e) {
-            e.stopPropagation();
-        });
+        //行点击事件监听，控制按钮显示
+        var oneList = ["NF-edit", "NF-details"];//选择1条显示
+        var morerList = ["NF-delete"];//选中1条以上显示
+        commonTable.tableRowClick("checkbox", "currentTableFilter", "currentTableId", oneList, morerList);
         //toolbar监听事件
         table.on('toolbar(currentTableFilter)', function (obj) {
+            var data = table.checkStatus('currentTableId').data;
+            var id = data.length > 0 ?data[0].F_Id:null;
             if (obj.event === 'add') {  // 监听添加操作
                 common.openNewTabByIframe({
                     title: "添加文章",
@@ -156,7 +158,6 @@
                 });
             }
             else if (obj.event === 'delete') {
-                var data = table.checkStatus('currentTableId').data;
                 if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
@@ -174,7 +175,6 @@
                 });
             }
             else if (obj.event === 'edit') {
-                var data = table.checkStatus('currentTableId').data;
                 if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
@@ -185,11 +185,10 @@
                 }
                 common.openNewTabByIframe({
                     title: "编辑文章",
-                    href: "/ContentManage/ArticleNews/Form?keyValue=" + data[0].F_Id,
+                    href: "/ContentManage/ArticleNews/Form?keyValue=" + id,
                 });
             }
             else if (obj.event === 'details') {
-                var data = table.checkStatus('currentTableId').data;
                 if (data.length == 0) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
@@ -200,7 +199,7 @@
                 }
                 common.openNewTabByIframe({
                     title: "查看文章",
-                    href: "/ContentManage/ArticleNews/Details?keyValue=" + data[0].F_Id,
+                    href: "/ContentManage/ArticleNews/Details?keyValue=" + id,
                 });
             }
             else if (obj.event === 'TABLE_SEARCH') {
@@ -215,10 +214,11 @@
         });
         //toolrow监听事件
         table.on('tool(currentTableFilter)', function (obj) {
+            var id = obj.data.F_Id;
             if (obj.event === 'delete') {
                 common.deleteForm({
                     url: "/ContentManage/ArticleNews/DeleteForm",
-                    param: { keyValue: obj.data.F_Id },
+                    param: { keyValue: id },
                     success: function () {
                         obj.del();
                     }
@@ -227,16 +227,39 @@
             else if (obj.event === 'edit') {
                 common.openNewTabByIframe({
                     title: "编辑文章",
-                    href: "/ContentManage/ArticleNews/Form?keyValue=" + obj.data.F_Id,
+                    href: "/ContentManage/ArticleNews/Form?keyValue=" + id,
                 });
             }
             else if (obj.event === 'details') {
                 common.openNewTabByIframe({
                     title: "查看文章",
-                    href: "/ContentManage/ArticleNews/Details?keyValue=" + obj.data.F_Id,
+                    href: "/ContentManage/ArticleNews/Details?keyValue=" + id,
                 });
             }
             return false;
         });
     });
+    function previewImg(obj) {
+        var img = new Image();
+        img.src = obj.src;
+        var height = img.height + 50; //获取图片高度
+        var width = img.width; //获取图片宽度
+        if (height > 500) { height = 500; };
+        if (width > 500) { width = 500; };
+        var imgHtml = "<img src='" + obj.src + "' style=\"height: " + (height - 43) + "px; width: " + width + "px; line-height: 25px!important;\"/>";
+        //弹出层
+        layer.open({
+            type: 1,
+            shade: 0.8,
+            offset: 'auto',
+            area: [width + 'px', height + 'px'],
+            shadeClose: true,//点击外围关闭弹窗
+            scrollbar: false,//不现实滚动条
+            title: "图片预览", //不显示标题
+            content: imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响
+            cancel: function () {
+                //layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });
+            }
+        });
+    }
 </script>

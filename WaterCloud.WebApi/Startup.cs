@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Autofac;
+using Chloe.Infrastructure.Interception;
 using CSRedis;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -60,6 +61,9 @@ namespace WaterCloud.WebApi
                 services.AddSingleton(redisDB1);
                 services.AddSingleton(redisDB2);
             }
+            //雪花id初始化工作区(api和web请使用不同),示例IDGenerator.NextId()
+            var options = new IDGeneratorOptions(ushort.Parse(Configuration.GetSection("SystemConfig:WorkId").Value));
+            IDGenerator.SetIdGenerator(options);
             //注入数据库连接
             services.AddScoped<Chloe.IDbContext>((serviceProvider) =>
             {
@@ -67,6 +71,7 @@ namespace WaterCloud.WebApi
             });
             //代替HttpContext.Current
             services.AddHttpContextAccessor();
+            services.AddHttpClient();
             services.AddOptions();
             //跨域
             services.AddCors();
@@ -77,6 +82,9 @@ namespace WaterCloud.WebApi
             }).AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            }).ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
             });
             services.AddControllers().AddControllersAsServices();
             services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(GlobalContext.HostingEnvironment.ContentRootPath + Path.DirectorySeparatorChar + "DataProtection"));
@@ -96,13 +104,20 @@ namespace WaterCloud.WebApi
             builder.RegisterAssemblyTypes(typeof(Program).Assembly)
             .Where(t => controllerBaseType.IsAssignableFrom(t) && t != controllerBaseType)
             .PropertiesAutowired();
+            //注册特性
+            builder.RegisterType(typeof(AuthorizeFilterAttribute)).InstancePerLifetimeScope();
+            builder.RegisterType(typeof(LoginFilterAttribute)).InstancePerLifetimeScope();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
+                //打印sql
+                IDbCommandInterceptor interceptor = new DbCommandInterceptor();
+                DbInterception.Add(interceptor);
                 app.UseDeveloperExceptionPage();
+                GlobalContext.SystemConfig.Debug = true;
             }
             else
             {
@@ -139,7 +154,7 @@ namespace WaterCloud.WebApi
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute("default", "{controller=ApiHome}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute("default", "api/{controller=ApiHome}/{action=Index}/{id?}");
             });
             GlobalContext.ServiceProvider = app.ApplicationServices;
         }

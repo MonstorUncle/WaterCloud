@@ -53,9 +53,10 @@
         });
         //监听提交
         form.on('submit(saveBtn)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
+            if (!data.field.F_UrlAddress && !data.field.F_Authorize) {
+                common.modalMsg("请输入连接或者权限", "warning");
+                return false;
+            }
             var postData = data.field;
             if (!postData["F_EnabledMark"]) postData["F_EnabledMark"] = false;
             //if (!postData["F_Split"]) postData["F_Split"] = false;
@@ -113,9 +114,15 @@
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">
-                    <label class="layui-form-label required">连接</label>
+                    <label class="layui-form-label">连接</label>
                     <div class="layui-input-block">
-                        <input type="text" id="F_UrlAddress" name="F_UrlAddress" maxlength="50" lay-verify="required" class="layui-input ">
+                        <input type="text" id="F_UrlAddress" name="F_UrlAddress" maxlength="50" class="layui-input ">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">权限</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="F_Authorize" name="F_Authorize" maxlength="100" class="layui-input ">
                     </div>
                 </div>
                 <div class="layui-form-item layui-hide">

@@ -23,11 +23,16 @@
          </fieldset>
          <script type="text/html" id="toolbarDemo">
              <div class="layui-btn-container" id="toolbar">
-                 <button id="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>申请</button>
-                 <button id="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                 <button id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                 <button id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>进度</button>
+                 <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>申请</button>
+                 <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                 <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                 <button id="NF-details" name="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>进度</button>
              </div>
+         </script>
+         <script type="text/html" id="currentTableBar">
+             <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+             <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
+             <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
          </script>
          <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
      </div>
@@ -38,16 +43,17 @@
              table = layui.table,
              commonTable = layui.commonTable,
              common = layui.common;
-         var entity;
          //权限控制(js是值传递)
+         currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
          toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
          commonTable.rendertable({
              elem: '#currentTableId',
              id: 'currentTableId',
              url: '/FlowManage/Flowinstance/GetGridJson',           
              cols: [[
+                 { type: "radio", width: 50, fixed: 'left' },
                  {
-                     field: 'F_IsFinish', title: '流程状态', width: 120, sort: true, 
+                     field: 'F_IsFinish', title: '流程状态', width: 120, sort: true, filter: true, 
                      templet: function (d) {
                          if (d.F_IsFinish == 0) {
                              return "<span class='layui-badge layui-bg-blue'>正在运行</span>";
@@ -63,13 +69,12 @@
                          }
                      }
                  },
-                 //此处需修改
-                 { field: 'F_Code', title: '实例编号', width: 150, sort: true },
-                 { field: 'F_CustomName', title: '实例名称', minWidth: 150, sort: true },
-                 { field: 'F_ActivityName', title: '当前节点名称', width: 120 },
-                 { field: 'F_Description', title: '实例备注', minWidth: 150 },
+                 { field: 'F_Code', title: '实例编号', width: 150, sort: true, filter: true },
+                 { field: 'F_CustomName', title: '实例名称', minWidth: 150, sort: true, filter: true },
+                 { field: 'F_ActivityName', title: '当前节点名称', width: 140, filter: true },
+                 { field: 'F_Description', title: '实例备注', minWidth: 150, filter: true },
                  {
-                     field: 'F_CreatorTime', title: '创建时间', width: 120,
+                     field: 'F_CreatorTime', title: '创建时间', width: 120, filter: { type: 'date[yyyy-MM-dd]' },
                      templet: function (d) {
                          if (d.F_CreatorTime) {
                              var time = new Date(d.F_CreatorTime);
@@ -78,7 +83,8 @@
                          return '';
                      }
                  },
-                 { field: 'F_CreatorUserName', title: '创建人', width: 120, sort: true },
+                 { field: 'F_CreatorUserName', title: '创建人', width: 120, sort: true, filter: true },
+                 { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
              ]]
          });
          // 监听搜索操作
@@ -93,12 +99,12 @@
              return false;
          });
          wcLoading.close();
-         table.on('row(currentTableFilter)', function (obj) {
-             obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-             entity = obj;
-         })
+         //行点击事件监听，控制按钮显示
+         var oneList = ["NF-edit", "NF-details", "NF-delete"];//选择1条显示
+         commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
          //toolbar监听事件
          table.on('toolbar(currentTableFilter)', function (obj) { 
+             var data = table.checkStatus('currentTableId').data;
              if (obj.event === 'add') {  // 监听添加操作
                  common.openNewTabByIframe({
                      title: "添加申请",
@@ -106,17 +112,17 @@
                  });
              } 
              else if (obj.event === 'delete') {
-                 if (entity == null) {
+                 if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
-                 if (entity.data.F_IsFinish != 4) {
+                 if (data[0].F_IsFinish != 4) {
                      common.modalMsg("申请已处理，无法删除", "warning");
                      return false;
                  }
                  common.deleteForm({
                      url: "/FlowManage/Flowinstance/DeleteForm",
-                     param: { keyValue: entity.data.F_Id },
+                     param: { keyValue: data[0].F_Id },
                      success: function () {
                          common.reload('data-search-btn');
                          entity = null;
@@ -124,29 +130,29 @@
                });
            }
            else if (obj.event === 'edit') {
-                 if (entity == null) {
+                 if (data.length == 0) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
                  var userJsonStr = sessionStorage.getItem('currentUser');
                  var userId = JSON.parse(userJsonStr).F_Id;
-                 if (entity.data.F_IsFinish != 4 || entity.data.F_MakerList.indexOf(userId)<0 ) {
+                 if (data[0].F_IsFinish != 4 || data[0].F_MakerList.indexOf(userId)<0 ) {
                      common.modalMsg("申请已处理，无法修改", "warning");
                      return false;
                  }
                  common.openNewTabByIframe({
                      title: "修改申请",
-                     href: "/FlowManage/Flowinstance/Form?keyValue=" + entity.data.F_Id,
+                     href: "/FlowManage/Flowinstance/Form?keyValue=" + data[0].F_Id,
                  });
            }
            else if (obj.event === 'details') {
-               if (entity == null) {
+                 if (data.length == 0) {
                    common.modalMsg("未选中数据", "warning");
                    return false;
                  }
                  common.modalOpen({
                      title: "查看进度",
-                     url: "/FlowManage/Flowinstance/Details?keyValue=" + entity.data.F_Id,
+                     url: "/FlowManage/Flowinstance/Details?keyValue=" + data[0].F_Id,
                      width: "700px",
                      height: "600px",
                      btn: []
@@ -161,6 +167,45 @@
                  }
              }
            return false;
-       });
+         });
+         //toolrow监听事件
+         table.on('tool(currentTableFilter)', function (obj) {
+             if (obj.event === 'delete') {
+                 if (obj.data.F_IsFinish != 4) {
+                     common.modalMsg("申请已处理，无法删除", "warning");
+                     return false;
+                 }
+                 common.deleteForm({
+                     url: "/FlowManage/Flowinstance/DeleteForm",
+                     param: { keyValue: obj.data.F_Id },
+                     success: function () {
+                         common.reload('data-search-btn');
+                         entity = null;
+                     }
+                 });
+             }
+             else if (obj.event === 'edit') {
+                 var userJsonStr = sessionStorage.getItem('currentUser');
+                 var userId = JSON.parse(userJsonStr).F_Id;
+                 if (obj.data.F_IsFinish != 4 || obj.data.F_MakerList.indexOf(userId) < 0) {
+                     common.modalMsg("申请已处理，无法修改", "warning");
+                     return false;
+                 }
+                 common.openNewTabByIframe({
+                     title: "修改申请",
+                     href: "/FlowManage/Flowinstance/Form?keyValue=" + obj.data.F_Id,
+                 });
+             }
+             else if (obj.event === 'details') {
+                 common.modalOpen({
+                     title: "查看进度",
+                     url: "/FlowManage/Flowinstance/Details?keyValue=" + obj.data.F_Id,
+                     width: "700px",
+                     height: "600px",
+                     btn: []
+                 });
+             }
+             return false;
+         });
    });
 </script>

@@ -13,8 +13,6 @@ using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Newtonsoft.Json.Serialization;
 using WaterCloud.Service.AutoJob;
-using UEditor.Core;
-using Microsoft.Extensions.FileProviders;
 using WaterCloud.DataBase;
 using System.Reflection;
 using System.Linq;
@@ -25,10 +23,11 @@ using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
 using System;
+using Chloe.Infrastructure.Interception;
 
 namespace WaterCloud.Web
 {
-    public class Startup
+	public class Startup
     {
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment WebHostEnvironment { get; set; }
@@ -68,6 +67,10 @@ namespace WaterCloud.Web
                 services.AddSingleton(redisDB1);
                 services.AddSingleton(redisDB2);
             }
+            //雪花id初始化,示例IDGenerator.NextId()
+            var options = new IDGeneratorOptions(ushort.Parse(Configuration.GetSection("SystemConfig:WorkId").Value));
+            IDGenerator.SetIdGenerator(options);
+
             #region 依赖注入
             //注入数据库连接
             services.AddScoped<Chloe.IDbContext>((serviceProvider) =>
@@ -75,11 +78,15 @@ namespace WaterCloud.Web
                 return DBContexHelper.Contex();
             });
             #region 注入 Quartz调度类
-            services.AddSingleton<JobCenter>();
             services.AddSingleton<JobExecute>();
             //注册ISchedulerFactory的实例。
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             services.AddSingleton<IJobFactory, IOCJobFactory>();
+            //是否开启后台任务
+            if (Configuration.GetSection("SystemConfig:OpenQuarz").Value == "True")
+            {
+                services.AddHostedService<JobCenter>();
+            }
             #endregion
             //注入SignalR实时通讯，默认用json传输
             services.AddSignalR(options =>
@@ -89,8 +96,6 @@ namespace WaterCloud.Web
                 //服务端发保持连接请求到客户端间隔，默认15秒，改成2分钟，网页需跟着设置connection.serverTimeoutInMilliseconds = 24e4;即4分钟
                 options.KeepAliveInterval = TimeSpan.FromMinutes(2);
             });
-            //百度UEditor
-            services.AddUEditorService();
             ////注册html解析
             //services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
             ////注册特性
@@ -102,6 +107,13 @@ namespace WaterCloud.Web
             //////定时任务（已废除）
             ////services.AddBackgroundServices();
             #endregion
+            services.AddCors(options => options.AddPolicy("CorsPolicy",
+            builder =>
+            {
+                builder.AllowAnyMethod().AllowAnyHeader()
+                       .WithOrigins(Configuration.GetSection("SystemConfig:AllowCorsSite").Value.Split(","))
+                       .AllowCredentials();
+            }));
             services.AddHttpClient();
 
             services.AddControllersWithViews(options =>
@@ -134,12 +146,14 @@ namespace WaterCloud.Web
                 temp.F_AdminPassword = GlobalContext.SystemConfig.SysemUserPwd;
                 temp.F_DBProvider = GlobalContext.SystemConfig.DBProvider;
                 temp.F_DbString = GlobalContext.SystemConfig.DBConnectionString;
-                _setService.SubmitForm(temp, GlobalContext.SystemConfig.SysemMasterProject);
+                _setService.SubmitForm(temp, GlobalContext.SystemConfig.SysemMasterProject).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
                 LogHelper.Write(ex);
             }
+            //清理缓存
+            //CacheHelper.FlushAll().GetAwaiter().GetResult();
         }
         //AutoFac注入
         public void ConfigureContainer(ContainerBuilder builder)
@@ -171,6 +185,7 @@ namespace WaterCloud.Web
             builder.RegisterType(typeof(HandlerLoginAttribute)).InstancePerLifetimeScope();
             builder.RegisterType(typeof(HandlerAuthorizeAttribute)).InstancePerLifetimeScope();
             builder.RegisterType(typeof(HandlerAdminAttribute)).InstancePerLifetimeScope();
+            builder.RegisterType(typeof(HandlerLockAttribute)).InstancePerLifetimeScope();
             ////注册ue编辑器
             //Config.ConfigFile = "config.json";
             //Config.noCache = true;
@@ -183,28 +198,33 @@ namespace WaterCloud.Web
         {
             //由于.Net Core默认只会从wwwroot目录加载静态文件，其他文件夹的静态文件无法正常访问。
             //而我们希望将图片上传到网站根目录的upload文件夹下，所以需要额外在Startup.cs类的Configure方法中
-            string resource = Path.Combine(Directory.GetCurrentDirectory(), "upload");
-            if (!FileHelper.IsExistDirectory(resource))
-            {
-                FileHelper.CreateFolder(resource);
-            }
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(resource),
-                RequestPath = "/upload",
-                OnPrepareResponse = ctx =>
-                {
-                    ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=36000");
-                }
-            });
+            //string resource = Path.Combine(Directory.GetCurrentDirectory(), "upload");
+            //if (!FileHelper.IsExistDirectory(resource))
+            //{
+            //    FileHelper.CreateFolder(resource);
+            //}
+            //app.UseStaticFiles(new StaticFileOptions
+            //{
+            //    FileProvider = new PhysicalFileProvider(resource),
+            //    RequestPath = "/upload",
+            //    OnPrepareResponse = ctx =>
+            //    {
+            //        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=36000");
+            //    }
+            //});
             //虚拟目录 
             //如需使用，所有URL修改，例："/Home/Index"改成'@Url.Content("~/Home/Index")'，部署访问首页必须带虚拟目录;
             //if (!string.IsNullOrEmpty(GlobalContext.SystemConfig.VirtualDirectory))
             //{
             //    app.UsePathBase(new PathString(GlobalContext.SystemConfig.VirtualDirectory)); // 让 Pathbase 中间件成为第一个处理请求的中间件， 才能正确的模拟虚拟路径
             //}
+            //实时通讯跨域
+            app.UseCors("CorsPolicy");
             if (WebHostEnvironment.IsDevelopment())
             {
+                //打印sql
+                IDbCommandInterceptor interceptor = new DbCommandInterceptor();
+                DbInterception.Add(interceptor);
                 GlobalContext.SystemConfig.Debug = true;
                 app.UseDeveloperExceptionPage();
             }
@@ -231,9 +251,6 @@ namespace WaterCloud.Web
                 endpoints.MapControllerRoute("default", "{controller=Login}/{action=Index}/{id?}");
             });
             GlobalContext.ServiceProvider = app.ApplicationServices;
-            //获取前面注入的Quartz调度类
-            var quartz = app.ApplicationServices.GetRequiredService<JobCenter>();
-            quartz.Start();
         }
     }
 }

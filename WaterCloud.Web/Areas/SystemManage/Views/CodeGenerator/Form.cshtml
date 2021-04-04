@@ -64,7 +64,7 @@
             filter: 'stepForm',
             width: '100%', //设置容器宽度
             stepWidth: '600px',
-            height: '430px',
+            height: '550px',
             stepItems: [{
                 title: '基本配置'
             }, {
@@ -92,12 +92,15 @@
                         common.val('stepForm', data);
                         common.val('stepForm', data.FileConfig);
                         common.val('stepForm', data.OutputConfig);
+                        common.val('stepForm', data.PageIndex);
+                        $("#KeywordColum").val(data.PageIndex.KeywordColum.join(','));
                         $("#n_columns").val(data.PageForm.ShowMode);
+                        $("#ParentColum").parent().parent().addClass("layui-hide");
+                        $("#TreeColum").parent().parent().addClass("layui-hide");
                         var datas = [];
-                        for (let i in data.PageIndex.ColumnList) {
+                        for (var i = 0; i < data.PageIndex.ColumnList.length; i++) {
                             let o = {};
-                            o["TableColumn"] =i;
-                            o["Remark"] = data.PageIndex.ColumnList[i];
+                            o = data.PageIndex.ColumnList[i];
                             o["F_Id"] = uuid();
                             datas.push(o);
                         }
@@ -108,41 +111,6 @@
                     }
                 });
             }
-        });
-        ////渲染多选
-        //var outputModule = common.radioSelectRender({
-        //    el: '#OutputModule',
-        //    name: 'outputmodule',
-        //    remoteMethod: function (val, cb, show) {
-        //        common.ajax({
-        //            url: '/SystemManage/Module/GetSelectJson',
-        //            data: { keyword: val },
-        //            dataType: "json",
-        //            success: function (data) {
-        //                cb(data);
-        //            },
-        //            error: function () {
-        //                cb([]);
-        //            }
-        //        });
-        //    }
-        //});
-        ////清空沙雕ie存的方法
-        //outputModule.setValue([]);
-        //页面选择
-        var outputOptions = common.multipleSelectRender({
-            el: '#OutputOptions',
-            remoteSearch: false,
-            layVerify: 'required',
-            layVerType: 'msg',
-            data: [
-                { text: '菜单显示', id: 'IsMunu', selected: true },
-                { text: '是否公共', id: 'IsPublic', selected: false },
-                { text: '树形表格', id: 'IsTree', selected: false },
-                { text: '搜索框', id: 'IsSearch', selected: true },
-                { text: '分页', id: 'IsPagination', selected: true },
-                { text: '字段控制', id: 'IsFields', selected: false },
-            ]
         });
         //按钮选择
         var buttonList = common.multipleSelectRender({
@@ -157,63 +125,125 @@
                 { text: '查看按钮', id: 'details', selected: true },
             ]
         });
-        //var templist;
-        ////字段选择
-        //var columnList = common.multipleSelectRender({
-        //    el: '#ColumnList',
-        //    name: 'columnlist',
-        //    layVerify: 'required',
-        //    layVerType: 'msg',
-        //    pageSize: 3,//分页大小
-        //    //model: {
-        //    //    label: {
-        //    //        type: 'setnum', //自定义与下面的对应
-        //    //        setnum: {
-        //    //            template(data, sels) {
-        //    //                return "已选中 " + sels.length + " 项, 共 " + data.length + " 项"
-        //    //            }
-        //    //        },
-        //    //    }
-        //    //},
-        //    remoteMethod: function (val, cb, show) {
-        //        common.ajax({
-        //            url: '/SystemManage/CodeGenerator/GetTableFieldFilterSelectJson',
-        //            dataType: "json",
-        //            data: { keyValue: keyValue, keyword: val },
-        //            success: function (data) {
-        //                templist = data;
-        //                cb(data);
-        //            },
-        //            error: function () {
-        //                cb([]);
-        //            }
-        //        });
-        //    }
-        //});
-        ////清空沙雕ie存的方法
-        //columnList.setValue([]);
-        ////赋值
-        //for (var i = 0; i < templist.length; i++) {
-        //    columnList.append([templist[i].id]);
-        //}
         commonTable.rendertable({
             elem: '#currentTableId',
             id: 'currentTableId',
             data: [],
-            search:false,
+            search: false,
             limit: 9999,//每页数据 默认
             page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
                 layout: ['count'] //自定义分页布局
                 , first: false //不显示首页
                 , last: false //不显示尾页
             },
-            
-            height: 'full-220',
-            defaultToolbar:false,//默认工具栏
+            rowDrag: {
+                done: function (obj) {
+                }
+            }, 
+            height: 'full-340',
+            defaultToolbar: false,//默认工具栏
             cols: [[
-                { field: 'TableColumn', title: '字段编号', width: 200 },
-                { field: 'Remark', title: '字段名称', minWidth: 200 },
+                { field: 'field', title: '字段', width: 200 },
+                { field: 'title', title: '名称', width: 200, edit: 'string' },
+                { field: 'width', title: '宽度', width: 90, edit: 'string' },
+                {
+                    field: 'isAotuWidth', title: '补全列宽', width: 90, templet: function (d) {
+                        if (d.isAotuWidth == true) {
+                            return ' <input type="checkbox" name="isAotuWidth" lay-skin="switch" checked value= "' + d.field + '"   lay-text="是|否" lay-filter="AotuWidth" >';
+                        }
+                        else {
+                            return '<input type="checkbox" name="isAotuWidth" lay-skin="switch"  value= "' + d.field + '"  lay-text="是|否" lay-filter="AotuWidth" >';
+                        }
+                    }
+                },
+                {
+                    field: 'isSorted', title: '是否排序', width: 90, templet: function (d) {
+                        if (d.isSorted == true) {
+                            return ' <input type="checkbox" name="isSorted" lay-skin="switch" checked  value= "' + d.field + '"  lay-text="是|否" lay-filter="Sorted" >';
+                        }
+                        else {
+                            return '<input type="checkbox" name="isSorted" lay-skin="switch"  value= "' + d.field + '" lay-text="是|否" lay-filter="Sorted" >';
+                        }
+                    }
+                },
+                {
+                    field: 'isFilter', title: '是否过滤', width: 90, templet: function (d) {
+                        if (d.isFilter == true) {
+                            return ' <input type="checkbox" name="isFilter" lay-skin="switch" checked  value= "' + d.field + '"  lay-text="是|否" lay-filter="Filter" >';
+                        }
+                        else {
+                            return '<input type="checkbox" name="isFilter" lay-skin="switch"  value= "' + d.field + '" lay-text="是|否" lay-filter="Filter" >';
+                        }
+                    }
+                },
+                {
+                    field: 'isShow', title: '是否显示', width: 90, templet: function (d) {
+                        if (d.isShow == true) {
+                            return ' <input type="checkbox" name="isShow" lay-skin="switch" checked   value= "' + d.field + '" lay-text="是|否" lay-filter="Show" >';
+                        }
+                        else {
+                            return '<input type="checkbox" name="isShow" lay-skin="switch"  value= "' + d.field + '" lay-text="是|否" lay-filter="Show" >';
+                        }
+                    }
+                },
+                {
+                    field: 'value', title: '初始值', width: 90, edit: 'string'
+                },
+                {
+                    field: 'filterType', title: '过滤类型', width: 150, edit: 'string'
+                },
+                {
+                    field: 'templet', title: '模板', minWidth: 150, edit: 'string'
+                }
             ]]
+        });
+        form.on('switch(AotuWidth)', function (data) {
+            // 得到开关的value值，实际是需要修改的ID值。
+            var field = data.value;
+            var status = this.checked ? true : false;
+            var cachedata = table.cache.currentTableId;
+            for (var i = 0; i < cachedata.length; i++) {
+                if (field == cachedata[i].field) {
+                    cachedata[i].isAotuWidth = status;
+                    break;
+                }
+            }
+        });
+        form.on('switch(Sorted)', function (data) {
+            // 得到开关的value值，实际是需要修改的ID值。
+            var field = data.value;
+            var status = this.checked ? true : false;
+            var cachedata = table.cache.currentTableId;
+            for (var i = 0; i < cachedata.length; i++) {
+                if (field == cachedata[i].field) {
+                    cachedata[i].isSorted = status;
+                    break;
+                }
+            }
+        });
+        form.on('switch(Filter)', function (data) {
+            // 得到开关的value值，实际是需要修改的ID值。
+            var field = data.value;
+            var status = this.checked ? true : false;
+            var cachedata = table.cache.currentTableId;
+            for (var i = 0; i < cachedata.length; i++) {
+                if (field == cachedata[i].field) {
+                    cachedata[i].isFilter = status;
+                    break;
+                }
+            }
+        });
+        form.on('switch(Show)', function (data) {
+            // 得到开关的value值，实际是需要修改的ID值。
+            var field = data.value;
+            var status = this.checked ? true : false;
+            var cachedata = table.cache.currentTableId;
+            for (var i = 0; i < cachedata.length; i++) {
+                if (field == cachedata[i].field) {
+                    cachedata[i].isShow = status;
+                    break;
+                }
+            }
         });
         var entity;
         table.on('row(currentTableFilter)', function (obj) {
@@ -225,8 +255,8 @@
                 common.modalOpen({
                     title: "添加字段",
                     url: "/SystemManage/CodeGenerator/RuleForm",
-                    width: "400px",
-                    height: "400px",
+                    width: "500px",
+                    height: "500px",
                 });
             }
             else if (obj.event === 'delete') {
@@ -247,7 +277,7 @@
                                     break;
                                 }
                             }
-                            var divId = "#" + "div" + entity.data.TableColumn;
+                            var divId = "#" + "div" + entity.data.field;
                             if ($(divId).length > 0) {
                                 $(divId).remove();
                             }
@@ -274,11 +304,34 @@
                 common.modalOpen({
                     title: "编辑字段",
                     url: "/SystemManage/CodeGenerator/RuleForm",
-                    width: "400px",
-                    height: "400px",
+                    width: "500px",
+                    height: "500px",
                     data: entity.data
                 });
             }
+            else if (obj.event === 'sort') {
+                if (entity == null) {
+                    common.modalMsg("未选中数据", "warning");
+                    return false;
+                }
+                common.modalConfirm("注：您确定要把该项数据设定为排序字段吗？", function (r) {
+                    if (r) {
+                        var index = parent.layer.load(0, {
+                            shade: [0.5, '#000'], //0.1透明度的背景
+                        });
+                        try {
+                            $("#SortColumn").val(entity.data.field);
+                            common.modalMsg("操作成功", "success");
+                        } catch (e) {
+                            alert(e);
+                        }
+                        parent.layer.close(index);
+                    }
+                    else {
+                        return false;
+                    }
+                });
+            } 
             return false;
         });
         form.on('select(n_columns)', function (data) {
@@ -297,6 +350,16 @@
                 $(".layui-card-body .layui-col-md12").toggle(false);
             }
         });
+        form.on('checkbox(IsTree)', function (data) {
+            if (data.elem.checked) {
+                $("#ParentColum").parent().parent().removeClass("layui-hide");
+                $("#TreeColum").parent().parent().removeClass("layui-hide");
+            }
+            else {
+                $("#ParentColum").parent().parent().addClass("layui-hide");
+                $("#TreeColum").parent().parent().addClass("layui-hide");
+            }
+        });
         form.on('submit(formStep1)', function (data) {
             baseConfig.FileConfig.ClassPrefix = data.field.ClassPrefix;
             baseConfig.FileConfig.EntityName = data.field.ClassPrefix + "Entity";
@@ -311,10 +374,6 @@
         });
         var cout = 0;
         form.on('submit(formStep2)', function (data) {
-            if (outputOptions.getValue('value').length == 0) {
-                outputOptions.warning();
-                return false;
-            }
             if (buttonList.getValue('value').length == 0) {
                 buttonList.warning();
                 return false;
@@ -323,62 +382,55 @@
             //    columnList.warning();
             //    return false;
             //}
-            var options = outputOptions.getValue('value');
-            if (options.indexOf("IsMunu") > -1) {
-                baseConfig.PageIndex.IsMunu = 1;
-            }
-            else {
-                baseConfig.PageIndex.IsMunu = 0;
-            }
-            if (options.indexOf("IsSearch") > -1) {
-                baseConfig.PageIndex.IsSearch = 1;
-            }
-            else {
-                baseConfig.PageIndex.IsSearch = 0;
-            }
-            if (options.indexOf("IsTree") > -1) {
-                baseConfig.PageIndex.IsTree = 1;
-            }
-            else {
-                baseConfig.PageIndex.IsTree = 0;
-            }
-            if (options.indexOf("IsPagination") > -1) {
-                baseConfig.PageIndex.IsPagination = 1;
-            }
-            else {
-                baseConfig.PageIndex.IsPagination = 0;
-            }
-            if (options.indexOf("IsFields") > -1) {
-                baseConfig.PageIndex.IsFields = 1;
-            }
-            else {
-                baseConfig.PageIndex.IsFields = 0;
-            }
-            if (options.indexOf("IsPublic") > -1) {
-                baseConfig.PageIndex.IsPublic = 1;
-            }
-            else {
-                baseConfig.PageIndex.IsPublic = 0;
-            }
+            baseConfig.PageIndex.IsMunu = !data.field.IsMunu || data.field.IsMunu != "true" ? false : true;
+            baseConfig.PageIndex.IsSearch = !data.field.IsSearch || data.field.IsSearch != "true" ? false : true;
+            baseConfig.PageIndex.IsTree = !data.field.IsTree || data.field.IsTree != "true" ? false : true;
+            baseConfig.PageIndex.IsPagination = !data.field.IsPagination || data.field.IsPagination != "true" ? false : true;
+            baseConfig.PageIndex.IsFields = !data.field.IsFields || data.field.IsFields != "true" ? false : true;
+            baseConfig.PageIndex.IsPublic = !data.field.IsPublic || data.field.IsPublic != "true" ? false : true;
+            baseConfig.PageIndex.IsCache = !data.field.IsCache || data.field.IsCache != "true" ? false : true;
             baseConfig.PageIndex.ButtonList = buttonList.getValue('value');
             var cachedata = table.cache.currentTableId
             if (cachedata.length == 0) {
                 common.modalMsg("未添加字段", "warning");
                 return false;
             }
+            baseConfig.PageIndex.SortColumn = data.field.SortColumn;
+            baseConfig.PageIndex.ParentColum = data.field.ParentColum;
+            baseConfig.PageIndex.TreeColum = data.field.TreeColum;
+            baseConfig.PageIndex.CreateColum = data.field.CreateColum;
+            baseConfig.PageIndex.DeleteColum = data.field.DeleteColum;
+            baseConfig.PageIndex.KeywordColum = data.field.KeywordColum.split(',');
+            baseConfig.PageIndex.IsAsc = !data.field.IsAsc || data.field.IsAsc != "true" ? false : true;
             baseConfig.PageIndex.ColumnList = [];
             var treelist = [];
             for (var i = 0; i < cachedata.length; i++) {
                 var temp = {};
                 var treetemp = {};
-                temp["key"] = cachedata[i].TableColumn;
-                temp["value"] = cachedata[i].Remark;
+                temp["field"] = cachedata[i].field;
+                temp["title"] = cachedata[i].title;
+                temp["isFilter"] = cachedata[i].isFilter;
+                temp["isAotuWidth"] = cachedata[i].isAotuWidth;
+                temp["isSorted"] = cachedata[i].isSorted;
+                temp["isShow"] = cachedata[i].isShow;
+                temp["width"] = cachedata[i].width;
+                temp["filterType"] = cachedata[i].filterType;
+                temp["templet"] = cachedata[i].templet;
+                temp["value"] = cachedata[i].value;
                 baseConfig.PageIndex.ColumnList.push(temp);
-                treetemp["id"] = cachedata[i].TableColumn;
-                treetemp["title"] = cachedata[i].Remark;
-                treetemp["parentId"] = "0";
-                treetemp["checkArr"] = "0";
-                treelist.push(treetemp);
+                if (cachedata[i].isShow == true) {
+                    treetemp["id"] = cachedata[i].field;
+                    treetemp["title"] = cachedata[i].title;
+                    treetemp["parentId"] = "0";
+                    treetemp["checkArr"] = "0";
+                    treelist.push(treetemp);
+                }
+                else {
+                    var divId = "#" + "div" + cachedata[i].field;
+                    if ($(divId).length > 0) {
+                        $(divId).remove();
+                    }
+                }
             }
             //form字段选择
             var formColumnList = dtree.render({
@@ -476,7 +528,6 @@
                         $(divId).remove();
                     }
                 }
-
             });
             step.next('#stepForm');
             return false;
@@ -494,7 +545,7 @@
                     baseConfig.PageForm.FieldList.push(temp);
                 }
             });
-            if (baseConfig.PageForm.FieldList.length<=0) {
+            if (baseConfig.PageForm.FieldList.length <= 0) {
                 common.modalMsg("未添加表单字段", "warning");
                 return false;
             }
@@ -529,9 +580,6 @@
             return false;
         });
         form.on('submit(formStep4)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
             var postData = baseConfig;
             postData.Code = encodeURIComponent(JSON.stringify(codeList));
             common.submitForm({
@@ -549,14 +597,14 @@
     function editName(data) {
         var key = $('#' + data).parent().find("input")[0].id;
         var value = $('#' + data).html();
-        
+
         layui.use(['jquery', 'form', 'laydate', 'common'], function () {
             layui.common.modalOpen({
                 title: "修改值",
                 url: "/SystemManage/CodeGenerator/AddForm?parentform=" + window.name + "&event=" + data,
                 width: "400px",
                 height: "400px",
-                data: { TableColumn: key, Remark:value},
+                data: { TableColumn: key, Remark: value },
             });
         });
     }
@@ -610,25 +658,74 @@
                 <div>
                     <form class="layui-form layuimini-form">
                         <div class="layui-form-item">
-                            <label class="layui-form-label required">页面选项</label>
-                            <div class="layui-input-block">
-                                <div id="OutputOptions" name="OutputOptions" class="xm-select-demo">
+                            <div class="layui-col-md12">
+                                <label class="layui-form-label required">页面选项</label>
+                                <div class="layui-input-block">
+                                    <input type="checkbox" name="IsMunu" id="IsMunu" checked="checked" value="true" title="菜单显示">
+                                    <input type="checkbox" name="IsCache" id="IsCache" checked="" value="true" title="缓存">
+                                    <input type="checkbox" name="IsTree" id="IsTree" checked="" value="true" lay-filter="IsTree" title="树形表格">
+                                    <input type="checkbox" name="IsSearch" id="IsSearch" checked="checked" value="true" title="搜索框">
+                                    <input type="checkbox" name="IsPagination" id="IsPagination" checked="checked" value="true" title="分页">
+                                    <input type="checkbox" name="IsFields" id="IsFields" checked="" value="true" title="字段控制">
+                                    <input type="checkbox" name="IsPublic" id="IsPublic" checked="" value="true" title="是否公共">
                                 </div>
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label required">按钮选项</label>
-                            <div class="layui-input-block">
-                                <div id="ButtonList" name="ButtonList" class="xm-select-demo">
+                            <div class="layui-col-md6 layui-col-xs6">
+                                <label class="layui-form-label required">按钮选项</label>
+                                <div class="layui-input-block">
+                                    <div id="ButtonList" name="ButtonList" class="xm-select-demo">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md6 layui-col-xs6">
+                                <label class="layui-form-label required">模糊查询字段</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="KeywordColum" name="KeywordColum" lay-verify="required" class="layui-input">
                                 </div>
                             </div>
                         </div>
-                        @*<div class="layui-form-item">
-                            <label class="layui-form-label required">字段选择</label>
-                            <div class="layui-input-block">
-                                <div id="ColumnList" name="ColumnList" class="xm-select-demo"></div>
+                        <div class="layui-form-item">
+                            <div class="layui-col-md3 layui-col-xs3">
+                                <label class="layui-form-label required">排序字段</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="SortColumn" name="SortColumn" readonly lay-verify="required" class="layui-input">
+                                </div>
                             </div>
-                        </div>*@
+                            <div class="layui-col-md3 layui-col-xs3">
+                                <label class="layui-form-label">排序</label>
+                                <div class="layui-input-block">
+                                    <input type="checkbox" name="IsAsc" id="IsAsc" checked="" value="true" title="顺序">
+                                </div>
+                            </div>
+                            <div class="layui-col-md3 layui-col-xs3">
+                                <label class="layui-form-label">删除字段</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="DeleteColum" name="DeleteColum" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-col-md3 layui-col-xs3">
+                                <label class="layui-form-label">创建字段</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="CreateColum" name="CreateColum" class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-col-md6 layui-col-xs6">
+                                <label class="layui-form-label">父级字段</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="ParentColum" name="ParentColum" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-col-md6 layui-col-xs6">
+                                <label class="layui-form-label">树形显示字段</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="TreeColum" name="TreeColum" class="layui-input">
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group-bottom text-right">
                             <div class="layui-input-block">
                                 <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
@@ -639,9 +736,9 @@
                     <script type="text/html" id="toolbarDemo">
                         <div class="layui-btn-container" id="toolbar">
                             <button class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
-                            <button class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                            <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                        </div>
+                            <button class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</button>
+                            <button class="layui-btn layui-btn-sm data-edit-btn" lay-event="sort"><i class="layui-icon">&#xe61a;</i>设为排序</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>                        </div>
                     </script>
                     <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
                 </div>

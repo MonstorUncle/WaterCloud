@@ -46,59 +46,73 @@
         </div>
 
     </body>
-<script>
-    layui.use(['jquery', 'form', 'laydate', 'common', 'optimizeSelectOption'], function () {
-        var form = layui.form,
-            $ = layui.$,
-            common = layui.common,
-            laydate = layui.laydate;
-        var keyValue = $.request("keyValue");
-        //权限字段
-        common.authorizeFields('adminform');
-        $(function () {
-            initControl();
-            if (!!keyValue) {
-                common.ajax({
-                    url: "/SystemSecurity/OpenJobs/GetFormJson",
-                    dataType: "json",
-                    data: { keyValue: keyValue },
-                    async: false,
-                    success: function (data) {
-                        common.val('adminform', data);
-                    }
+    <script>
+        layui.use(['jquery', 'form', 'laydate', 'common', 'optimizeSelectOption','cron'], function () {
+            var form = layui.form,
+                $ = layui.$,
+                common = layui.common,
+                cron = layui.cron,
+                laydate = layui.laydate;
+            var keyValue = $.request("keyValue");
+            //权限字段
+            common.authorizeFields('adminform');
+            $(function () {
+                initControl();
+                if (!!keyValue) {
+                    common.ajax({
+                        url: "/SystemSecurity/OpenJobs/GetFormJson",
+                        dataType: "json",
+                        data: { keyValue: keyValue },
+                        async: false,
+                        success: function (data) {
+                            common.val('adminform', data);
+                            cron.render({
+                                elem: "#F_CronExpress",           // 绑定元素
+                                value: data.F_CronExpress, // 默认值
+                                done: function (cronStr) {  // 点击确定，或运行时，触发，参数为 cron 表达式字符串
+                                    $("#F_CronExpress").val(cronStr);
+                                },
+                            });
+                        }
+                    });
+                }
+                else {
+                    cron.render({
+                        elem: "#F_CronExpress",           // 绑定元素
+                        value: "0/20 * * * * ?", // 默认值
+                        done: function (cronStr) {  // 点击确定，或运行时，触发，参数为 cron 表达式字符串
+                            $("#F_CronExpress").val(cronStr);
+                        },
+                    });
+                }
+                form.render();
+            });
+            wcLoading.close();
+            function initControl() {
+                $("#F_FileName").bindSelect({
+                    url: "/SystemSecurity/OpenJobs/QueryLocalHandlers",
+                    id: ""
                 });
             }
-            form.render();
-        });
-        wcLoading.close();
-        function initControl() {
-            $("#F_FileName").bindSelect({
-                url: "/SystemSecurity/OpenJobs/QueryLocalHandlers",
-                id: ""
+            //select验证
+            form.verify({
+                required: function (value, item) {
+                    var msg = "必填项不能为空";
+                    value = $.trim(value);
+                    var isEmpty = !value || value.length < 1;
+                    // 当前验证元素是select且为空时,将页面定位至layui渲染的select处，或自定义想定位的位置
+                    if (item.tagName == 'SELECT' && isEmpty) {
+                        $("html").animate({
+                            scrollTop: $(item).siblings(".layui-form-select").offset().top - 74
+                        }, 50);
+                    }
+                    if (isEmpty) {
+                        return msg;
+                    }
+                }
             });
-        }
-        //select验证
-        form.verify({
-            required: function (value, item) {
-                var msg = "必填项不能为空";
-                value = $.trim(value);
-                var isEmpty = !value || value.length < 1;
-                // 当前验证元素是select且为空时,将页面定位至layui渲染的select处，或自定义想定位的位置
-                if (item.tagName == 'SELECT' && isEmpty) {
-                    $("html").animate({
-                        scrollTop: $(item).siblings(".layui-form-select").offset().top - 74
-                    }, 50);
-                }
-                if (isEmpty) {
-                    return msg;
-                }
-            }
-        });
-        //监听提交
-        form.on('submit(saveBtn)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
                 var postData = data.field;
                 if (!postData["F_EnabledMark"]) postData["F_EnabledMark"] = false;
                 common.submitForm({
@@ -108,8 +122,8 @@
                         common.parentreload("data-search-btn");
                     }
                 })
-            return false;
+                return false;
+            });
         });
-    });
-</script>
+    </script>
 

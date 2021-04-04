@@ -2,180 +2,244 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Index.cshtml";
 }
-    <script>
-        layui.use(['commonTable', 'form', 'table', 'common', 'optimizeSelectOption'], function () {
-            var commonTable = layui.commonTable,
-                form = layui.form,
-                table = layui.table,
-                common = layui.common;
-            //加载数据
-            wcLoading.close();
-            //权限控制(js是值传递)
-            toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
-            commonTable.rendertable({
-                elem: '#currentTableId',
-                id: 'currentTableId',
-                url: '/SystemSecurity/OpenJobs/GetGridJson',
-                page: false,
-                cols: [[
-                    { field: 'F_JobName', title: '名称', width: 150 },
-                    { field: 'F_JobGroup', title: '组名', width: 150 },
-                    { field: 'F_FileName', title: '文件名', minWidth: 200 },
-                    { field: 'F_CronExpress', title: 'CRON', width: 180 },
-                    {
-                        field: 'F_EnabledMark', title: '状态', width: 80, sort: true,
-                        templet: function (d) {
-                            if (d.F_EnabledMark == true) {
-                                return "<span class='layui-btn layui-btn-normal layui-btn-xs'>有效</span>";
-                            } else {
-                                return "<span class='layui-btn layui-btn-warm layui-btn-xs'>无效</span>";
-                            }
+<script>
+    layui.use(['commonTable', 'form', 'table', 'common', 'optimizeSelectOption'], function () {
+        var commonTable = layui.commonTable,
+            form = layui.form,
+            table = layui.table,
+            common = layui.common;
+        //加载数据
+        wcLoading.close();
+        //权限控制(js是值传递)
+        currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
+        toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
+        commonTable.rendertable({
+            elem: '#currentTableId',
+            id: 'currentTableId',
+            url: '/SystemSecurity/OpenJobs/GetGridJson',
+            page: false,
+            cols: [[
+                { type: "radio", width: 50, fixed: 'left'},
+                { field: 'F_JobName', title: '名称', width: 120, sort: true },
+                { field: 'F_JobGroup', title: '组名', width: 120, sort: true },
+                { field: 'F_FileName', title: '文件名', width: 180, sort: true },
+                { field: 'F_CronExpress', title: 'CRON', width: 150 },
+                {
+                    field: 'F_EnabledMark', title: '状态', width: 80, sort: true,
+                    templet: function (d) {
+                        if (d.F_EnabledMark == true) {
+                            return "<span class='layui-btn layui-btn-normal layui-btn-xs'>有效</span>";
+                        } else {
+                            return "<span class='layui-btn layui-btn-warm layui-btn-xs'>无效</span>";
                         }
-                    },
-                    {
-                        field: 'F_LastRunTime', title: '最近执行时间', width: 180,
-                        templet: function (d) {
-                            if (d.F_LastRunTime) {
-                                var time = new Date(d.F_LastRunTime);
-                                return time.Format("yyyy-MM-dd hh:mm:ss");
-                            }
-                            return '';
+                    }
+                },
+                {
+                    field: 'F_LastRunTime', title: '最近执行时间', width: 180, sort: true,
+                    templet: function (d) {
+                        if (d.F_LastRunTime) {
+                            var time = new Date(d.F_LastRunTime);
+                            return time.Format("yyyy-MM-dd hh:mm:ss");
                         }
-                    },
-                    {
-                        field: 'F_StarRunTime', title: '最近启动时间', width: 180,
-                        templet: function (d) {
-                            if (d.F_StarRunTime) {
-                                var time = new Date(d.F_StarRunTime);
-                                return time.Format("yyyy-MM-dd hh:mm:ss");
-                            }
-                            return '';
+                        return '';
+                    }
+                },
+                {
+                    field: 'F_StarRunTime', title: '最近启动时间', width: 170, sort: true,
+                    templet: function (d) {
+                        if (d.F_StarRunTime) {
+                            var time = new Date(d.F_StarRunTime);
+                            return time.Format("yyyy-MM-dd hh:mm:ss");
                         }
-                    },
-                    {
-                        field: 'F_EndRunTime', title: '最近关闭时间', width: 180,
-                        templet: function (d) {
-                            if (d.F_EndRunTime) {
-                                var time = new Date(d.F_EndRunTime);
-                                return time.Format("yyyy-MM-dd hh:mm:ss");
-                            }
-                            return '';
+                        return '';
+                    }
+                },
+                {
+                    field: 'F_EndRunTime', title: '最近关闭时间', width: 170, sort: true,
+                    templet: function (d) {
+                        if (d.F_EndRunTime) {
+                            var time = new Date(d.F_EndRunTime);
+                            return time.Format("yyyy-MM-dd hh:mm:ss");
                         }
-                    },
+                        return '';
+                    }
+                },
 
-                    { field: 'F_Description', title: '备注', minWidth: 200 },
-                ]]
-            });
-            // 监听搜索操作
-            form.on('submit(data-search-btn)', function (data) {
-                //执行搜索重载
-                commonTable.reloadtable({
-                    elem: 'currentTableId',
-                    page: false,
-                    curr: 1,
-                    where: { keyword: data.field.txt_keyword }
-                });
-                entity = null;
-                return false;
-            });
-            var entity;
-            table.on('row(currentTableFilter)', function (obj) {
-                obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-                entity = obj;
-            })
-            /**
-             * toolbar监听事件
-             */
-            table.on('toolbar(currentTableFilter)', function (obj) {
-                if (obj.event === 'add') {  // 监听删除操作
-                    common.modalOpen({
-                        title: "添加任务",
-                        url: "/SystemSecurity/OpenJobs/Form",
-                        width: "550px",
-                        height: "500px",
-                    });
-                }
-                else if (obj.event === 'delete') {
-                    if (entity == null) {
-                        common.modalMsg("未选中数据", "warning");
-                        return false;
-                    }
-                    common.deleteForm({
-                        url: "/SystemSecurity/OpenJobs/DeleteForm",
-                        param: { keyValue: entity.data.F_Id },
-                        success: function () {
-                            common.reload('data-search-btn');
-                        }
-                    });
-                }
-                else if (obj.event === 'edit') {
-                    if (entity == null) {
-                        common.modalMsg("未选中数据", "warning");
-                        return false;
-                    }
-                    common.modalOpen({
-                        title: "修改任务",
-                        url: "/SystemSecurity/OpenJobs/Form?keyValue=" + entity.data.F_Id,
-                        width: "550px",
-                        height: "500px",
-                    });
-                }
-                else if (obj.event === 'disabled') {
-                    if (entity == null) {
-                        common.modalMsg("未选中数据", "warning");
-                        return false;
-                    }
-                    if (entity.data.F_EnabledMark!=true) {
-                        common.modalMsg("任务未启动，无法关闭！", "warning");
-                        return false;
-                    }
-                    common.modalConfirm("注：您确定要【关闭】该项任务吗？", function (r) {
-                        if (r) {
-                            common.submitForm({
-                                url: "/SystemSecurity/OpenJobs/ChangeStatus",
-                                param: { keyValue: entity.data.F_Id, status: 0},
-                                close: false,
-                                success: function () {
-                                    common.reload('data-search-btn');
-                                }
-                            })
-                        }
-                    });
-                }
-                else if (obj.event === 'enabled') {
-                    if (entity == null) {
-                        common.modalMsg("未选中数据", "warning");
-                        return false;
-                    }
-                    if (entity.data.F_EnabledMark == true) {
-                        common.modalMsg("任务已启动，无法启动！", "warning");
-                        return false;
-                    }
-                    common.modalConfirm("注：您确定要【启动】该项任务吗？", function (r) {
-                        if (r) {
-                            common.submitForm({
-                                url: "/SystemSecurity/OpenJobs/ChangeStatus",
-                                param: { keyValue: entity.data.F_Id, status: 1 },
-                                close: false,
-                                success: function () {
-                                    common.reload('data-search-btn');
-                                }
-                            })
-                        }
-                    });
-                }
-                else if (obj.event === 'TABLE_SEARCH') {
-                    var _that = $("#searchField");
-                    if (_that.hasClass("layui-hide")) {
-                        _that.removeClass('layui-hide');
-                    } else {
-                        _that.addClass('layui-hide');
-                    }
-                }
-                return false;
-            });
+                { field: 'F_Description', title: '备注', minWidth: 200, sort: true },
+                { title: '操作', width: 260, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
+            ]]
         });
-    </script>
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            //执行搜索重载
+            commonTable.reloadtable({
+                elem: 'currentTableId',
+                page: false,
+                curr: 1,
+                where: { keyword: data.field.txt_keyword }
+            });
+            return false;
+        });
+        //行点击事件监听，控制按钮显示
+        var oneList = ["NF-edit", "NF-disabled", "NF-enabled", "NF-edit", "NF-log"];//选择1条显示
+        commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
+        /**
+         * toolbar监听事件
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            var data = table.checkStatus('currentTableId').data;
+            if (obj.event === 'add') {  // 监听删除操作
+                common.modalOpen({
+                    title: "添加任务",
+                    url: "/SystemSecurity/OpenJobs/Form",
+                    width: "750px",
+                    height: "650px",
+                });
+            }
+            else if (obj.event === 'delete') {
+                if (data.length == 0) {
+                    common.modalMsg("未选中数据", "warning");
+                    return false;
+                }
+                common.deleteForm({
+                    url: "/SystemSecurity/OpenJobs/DeleteForm",
+                    param: { keyValue: data[0].F_Id },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'edit') {
+                if (data.length == 0) {
+                    common.modalMsg("未选中数据", "warning");
+                    return false;
+                }
+                common.modalOpen({
+                    title: "修改任务",
+                    url: "/SystemSecurity/OpenJobs/Form?keyValue=" + data[0].F_Id,
+                    width: "750px",
+                    height: "650px",
+                });
+            }
+            else if (obj.event === 'disabled') {
+                if (data.length == 0) {
+                    common.modalMsg("未选中数据", "warning");
+                    return false;
+                }
+                if (data[0].F_EnabledMark != true) {
+                    common.modalMsg("任务未启动，无法关闭！", "warning");
+                    return false;
+                }
+                common.submitPost({
+                    prompt: "注：您确定要【关闭】该项任务吗？",
+                    url: "/SystemSecurity/OpenJobs/ChangeStatus",
+                    param: { keyValue: data[0].F_Id, status: 0 },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'enabled') {
+                if (data.length == 0) {
+                    common.modalMsg("未选中数据", "warning");
+                    return false;
+                }
+                if (data[0].F_EnabledMark == true) {
+                    common.modalMsg("任务已启动，无法启动！", "warning");
+                    return false;
+                }
+                common.submitPost({
+                    prompt: "注：您确定要【启动】该项任务吗？",
+                    url: "/SystemSecurity/OpenJobs/ChangeStatus",
+                    param: { keyValue: data[0].F_Id, status: 1 },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'log') {
+                if (data.length == 0) {
+                    common.modalMsg("未选中数据", "warning");
+                    return false;
+                }
+                common.modalOpen({
+                    title: "任务日志",
+                    url: "/SystemSecurity/OpenJobs/Details?keyValue=" + data[0].F_Id,
+                    width: "700px",
+                    height: "600px",
+                    btn: []
+                });
+            }
+            else if (obj.event === 'TABLE_SEARCH') {
+                var _that = $("#searchField");
+                if (_that.hasClass("layui-hide")) {
+                    _that.removeClass('layui-hide');
+                } else {
+                    _that.addClass('layui-hide');
+                }
+            }
+            return false;
+        });
+        //toolrow监听事件
+        table.on('tool(currentTableFilter)', function (obj) {
+            if (obj.event === 'delete') {
+                common.deleteForm({
+                    url: "/SystemSecurity/OpenJobs/DeleteForm",
+                    param: { keyValue: obj.data.F_Id },
+                    success: function () {
+                        obj.del();
+                    }
+                });
+            }
+            else if (obj.event === 'edit') {
+                common.modalOpen({
+                    title: "修改任务",
+                    url: "/SystemSecurity/OpenJobs/Form?keyValue=" + obj.data.F_Id,
+                    width: "750px",
+                    height: "650px",
+                });
+            }
+            else if (obj.event === 'disabled') {
+                if (obj.data.F_EnabledMark != true) {
+                    common.modalMsg("任务未启动，无法关闭！", "warning");
+                    return false;
+                }
+                common.submitPost({
+                    prompt: "注：您确定要【关闭】该项任务吗？",
+                    url: "/SystemSecurity/OpenJobs/ChangeStatus",
+                    param: { keyValue: obj.data.F_Id, status: 0 },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'enabled') {
+                if (obj.data.F_EnabledMark == true) {
+                    common.modalMsg("任务已启动，无法启动！", "warning");
+                    return false;
+                }
+                common.submitPost({
+                    prompt: "注：您确定要【启动】该项任务吗？",
+                    url: "/SystemSecurity/OpenJobs/ChangeStatus",
+                    param: { keyValue: obj.data.F_Id, status: 1 },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'log') {
+                common.modalOpen({
+                    title: "任务日志",
+                    url: "/SystemSecurity/OpenJobs/Details?keyValue=" + obj.data.F_Id,
+                    width: "700px",
+                    height: "600px",
+                    btn: []
+                });
+            }
+            return false;
+        });
+    });
+</script>
 <div class="layuimini-container">
     <div class="layuimini-main">
 
@@ -200,15 +264,21 @@
 
         <script type="text/html" id="toolbarDemo">
             <div class="layui-btn-container" id="toolbar">
-                <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
-                <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                <button id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                <button id="NF-enabled" authorize="yes" class="layui-btn layui-btn-sm data-enabled-btn layui-hide" lay-event="enabled"> <i class="fa fa-play-circle"></i>启动</button>
-                <button id="NF-disabled" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-disabled-btn layui-hide" lay-event="disabled"><i class="fa fa-stop-circle"></i>关闭</button>
-
+                <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
+                <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                <button id="NF-enabled" name="NF-enabled" authorize class="layui-btn layui-btn-sm data-enabled-btn layui-hide" lay-event="enabled"> <i class="fa fa-play-circle"></i>启动</button>
+                <button id="NF-disabled" name="NF-disabled" authorize class="layui-btn layui-btn-sm layui-btn-danger data-disabled-btn layui-hide" lay-event="disabled"><i class="fa fa-stop-circle"></i>关闭</button>
+                <button id="NF-log" name="NF-log" authorize class="layui-btn layui-btn-sm data-log-btn layui-hide" lay-event="log"><i class="layui-icon">&#xe642;</i>日志</button>
             </div>
         </script>
-
+        <script type="text/html" id="currentTableBar">
+            <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+            <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
+            <a id="NF-enabled" authorize class="layui-btn layui-btn-sm" lay-event="enabled"><i class="fa fa-play-circle"></i></a>
+            <a id="NF-disabled" authorize class="layui-btn layui-btn-danger layui-btn-sm" lay-event="disabled"><i class="fa fa-stop-circle"></i></a>
+            <a id="NF-log" authorize class="layui-btn layui-btn-sm" lay-event="log"><i class="layui-icon">&#xe642;</i></a>
+        </script>
         <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
 
     </div>

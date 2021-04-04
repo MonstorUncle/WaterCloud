@@ -24,18 +24,14 @@ namespace WaterCloud.Service.SystemSecurity
         private IRepositoryBase<OpenJobEntity> repository;
         private IRepositoryBase uniwork;
         private IScheduler _scheduler;
-        /// <summary>
-        /// 缓存操作类
-        /// </summary>
-
-        private string cacheKey = "watercloud_openjob_";// IP过滤
+        private string HandleLogProvider = GlobalContext.SystemConfig.HandleLogProvider;
         //获取类名
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
-        public OpenJobsService(IDbContext context,ISchedulerFactory schedulerFactory, IJobFactory iocJobfactory)
+        
+        public OpenJobsService(IDbContext context, ISchedulerFactory schedulerFactory, IJobFactory iocJobfactory)
         {
             repository = new RepositoryBase<OpenJobEntity>(context);
             uniwork = new RepositoryBase(context);
-            _scheduler =schedulerFactory.GetScheduler().Result;
+            _scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
             _scheduler.JobFactory = iocJobfactory;
         }
         /// <summary>
@@ -43,8 +39,7 @@ namespace WaterCloud.Service.SystemSecurity
         /// </summary>
         public async Task<List<OpenJobEntity>> GetLookList(Pagination pagination, string keyword = "")
         {
-            //获取数据权限
-            var list = repository.IQueryable() ;
+            var list = repository.IQueryable();
             if (!string.IsNullOrEmpty(keyword))
             {
                 list = list.Where(u => u.F_JobName.Contains(keyword) || u.F_Description.Contains(keyword));
@@ -52,23 +47,30 @@ namespace WaterCloud.Service.SystemSecurity
             list = list.Where(u => u.F_DeleteMark == false);
             return await repository.OrderList(list, pagination);
         }
+
+        public async Task<List<OpenJobLogEntity>> GetLogList(string keyValue)
+        {
+            if (HandleLogProvider != Define.CACHEPROVIDER_REDIS)
+            {
+                return uniwork.IQueryable<OpenJobLogEntity>().Where(a => a.F_JobId == keyValue).OrderByDesc(a => a.F_CreatorTime).ToList();
+            }
+            else
+            {
+                return HandleLogHelper.HGetAll<OpenJobLogEntity>(keyValue).Values.OrderByDescending(a => a.F_CreatorTime).ToList(); ;
+            }
+        }
         public async Task<List<OpenJobEntity>> GetList(string keyword = "")
         {
-            var cachedata = await repository.CheckCacheList(cacheKey+"list");
+            var cachedata = repository.IQueryable();
             if (!string.IsNullOrEmpty(keyword))
             {
-                cachedata = cachedata.Where(t => t.F_JobName.Contains(keyword)).ToList();
+                cachedata = cachedata.Where(t => t.F_JobName.Contains(keyword));
             }
             return cachedata.Where(a => a.F_DeleteMark == false).ToList();
         }
         public async Task<OpenJobEntity> GetForm(string keyValue)
         {
-            var cachedata = await repository.CheckCache(cacheKey, keyValue);
-            return cachedata;
-        }
-        public async Task<OpenJobEntity> GetLookForm(string keyValue)
-        {
-            var cachedata = await repository.CheckCache(cacheKey, keyValue);
+            var cachedata = await repository.FindEntity(keyValue);
             return cachedata;
         }
         public async Task SubmitForm(OpenJobEntity entity, string keyValue)
@@ -77,30 +79,17 @@ namespace WaterCloud.Service.SystemSecurity
             {
                 entity.Modify(keyValue);
                 await repository.Update(entity);
-                await CacheHelper.Remove(cacheKey + keyValue);
-                await CacheHelper.Remove(cacheKey + "list");
             }
             else
             {
                 entity.Create();
                 await repository.Insert(entity);
             }
-            await CacheHelper.Remove(cacheKey + "list");
         }
+
         public async Task DeleteForm(string keyValue)
         {
             await repository.Delete(t => t.F_Id == keyValue);
-            await CacheHelper.Remove(cacheKey + keyValue);
-            await CacheHelper.Remove(cacheKey + "list");
-        }
-
-        public async Task UpdataLastRuntime(string keyValue)
-        {
-            await repository.Update(t => t.F_Id == keyValue,a=>new OpenJobEntity { 
-               F_LastRunTime=DateTime.Now           
-            });
-            await CacheHelper.Remove(cacheKey + keyValue);
-            await CacheHelper.Remove(cacheKey + "list");
         }
         #region 定时任务运行相关操作
 
@@ -154,8 +143,19 @@ namespace WaterCloud.Service.SystemSecurity
             }
             job.Modify(job.F_Id);
             await repository.Update(job);
-            await CacheHelper.Remove(cacheKey + keyValue);
-            await CacheHelper.Remove(cacheKey + "list");
+        }
+
+        public async Task DeleteLogForm(string keyValue)
+        {
+            if (HandleLogProvider != Define.CACHEPROVIDER_REDIS)
+            {
+                await uniwork.Delete<OpenJobLogEntity>(a => a.F_JobId == keyValue);
+            }
+            else
+            {
+                string[] list= HandleLogHelper.HGetAll<OpenJobLogEntity>(keyValue).Keys.ToArray();
+                await HandleLogHelper.HDelAsync(keyValue, list);
+            }
         }
         #endregion
     }

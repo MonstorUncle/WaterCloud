@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -14,7 +14,7 @@
     <meta name="format-detection" content="telephone=no">
     <script src="~/lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
     <link rel="icon" href="@ViewBag.LogoIcon">
-    <link rel="stylesheet" href="~/lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="~/lib/layui/css/layui.css" media="all">
     <link rel="stylesheet" href="~/css/layuimini.css" media="all">
     <link rel="stylesheet" href="~/css/themes/default.css" media="all">
     <link rel="stylesheet" href="~/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
@@ -47,6 +47,9 @@
                 </ul>
 
                 <ul class="layui-nav layui-layout-right">
+                    <li class="layui-nav-item" lay-unselect>
+                        <a href="javascript:;" data-tohome="主页"><i class="fa fa-home"></i></a>
+                    </li>
                     <li class="layui-nav-item" lay-unselect>
                         <a href="javascript:;" data-clear="清理" class="layuimini-clear layui-hide"><i class="fa fa-trash-o"></i></a>
                     </li>
@@ -128,7 +131,7 @@
         </div>
 
     </div>
-    <script src="~/lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="~/lib/layui/layui.js" charset="utf-8"></script>
     <script src="~/js/lay-config.js?v=@WaterCloud.Code.GlobalContext.GetVersion()" charset="utf-8"></script>
     <script src="~/js/framework-clientdata.js?v=@WaterCloud.Code.GlobalContext.GetVersion()"></script>
     <script src="~/js/framework-ui.js?v=@WaterCloud.Code.GlobalContext.GetVersion()"></script>
@@ -166,6 +169,9 @@
                         var code = document.getElementById("usercode");
                         if (data.F_IsAdmin) {
                             $('[data-clear]').removeClass('layui-hide');
+                        }
+                        else {
+                            $('[data-clear]').parent().remove();
                         }
                         code.innerHTML = data.F_Account + '<span class="layui-nav-more"></span>';
                         sessionStorage.setItem('currentUser', JSON.stringify(data));

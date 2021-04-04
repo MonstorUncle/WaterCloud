@@ -17,7 +17,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
     [Area("SystemManage")]
     public class FlowschemeController :  ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public FlowschemeService _service {get;set;}
         public FormService _formService { get; set; }
         [HttpGet]
@@ -27,6 +27,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         }
         [HttpGet]
         public virtual ActionResult LineInfo()
+        {
+            return View();
+        }
+        [HttpGet]
+        public virtual ActionResult AreaInfo()
         {
             return View();
         }
@@ -50,23 +55,14 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                 treeModel.self = item;
                 treeList.Add(treeModel);
             }
-            return ResultDTree(treeList.TreeList());
+            return DTreeResult(treeList.TreeList());
         }
         [HttpGet]
         [HandlerAjaxOnly]
-        public async Task<ActionResult> GetGridJson(Pagination pagination, string keyword)
+        public async Task<ActionResult> GetGridJson(string ItemId, string keyword)
         {
-            //此处需修改
-            pagination.order = "asc";
-            pagination.sort = "F_SortCode";
-            //导出全部页使用
-            if (pagination.rows == 0 && pagination.page == 0)
-            {
-                pagination.rows = 99999999;
-                pagination.page = 1;
-            }
-            var data = await _service.GetLookList(pagination,keyword);
-            return Success(pagination.records, data);
+            var data = await _service.GetLookList(ItemId, keyword);
+            return Success(data.Count, data);
         }
 
         [HttpGet]
@@ -105,11 +101,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
             try
             {
                 await _service.SubmitForm(entity, keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
 
@@ -121,11 +117,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
             try
             {
                 await _service.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
         #endregion

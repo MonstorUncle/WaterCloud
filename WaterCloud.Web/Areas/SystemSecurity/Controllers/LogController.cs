@@ -15,6 +15,7 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
     {
 
         [HttpGet]
+        [ServiceFilter(typeof(HandlerAuthorizeAttribute))]
         public ActionResult RemoveLog()
         {
             return View();
@@ -36,7 +37,6 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
         }
         [HttpPost]
         [HandlerAjaxOnly]
-        [ServiceFilter(typeof(HandlerAuthorizeAttribute))]
         public async Task<ActionResult> SubmitRemoveLog(string keepTime)
         {
             await _logService.RemoveLog(keepTime);

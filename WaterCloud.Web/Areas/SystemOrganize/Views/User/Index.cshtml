@@ -11,16 +11,18 @@
         //加载数据
         wcLoading.close();
         //权限控制(js是值传递)
+        currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
         toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
         commonTable.rendertable({
             elem: '#currentTableId',
             id: 'currentTableId',
             url: '/SystemOrganize/User/GetGridJson',
             cols: [[
-                { field: 'F_Account', title: '账户', width: 150, sort: true},
-                { field: 'F_RealName', title: '姓名', width: 120, sort: true },
+                { type: "radio", width: 50, fixed: 'left' },
+                { field: 'F_Account', title: '账户', width: 150, sort: true, filter: true},
+                { field: 'F_RealName', title: '姓名', width: 120, sort: true, filter: true },
                 {
-                    field: 'F_Gender', title: '性别', width: 80, sort: true,
+                    field: 'F_Gender', title: '性别', width: 80, sort: true, filter: true,
                     templet: function (d) {
                         if (d.F_Gender == true) {
                             return "男";
@@ -29,33 +31,18 @@
                         }
                     }
                 },
-                { field: 'F_MobilePhone', title: '手机', width: 120, sort: true },
+                { field: 'F_MobilePhone', title: '手机', width: 120, sort: true, filter: true },
                 {
-                    field: 'F_OrganizeId', title: '公司', width: 150, sort: true,
-                    templet: function (d) {
-                        return top.clients.company[d.F_OrganizeId] == null ? "" : top.clients.company[d.F_OrganizeId].fullname;
-                    }
+                    field: 'F_CompanyName', title: '公司名称', width: 150, sort: true, filter: true
                 },
                 {
-                    field: 'F_DepartmentId', title: '部门', width: 200, sort: true,
-                    templet: function (d) {
-                        var list = d.F_DepartmentId.split(',');
-                        var temp = [];
-                        for (var i = 0; i < list.length; i++) {
-                            if (top.clients.organize[list[i]] != null) temp.push(top.clients.organize[list[i]].fullname);
-                        }
-                        return (temp.join(','));
-
-                    }
+                    field: 'F_DepartmentName', title: '部门名称', width: 200, sort: true
                 },
                 {
-                    field: 'F_DutyId', title: '岗位', width: 100, sort: true,
-                    templet: function (d) {
-                        return top.clients.duty[d.F_DutyId] == null ? "" : top.clients.duty[d.F_DutyId].fullname;
-                    }
+                    field: 'F_DutyName', title: '岗位名称', width: 120, sort: true, filter: true
                 },
                 {
-                    field: 'F_EnabledMark', title: '状态', width: 80, sort: true,
+                    field: 'F_EnabledMark', title: '状态', width: 80, sort: true, filter: true,
                     templet: function (d) {
                         if (d.F_EnabledMark == true) {
                             return "<span class='layui-btn layui-btn-normal layui-btn-xs'>有效</span>";
@@ -65,7 +52,7 @@
                     }
                 },
                 {
-                    field: 'F_CreatorTime', title: '创建时间', width: 120, sort: true,
+                    field: 'F_CreatorTime', title: '创建时间', width: 120, sort: true, filter: { type: 'date[yyyy-MM-dd]' },
                     templet: function (d) {
                         if (d.F_CreatorTime) {
                             var time = new Date(d.F_CreatorTime);
@@ -74,7 +61,8 @@
                         return '';
                     }
                 },
-                { field: 'F_Description', title: '备注', minWidth: 150, sort: true },
+                { field: 'F_Description', title: '备注', minWidth: 150, sort: true, filter: true },
+                { title: '操作', width: 260, toolbar: '#currentTableBar', align: "center", fixed: 'right'}
             ]]
         });
         // 监听搜索操作
@@ -85,18 +73,17 @@
                 curr: 1,
                 where: { keyword: data.field.txt_keyword }
             });
-            user = null;
             return false;
         });
-        var user;
-        table.on('row(currentTableFilter)', function (obj) {
-            obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-            user = obj;
-        })
+        //行点击事件监听，控制按钮显示
+        var oneList = ["NF-edit", "NF-details", "NF-revisepassword", "NF-disabled", "NF-enabled","NF-delete"];//选择1条显示
+        commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
         /**
          * toolbar监听事件
          */
         table.on('toolbar(currentTableFilter)', function (obj) {
+            var data = table.checkStatus('currentTableId').data;
+            var id = data.length > 0 ? data[0].F_Id : null;
             if (obj.event === 'add') {  // 监听删除操作
                 common.modalOpen({
                     title: "添加用户",
@@ -110,62 +97,54 @@
                 });
             }
             else if (obj.event === 'delete') {
-                if (user == null) {
+                if (id == null) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.deleteForm({
                     url: "/SystemOrganize/User/DeleteForm",
-                    param: { keyValue: user.data.F_Id },
+                    param: { keyValue: id },
                     success: function () {
                         common.reload('data-search-btn');
                     }
                 });
             }
             else if (obj.event === 'disabled') {
-                if (user == null) {
+                if (id == null) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
-                common.modalConfirm("注：您确定要【禁用】该项账户吗？", function (r) {
-                    if (r) {
-                        common.submitForm({
-                            url: "/SystemOrganize/User/DisabledAccount",
-                            param: { keyValue: user.data.F_Id },
-                            close: false,
-                            success: function () {
-                                common.reload('data-search-btn');
-                            }
-                        })
+                common.submitPost({
+                    prompt: "注：您确定要【禁用】该项账户吗？",
+                    url: "/SystemOrganize/User/DisabledAccount",
+                    param: { keyValue: id },
+                    success: function () {
+                        common.reload('data-search-btn');
                     }
                 });
             }
             else if (obj.event === 'enabled') {
-                if (user == null) {
+                if (id == null) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
-                common.modalConfirm("注：您确定要【启用】该项账户吗？", function (r) {
-                    if (r) {
-                        common.submitForm({
-                            url: "/SystemOrganize/User/EnabledAccount",
-                            param: { keyValue: user.data.F_Id },
-                            close: false,
-                            success: function () {
-                                common.reload('data-search-btn');
-                            }
-                        })
+                common.submitPost({
+                    prompt: "注：您确定要【启用】该项账户吗？",
+                    url: "/SystemOrganize/User/EnabledAccount",
+                    param: { keyValue: id },
+                    success: function () {
+                        common.reload('data-search-btn');
                     }
                 });
             }
             else if (obj.event === 'edit') {
-                if (user == null) {
+                if (id == null) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.modalOpen({
                     title: "编辑用户",
-                    url: "/SystemOrganize/User/Form?keyValue=" + user.data.F_Id,
+                    url: "/SystemOrganize/User/Form?keyValue=" + id,
                     width: "750px",
                     height: "550px",
                     //callBack: function (index) {
@@ -175,13 +154,13 @@
                 });
             }
             else if (obj.event === 'details') {
-                if (user == null) {
+                if (id == null) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.modalOpen({
                     title: "查看用户",
-                    url: "/SystemOrganize/User/Details?keyValue=" + user.data.F_Id,
+                    url: "/SystemOrganize/User/Details?keyValue=" + id,
                     width: "750px",
                     height: "550px",
                     btn: []
@@ -192,13 +171,13 @@
                 });
             }
             else if (obj.event === 'revisepassword') {
-                if (user == null) {
+                if (id == null) {
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
                 common.modalOpen({
                     title: "重置密码",
-                    url: '/SystemOrganize/User/RevisePassword?keyValue=' + user.data.F_Id,
+                    url: '/SystemOrganize/User/RevisePassword?keyValue=' + id,
                     width: "400px",
                     height: "300px",
                     //callBack: function (index) {
@@ -214,6 +193,56 @@
                 } else {
                     _that.addClass('layui-hide');
                 }
+            }
+            return false;
+        });
+        //toolrow监听事件
+        table.on('tool(currentTableFilter)', function (obj) {
+            var id = obj.data.F_Id;
+            if (obj.event === 'delete') {
+                common.deleteForm({
+                    url: "/SystemOrganize/User/DeleteForm",
+                    param: { keyValue: id },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'disabled') {
+                common.submitPost({
+                    prompt: "注：您确定要【禁用】该项账户吗？",
+                    url: "/SystemOrganize/User/DisabledAccount",
+                    param: { keyValue: id },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'enabled') {
+                common.submitPost({
+                    prompt: "注：您确定要【启用】该项账户吗？",
+                    url: "/SystemOrganize/User/EnabledAccount",
+                    param: { keyValue: id },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
+            else if (obj.event === 'edit') {
+                common.modalOpen({
+                    title: "编辑用户",
+                    url: "/SystemOrganize/User/Form?keyValue=" + id,
+                    width: "750px",
+                    height: "550px",
+                });
+            }
+            else if (obj.event === 'revisepassword') {
+                common.modalOpen({
+                    title: "重置密码",
+                    url: '/SystemOrganize/User/RevisePassword?keyValue=' + id,
+                    width: "400px",
+                    height: "300px",
+                });
             }
             return false;
         });
@@ -242,16 +271,22 @@
 
         <script type="text/html" id="toolbarDemo">
             <div class="layui-btn-container" id="toolbar">
-                <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
-                <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                <button id="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
-                <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
-                <button id="NF-revisepassword" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-revisepassword-btn layui-hide" lay-event="revisepassword"><i class="layui-icon">&#xe673;</i>密码重置</button>
-                <button id="NF-disabled" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-disabled-btn layui-hide" lay-event="disabled"><i class="fa fa-stop-circle"></i>禁用</button>
-                <button id="NF-enabled" authorize="yes" class="layui-btn layui-btn-sm data-enabled-btn layui-hide" lay-event="enabled"> <i class="fa fa-play-circle"></i>启用</button>
+                <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新建</button>
+                <button id="NF-edit" name="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                <button id="NF-delete" name="NF-delete" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                <button id="NF-details" name="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                <button id="NF-revisepassword" name="NF-revisepassword" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-revisepassword-btn layui-hide" lay-event="revisepassword"><i class="layui-icon">&#xe673;</i>密码重置</button>
+                <button id="NF-disabled" name="NF-disabled" authorize="yes" class="layui-btn layui-btn-sm layui-btn-danger data-disabled-btn layui-hide" lay-event="disabled"><i class="fa fa-stop-circle"></i>禁用</button>
+                <button id="NF-enabled" name="NF-enabled" authorize="yes" class="layui-btn layui-btn-sm data-enabled-btn layui-hide" lay-event="enabled"> <i class="fa fa-play-circle"></i>启用</button>
             </div>
         </script>
-
+        <script type="text/html" id="currentTableBar">
+            <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+            <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
+            <a id="NF-revisepassword" authorize class="layui-btn layui-btn-sm layui-btn-warm" lay-event="revisepassword"><i class="layui-icon">&#xe673;</i></a>
+            <a id="NF-disabled" authorize class="layui-btn layui-btn-sm layui-btn-danger" lay-event="disabled"><i class="fa fa-stop-circle"></i></a>
+            <a id="NF-enabled" authorize class="layui-btn layui-btn-sm" lay-event="enabled"><i class="fa fa-play-circle"></i></a>
+        </script>
         <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
 
     </div>

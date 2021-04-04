@@ -13,25 +13,25 @@ using System.IO;
 using System.Reflection;
 using WaterCloud.Domain.InfoManage;
 using WaterCloud.Service.InfoManage;
-using Microsoft.AspNetCore.SignalR;
 
 namespace WaterCloud.Service.FlowManage
 {
-    /// <summary>
-    /// 创 建：超级管理员
-    /// 日 期：2020-07-14 09:18
-    /// 描 述：我的流程服务类
-    /// </summary>
-    public class FlowinstanceService : DataFilterService<FlowinstanceEntity>, IDenpendency
+	/// <summary>
+	/// 创 建：超级管理员
+	/// 日 期：2020-07-14 09:18
+	/// 描 述：我的流程服务类
+	/// </summary>
+	public class FlowinstanceService : DataFilterService<FlowinstanceEntity>, IDenpendency
     {
         private IHttpClientFactory _httpClientFactory;
         private string cacheKey = "watercloud_flowinstancedata_";
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
         private MessageService messageApp;
-        public FlowinstanceService(IDbContext context, IHttpClientFactory httpClientFactory, IHubContext<MessageHub> messageHub) : base(context)
+        private string flowCreator;
+        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        public FlowinstanceService(IDbContext context, IHttpClientFactory httpClientFactory) : base(context)
         {
             _httpClientFactory = httpClientFactory;
-            messageApp = new MessageService(context, messageHub);
+            messageApp = new MessageService(context, httpClientFactory);
         }
         #region 获取数据
         public async Task<List<FlowinstanceEntity>> GetList(string keyword = "")
@@ -42,60 +42,62 @@ namespace WaterCloud.Service.FlowManage
                 //此处需修改
                 cachedata = cachedata.Where(t => t.F_Code.Contains(keyword) || t.F_CustomName.Contains(keyword)).ToList();
             }
-            return cachedata.Where(a=>a.F_EnabledMark==true).OrderByDescending(t => t.F_CreatorTime).ToList();
+            return cachedata.Where(a => a.F_EnabledMark == true).OrderByDescending(t => t.F_CreatorTime).ToList();
         }
 
         public async Task<List<FlowInstanceOperationHistory>> QueryHistories(string keyValue)
         {
-           return uniwork.IQueryable<FlowInstanceOperationHistory>(u => u.F_InstanceId == keyValue).OrderBy(u => u.F_CreatorTime).ToList();
+            return uniwork.IQueryable<FlowInstanceOperationHistory>(u => u.F_InstanceId == keyValue).OrderBy(u => u.F_CreatorTime).ToList();
         }
 
         public async Task<List<FlowinstanceEntity>> GetLookList(string keyword = "")
         {
-            var list =new List<FlowinstanceEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
-            {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
-            }
+            var query = repository.IQueryable();
             if (!string.IsNullOrEmpty(keyword))
             {
                 //此处需修改
-                list = list.Where(u => u.F_Code.Contains(keyword) || u.F_CustomName.Contains(keyword)).ToList();
+                query = query.Where(u => u.F_Code.Contains(keyword) || u.F_CustomName.Contains(keyword));
             }
-            return GetFieldsFilterData(list.Where(a => a.F_EnabledMark == true).OrderByDescending(t => t.F_CreatorTime).ToList(),className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u", "", query);
+            return query.Where(a => a.F_EnabledMark == true).OrderByDesc(t => t.F_CreatorTime).ToList();
         }
 
-        public async Task<List<FlowinstanceEntity>> GetLookList(Pagination pagination, string type = "", string keyword = "")
+        public async Task<List<FlowinstanceEntity>> GetLookList(SoulPage<FlowinstanceEntity> pagination, string type = "", string keyword = "")
         {
-            //获取数据权限
-            var list = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
+            //反格式化显示只能用"等于"，其他不支持
+            Dictionary<string, Dictionary<string, string>> dic = new Dictionary<string, Dictionary<string, string>>();
+            Dictionary<string, string> enabledTemp = new Dictionary<string, string>();
+            enabledTemp.Add("正在运行", "0");
+            enabledTemp.Add("审批通过", "1");
+            //enabledTemp.Add("审批通过", "2");
+            enabledTemp.Add("不同意", "3");
+            enabledTemp.Add("被驳回", "4");
+            dic.Add("F_IsFinish", enabledTemp);
+            pagination = ChangeSoulData(dic, pagination);
+            var query = repository.IQueryable();
             if (!string.IsNullOrEmpty(keyword))
             {
                 //此处需修改
-                list = list.Where(u => u.F_Code.Contains(keyword) || u.F_CustomName.Contains(keyword));
+                query = query.Where(u => u.F_Code.Contains(keyword) || u.F_CustomName.Contains(keyword));
             }
             var user = currentuser;
-
             if (type == "todo")   //待办事项
             {
-                list = list.Where(u => ((u.F_MakerList == "1" || u.F_MakerList.Contains(user.UserId)))&& (u.F_IsFinish == 0|| u.F_IsFinish == 4) && u.F_ActivityType<3);
+                query = query.Where(u => ((u.F_MakerList == "1" || u.F_MakerList.Contains(user.UserId))) && (u.F_IsFinish == 0 || u.F_IsFinish == 4) && u.F_ActivityType < 3);
             }
             else if (type == "done")  //已办事项（即我参与过的流程）
             {
                 var instances = uniwork.IQueryable<FlowInstanceOperationHistory>(u => u.F_CreatorUserId == user.UserId)
                     .Select(u => u.F_InstanceId).Distinct().ToList();
-                list = list.Where(u => instances.Contains(u.F_Id));
+                query = query.Where(u => instances.Contains(u.F_Id));
             }
             else  //我的流程
             {
-                list = list.Where(u => u.F_CreatorUserId==user.UserId);
+                query = query.Where(u => u.F_CreatorUserId == user.UserId);
             }
-            return GetFieldsFilterData(await repository.OrderList(list.Where(a => a.F_EnabledMark == true), pagination),className.Substring(0, className.Length - 7));
+            //权限过滤
+            query = GetDataPrivilege("u","",query);
+            return await repository.OrderList(query.Where(a => a.F_EnabledMark == true), pagination);
         }
 
         public async Task<FlowinstanceEntity> GetForm(string keyValue)
@@ -108,7 +110,7 @@ namespace WaterCloud.Service.FlowManage
         public async Task<FlowinstanceEntity> GetLookForm(string keyValue)
         {
             var cachedata = await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata,className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
 
         #region 获取各种节点的流程审核者
@@ -121,7 +123,8 @@ namespace WaterCloud.Service.FlowManage
         {
             var user = currentuser;
 
-            FlowinstanceEntity flowInstance =await GetForm(reqest.F_FlowInstanceId);
+            FlowinstanceEntity flowInstance = await GetForm(reqest.F_FlowInstanceId);
+            flowCreator = flowInstance.F_CreatorUserId;
 
             FlowRuntime wfruntime = new FlowRuntime(flowInstance);
 
@@ -177,10 +180,10 @@ namespace WaterCloud.Service.FlowManage
                           + reqest.F_VerificationOpinion
             });
             MessageEntity msg = new MessageEntity();
-            if (resnode== wfruntime.startNodeId)
+            if (resnode == wfruntime.startNodeId)
             {
                 msg.F_MessageInfo = flowInstance.F_CustomName + "--流程驳回";
-                var module= uniwork.IQueryable<ModuleEntity>(a => a.F_EnCode == className.Substring(0, className.Length - 7)).FirstOrDefault();
+                var module = uniwork.IQueryable<ModuleEntity>(a => a.F_EnCode == className.Substring(0, className.Length - 7)).FirstOrDefault();
                 msg.F_Href = module.F_UrlAddress;
                 msg.F_HrefTarget = module.F_Target;
                 msg.F_ToUserId = flowInstance.F_CreatorUserId;
@@ -192,7 +195,7 @@ namespace WaterCloud.Service.FlowManage
             {
                 msg.F_MessageInfo = flowInstance.F_CustomName + "--流程待处理";
                 var module = uniwork.IQueryable<ModuleEntity>(a => a.F_EnCode == className.Substring(0, className.Length - 7)).FirstOrDefault();
-                msg.F_Href = module.F_UrlAddress.Remove(module.F_UrlAddress.Length - 5, 5)+ "ToDoFlow";
+                msg.F_Href = module.F_UrlAddress.Remove(module.F_UrlAddress.Length - 5, 5) + "ToDoFlow";
                 msg.F_HrefTarget = module.F_Target;
                 msg.F_ToUserId = flowInstance.F_MakerList == "1" ? "" : flowInstance.F_MakerList;
                 msg.F_ClickRead = false;
@@ -201,10 +204,10 @@ namespace WaterCloud.Service.FlowManage
             msg.F_CreatorUserName = currentuser.UserName;
             msg.F_EnabledMark = true;
             msg.F_MessageType = 2;
-            var lastmsg= uniwork.IQueryable<MessageEntity>(a => a.F_ClickRead == false && a.F_KeyValue == flowInstance.F_Id).OrderByDesc(a=>a.F_CreatorTime).FirstOrDefault();
-            if (lastmsg!=null&&uniwork.IQueryable<MessageHistoryEntity>(a => a.F_MessageId == lastmsg.F_Id).Count()==0)
+            var lastmsg = uniwork.IQueryable<MessageEntity>(a => a.F_ClickRead == false && a.F_KeyValue == flowInstance.F_Id).OrderByDesc(a => a.F_CreatorTime).FirstOrDefault();
+            if (lastmsg != null && uniwork.IQueryable<MessageHistoryEntity>(a => a.F_MessageId == lastmsg.F_Id).Count() == 0)
             {
-               await messageApp.ReadMsgForm(lastmsg.F_Id);
+                await messageApp.ReadMsgForm(lastmsg.F_Id);
             }
             await messageApp.SubmitForm(msg);
             uniwork.Commit();
@@ -220,7 +223,8 @@ namespace WaterCloud.Service.FlowManage
         /// <returns></returns>
         public async Task<bool> NodeVerification(string instanceId, Tag tag)
         {
-            FlowinstanceEntity flowInstance = GetForm(instanceId).Result;
+            FlowinstanceEntity flowInstance = await GetForm(instanceId);
+            flowCreator = flowInstance.F_CreatorUserId;
             FlowInstanceOperationHistory flowInstanceOperationHistory = new FlowInstanceOperationHistory
             {
                 F_Id = Utils.GuId(),
@@ -318,7 +322,7 @@ namespace WaterCloud.Service.FlowManage
             msg.F_EnabledMark = true;
             if (flowInstance.F_IsFinish == 1)
             {
-                msg.F_MessageInfo = flowInstance.F_CustomName +  "--流程已完成";
+                msg.F_MessageInfo = flowInstance.F_CustomName + "--流程已完成";
                 var module = uniwork.IQueryable<ModuleEntity>(a => a.F_EnCode == className.Substring(0, className.Length - 7)).FirstOrDefault();
                 msg.F_Href = module.F_UrlAddress;
                 msg.F_HrefTarget = module.F_Target;
@@ -326,7 +330,7 @@ namespace WaterCloud.Service.FlowManage
                 msg.F_ClickRead = true;
                 msg.F_KeyValue = flowInstance.F_Id;
             }
-            else if(flowInstance.F_IsFinish == 3)
+            else if (flowInstance.F_IsFinish == 3)
             {
                 msg.F_MessageInfo = flowInstance.F_CustomName + "--流程已终止";
                 var module = uniwork.IQueryable<ModuleEntity>(a => a.F_EnCode == className.Substring(0, className.Length - 7)).FirstOrDefault();
@@ -495,7 +499,7 @@ namespace WaterCloud.Service.FlowManage
                         var tempList = new List<UserEntity>();
                         if (node.setInfo.NodeDesignateData.currentDepart)
                         {
-                            var currentDepartment = currentuser.DepartmentId.Split(',').ToList();
+                            var currentDepartment = uniwork.FindEntity<UserEntity>(flowCreator).GetAwaiter().GetResult().F_DepartmentId.Split(',').ToList();
                             foreach (var user in temp)
                             {
                                 var nextCurrentDepartment = user.F_DepartmentId.Split(',').ToList();
@@ -584,11 +588,11 @@ namespace WaterCloud.Service.FlowManage
             bool isReject = TagState.Reject.Equals((TagState)tag.Taged);
             if (isReject)  //驳回
             {
-               await NodeReject(entity);
+                await NodeReject(entity);
             }
             else
             {
-               await NodeVerification(entity.F_FlowInstanceId, tag);
+                await NodeVerification(entity.F_FlowInstanceId, tag);
             }
             await CacheHelper.Remove(cacheKey + entity.F_FlowInstanceId);
             await CacheHelper.Remove(cacheKey + "list");
@@ -632,6 +636,7 @@ namespace WaterCloud.Service.FlowManage
             entity.F_DbName = form.F_WebId;
             entity.F_FlowLevel = 0;
             entity.Create();
+            flowCreator = currentuser.UserId;
             //创建运行实例
             var wfruntime = new FlowRuntime(entity);
             var user = currentuser;
@@ -654,7 +659,7 @@ namespace WaterCloud.Service.FlowManage
                 var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
                 var referencedAssemblies = Directory.GetFiles(path, "*.dll").Select(Assembly.LoadFrom).ToArray();
                 var t = referencedAssemblies
-                    .SelectMany(a => a.GetTypes().Where(t => t.FullName.Contains("WaterCloud.Service.") && t.FullName.Contains("."+entity.F_DbName + "Service"))).FirstOrDefault();
+                    .SelectMany(a => a.GetTypes().Where(t => t.FullName.Contains("WaterCloud.Service.") && t.FullName.Contains("." + entity.F_DbName + "Service"))).FirstOrDefault();
                 ICustomerForm icf = (ICustomerForm)GlobalContext.ServiceProvider.GetService(t);
                 await icf.Add(entity.F_Id, entity.F_FrmData);
             }
@@ -750,6 +755,7 @@ namespace WaterCloud.Service.FlowManage
             entity.F_InstanceSchemeId = "";
             entity.F_DbName = form.F_WebId;
             entity.F_FlowLevel = 0;
+            flowCreator = currentuser.UserId;
             //创建运行实例
             wfruntime = new FlowRuntime(entity);
 
@@ -772,7 +778,7 @@ namespace WaterCloud.Service.FlowManage
                 var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
                 var referencedAssemblies = Directory.GetFiles(path, "*.dll").Select(Assembly.LoadFrom).ToArray();
                 var t = referencedAssemblies
-                    .SelectMany(a => a.GetTypes().Where(t => t.FullName.Contains("WaterCloud.Service.") && t.FullName.Contains("."+entity.F_DbName + "Service"))).FirstOrDefault();
+                    .SelectMany(a => a.GetTypes().Where(t => t.FullName.Contains("WaterCloud.Service.") && t.FullName.Contains("." + entity.F_DbName + "Service"))).FirstOrDefault();
                 ICustomerForm icf = (ICustomerForm)GlobalContext.ServiceProvider.GetService(t);
                 await icf.Edit(entity.F_Id, entity.F_FrmData);
             }
@@ -853,7 +859,7 @@ namespace WaterCloud.Service.FlowManage
             });
             foreach (var item in ids)
             {
-            await CacheHelper.Remove(cacheKey + item);
+                await CacheHelper.Remove(cacheKey + item);
             }
             await CacheHelper.Remove(cacheKey + "list");
         }

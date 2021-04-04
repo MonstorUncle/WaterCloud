@@ -334,3 +334,9 @@ body .cool-black .layui-layer-btn a {
 .aboutusview .about .yellow{
     color:#e6ec8d;
 }
+.coltitle {
+    text-align: center;
+    background-color: lightgrey;
+    height:30px;
+    border:1px solid #fff;
+}

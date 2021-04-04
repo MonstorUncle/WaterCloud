@@ -22,7 +22,7 @@ namespace WaterCloud.Service.SystemOrganize
 
         private string cacheKey = "watercloud_organizedata_";
         //获取类名
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+        
         public OrganizeService(IDbContext context) : base(context)
         {
         }
@@ -33,22 +33,14 @@ namespace WaterCloud.Service.SystemOrganize
         }
         public async Task<List<OrganizeEntity>> GetLookList()
         {
-            var list = new List<OrganizeEntity>();
-            if (!CheckDataPrivilege(className.Substring(0, className.Length - 7)))
-            {
-                list = await repository.CheckCacheList(cacheKey + "list");
-            }
-            else
-            {
-                var forms = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
-                list = forms.ToList();
-            }
-            return GetFieldsFilterData(list.Where(a => a.F_DeleteMark == false).OrderBy(t => t.F_SortCode).ToList(), className.Substring(0, className.Length - 7));
+            var query = repository.IQueryable().Where(a => a.F_DeleteMark == false);
+            query = GetDataPrivilege("u","",query);
+            return query.OrderBy(t => t.F_SortCode).ToList();
         }
         public async Task<OrganizeEntity> GetLookForm(string keyValue)
         {
             var cachedata =await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata, className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
         public async Task<OrganizeEntity> GetForm(string keyValue)
         {

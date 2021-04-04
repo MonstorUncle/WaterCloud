@@ -1,51 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Chloe;
+using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
 using WaterCloud.Code;
-using WaterCloud.DataBase;
-using WaterCloud.DataBase.Extensions;
 using WaterCloud.Domain.SystemSecurity;
 using WaterCloud.Service.SystemSecurity;
 
 namespace WaterCloud.Service.AutoJob
 {
-    public class JobCenter
+    public class JobCenter : IHostedService
     {
         private OpenJobsService _service;
         private IScheduler _scheduler;
 
-        public JobCenter(OpenJobsService service, ISchedulerFactory schedulerFactory, IJobFactory iocJobfactory) 
+        public JobCenter(OpenJobsService service, ISchedulerFactory schedulerFactory, IJobFactory iocJobfactory)
         {
             _service = service;
-            _scheduler = schedulerFactory.GetScheduler().Result;
+            _scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
             _scheduler.JobFactory = iocJobfactory;
         }
-        public void Start()
+
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
-            Task.Run(async () =>
+            List<OpenJobEntity> obj = await _service.GetList(null);
+            obj = obj.Where(a => a.F_EnabledMark == true).ToList();
+            if (obj.Count > 0)
             {
-                List<OpenJobEntity> obj = await _service.GetList(null);
-                obj = obj.Where(a => a.F_EnabledMark == true).ToList();
-                if (obj.Count > 0)
-                {
-                    await AddScheduleJob(obj);
-                }
-                await _scheduler.Start();
-                //if (!GlobalContext.SystemConfig.Debug)
-                //{
-                //    List<OpenJobEntity> obj = await new OpenJobService().GetList(null);
-                //    if (obj.Count>0)
-                //    {
-                //        AddScheduleJob(obj);
-                //    }
-                //}
-            });
+                await AddScheduleJob(obj);
+            }
+            await _scheduler.Start();
+            //if (!GlobalContext.SystemConfig.Debug)
+            //{
+            //    List<OpenJobEntity> obj = await new OpenJobService().GetList(null);
+            //    if (obj.Count>0)
+            //    {
+            //        AddScheduleJob(obj);
+            //    }
+            //}
         }
 
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await ClearScheduleJob();
+        }
         #region 添加任务计划
         /// <summary>
         /// 添加任务计划
@@ -90,7 +92,7 @@ namespace WaterCloud.Service.AutoJob
         {
             try
             {
-              await _scheduler.Clear();
+                await _scheduler.Clear();
             }
             catch (Exception ex)
             {

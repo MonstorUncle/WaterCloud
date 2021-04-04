@@ -6,19 +6,19 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../lib/layui/css/layui.css" media="all">
     <link rel="stylesheet" href="../css/public.css" media="all">
     <link rel="stylesheet" href="../js/lay-module/step-lay/step.css" media="all">
     <script src="../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
     <script src="../js/framework-ui.js"></script>
-    <script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../lib/layui/layui.js" charset="utf-8"></script>
     <script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
 </head>
 <body>
     <div class="layuimini-container">
         <div class="layuimini-main">
 
-            <form class="layui-form" action="" style="padding:20px;">
+            <form class="layui-form" action="" lay-filter="areapicker" style="padding:20px;">
                 <div class="layui-form-item" id="area-picker">
                     <div class="layui-form-label">选择地区</div>
                     <div class="layui-input-inline" style="width: 200px;">
@@ -53,11 +53,20 @@
                     text: "F_FullName",
                     url: "/SystemManage/Area/GetSelectJson?keyValue=0",
                 });
+                $("#provid").val("120000000000");
+                ProvidChange("120000000000");
+                $("#cityid").val("120100000000");
+                CityChange("120100000000");
+                $("#areaid").val("120103000000");
                 form.render();//刷新select选择框渲染
             });
             //加载市数据
             form.on('select(provid)', function (data) {
                 var provid = data.value;
+                ProvidChange(provid);
+                form.render();//刷新select选择框渲染
+            });
+            function ProvidChange(value) {
                 $("#cityid").empty();//清空
                 $("#cityid").append($("<option></option>").val("").html("请选择市"));
                 $("#areaid").empty();//清空
@@ -66,26 +75,28 @@
                 $("#cityid").bindSelect({
                     id: "F_Id",
                     text: "F_FullName",
-                    url: "/SystemManage/Area/GetSelectJson?keyValue=" + provid,
+                    url: "/SystemManage/Area/GetSelectJson?keyValue=" + value,
                 });
                 $("#cityid").val(null);
                 $("#areaid").val(null);
-                form.render();//刷新select选择框渲染
-            });
+            }
             //加载区数据
             form.on('select(cityid)', function (data) {
                 var cityid = data.value;
+                CityChange(cityid)
+                form.render();//刷新select选择框渲染
+            });
+            function CityChange(value) {
                 $("#areaid").empty();//清空
                 $("#areaid").append($("<option></option>").val("").html("请选择区"));
                 //alert(areaId);
                 $("#areaid").bindSelect({
                     id: "F_Id",
                     text: "F_FullName",
-                    url: "/SystemManage/Area/GetSelectJson?keyValue=" + cityid,
+                    url: "/SystemManage/Area/GetSelectJson?keyValue=" + value,
                 });
                 $("#areaid").val(null);
-                form.render();//刷新select选择框渲染
-            });
+            }
         });
     </script>
 </body>

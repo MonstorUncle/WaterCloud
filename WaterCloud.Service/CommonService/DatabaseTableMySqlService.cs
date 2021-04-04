@@ -39,7 +39,7 @@ namespace WaterCloud.Service.CommonService
         {
             StringBuilder strSql = new StringBuilder();
             var parameter = new List<DbParam>();
-            strSql.Append(@"SELECT table_name TableName FROM information_schema.tables where table_schema='" + GetDatabase() + "' and (table_type='base table' or table_type='BASE TABLE')");
+            strSql.Append(@"SELECT table_name TableName,CREATE_TIME CreateTime FROM information_schema.tables where table_schema='" + GetDatabase() + "' and (table_type='base table' or table_type='BASE TABLE')");
 
             if (!string.IsNullOrEmpty(tableName))
             {
@@ -49,7 +49,7 @@ namespace WaterCloud.Service.CommonService
 
             IEnumerable<TableInfo> list =await FindList<TableInfo>(strSql.ToString(), parameter.ToArray());
             pagination.records = list.Count();
-            var tempData = list.Skip(pagination.rows * (pagination.page - 1)).Take(pagination.rows).AsQueryable().ToList();
+            var tempData = list.OrderByDescending(a=>a.CreateTime).Skip(pagination.rows * (pagination.page - 1)).Take(pagination.rows).AsQueryable().ToList();
             await SetTableDetail(tempData);
             return tempData;
         }
@@ -88,7 +88,6 @@ namespace WaterCloud.Service.CommonService
         public async Task SyncDatabase()
         {
             #region 同步SqlServer数据库
-            await SyncSqlServerTable<AreaEntity>();
             await SyncSqlServerTable<ModuleEntity>();
             await SyncSqlServerTable<ModuleButtonEntity>();
             await SyncSqlServerTable<ItemsEntity>();
@@ -127,7 +126,7 @@ namespace WaterCloud.Service.CommonService
         /// <returns></returns>
         private async Task<List<TableInfo>> GetTableDetailList()
         {
-            string strSql = @"SELECT t1.TABLE_NAME TableName,t1.TABLE_COMMENT Remark,t1.TABLE_ROWS TableCount,t2.CONSTRAINT_NAME TableKeyName,t2.column_name TableKey
+            string strSql = @"SELECT t1.TABLE_NAME TableName,t1.TABLE_COMMENT Remark,t1.TABLE_ROWS TableCount,t2.CONSTRAINT_NAME TableKeyName,t2.column_name TableKey,t1.CREATE_TIME CreateTime
                                      FROM information_schema.TABLES as t1 
 	                                 LEFT JOIN INFORMATION_SCHEMA.`KEY_COLUMN_USAGE` as t2 on t1.TABLE_NAME = t2.TABLE_NAME
                                      WHERE t1.TABLE_SCHEMA='" + GetDatabase() + "' AND t2.TABLE_SCHEMA='" + GetDatabase() + "'";
@@ -148,6 +147,7 @@ namespace WaterCloud.Service.CommonService
                 table.TableKey = string.Join(",", detailList.Where(p => p.TableName == table.TableName).Select(p => p.TableKey));
                 table.TableKeyName = detailList.Where(p => p.TableName == table.TableName).Select(p => p.TableKeyName).FirstOrDefault();
                 table.TableCount = detailList.Where(p => p.TableName == table.TableName).Select(p => p.TableCount).FirstOrDefault();
+                table.CreateTime = detailList.Where(p => p.TableName == table.TableName).Select(p => p.CreateTime).FirstOrDefault();
             }
         }
         private string GetDatabase()

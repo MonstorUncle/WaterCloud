@@ -20,7 +20,7 @@ namespace WaterCloud.Service.SystemManage
         private string initcacheKey = "watercloud_init_";
         private string authorizecacheKey = "watercloud_authorizeurldata_";// +权限
         //获取类名
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[3];
+
         public ModuleFieldsService(IDbContext context) : base(context)
         {
         }
@@ -33,26 +33,26 @@ namespace WaterCloud.Service.SystemManage
                 //此处需修改
                 cachedata = cachedata.Where(t => t.F_FullName.Contains(keyword) || t.F_EnCode.Contains(keyword)).ToList();
             }
-            return cachedata.Where(a=>a.F_DeleteMark==false).OrderByDescending(t => t.F_CreatorTime).ToList();
+            return cachedata.Where(a => a.F_DeleteMark == false).OrderByDescending(t => t.F_CreatorTime).ToList();
         }
 
         public async Task<List<ModuleFieldsEntity>> GetLookList(Pagination pagination, string moduleId, string keyword = "")
         {
             //获取数据权限
-            var list = GetDataPrivilege("u", className.Substring(0, className.Length - 7));
+            var query = repository.IQueryable().Where(u => u.F_DeleteMark == false && u.F_ModuleId == moduleId);
             if (!string.IsNullOrEmpty(keyword))
             {
-                list = list.Where(u => u.F_FullName.Contains(keyword) || u.F_EnCode.Contains(keyword));
+                query = query.Where(u => u.F_FullName.Contains(keyword) || u.F_EnCode.Contains(keyword));
             }
-            list = list.Where(u => u.F_DeleteMark == false&&u.F_ModuleId== moduleId);
-            return GetFieldsFilterData(await repository.OrderList(list, pagination), className.Substring(0, className.Length - 7));
+            query = GetDataPrivilege("u","", query);
+            return await repository.OrderList(query, pagination);
 
         }
 
         public async Task<ModuleFieldsEntity> GetLookForm(string keyValue)
         {
             var cachedata = await repository.CheckCache(cacheKey, keyValue);
-            return GetFieldsFilterData(cachedata, className.Substring(0, className.Length - 7));
+            return GetFieldsFilterData(cachedata);
         }
         public async Task<ModuleFieldsEntity> GetForm(string keyValue)
         {
@@ -73,7 +73,7 @@ namespace WaterCloud.Service.SystemManage
             }
             else
             {
-                entity.Modify(keyValue); 
+                entity.Modify(keyValue);
                 await repository.Update(entity);
                 await CacheHelper.Remove(cacheKey + keyValue);
                 await CacheHelper.Remove(cacheKey + "list");
@@ -116,11 +116,11 @@ namespace WaterCloud.Service.SystemManage
         public async Task<List<ModuleFieldsEntity>> GetListByRole(string roleid)
         {
             var moduleList = uniwork.IQueryable<RoleAuthorizeEntity>(a => a.F_ObjectId == roleid && a.F_ItemType == 3).Select(a => a.F_ItemId).ToList();
-            var query = repository.IQueryable().Where(a => (moduleList.Contains(a.F_Id)) && a.F_EnabledMark == true);
+            var query = repository.IQueryable().Where(a => (moduleList.Contains(a.F_Id) || a.F_IsPublic == true) && a.F_DeleteMark == false && a.F_EnabledMark == true);
             return query.OrderByDesc(a => a.F_CreatorTime).ToList();
         }
 
-        internal async Task<List<ModuleFieldsEntity>> GetListNew(string moduleId="")
+        internal async Task<List<ModuleFieldsEntity>> GetListNew(string moduleId = "")
         {
             var query = repository.IQueryable(a => a.F_EnabledMark == true)
             .InnerJoin<ModuleEntity>((a, b) => a.F_ModuleId == b.F_Id && b.F_EnabledMark == true)

@@ -2,7 +2,7 @@
     ViewBag.Title = "Form";
     Layout = "~/Views/Shared/_Form.cshtml";
 }
-<link href="~/js/lay-module/flow/GooFlow.css" rel="stylesheet" />
+<link href="~/js/lay-module/flow/WaterFlow.css" rel="stylesheet" />
 @*<link href="/css/formpreview.css" rel="stylesheet" />*@
 <link href="~/css/stepcss.css" rel="stylesheet" />
 <style type="text/css">
@@ -57,7 +57,7 @@
     //参数传递到表单页
     //表单数据
     var formtext;
-    layui.use(['form', 'layer', 'element', 'jquery', 'table', 'gooflow', 'flowlayout', 'common', 'step', 'dtree', 'formPreview', 'layedit','optimizeSelectOption'], function () {
+    layui.use(['form', 'layer', 'element', 'jquery', 'table', 'waterflow', 'flowlayout', 'common', 'step', 'dtree', 'formPreview', 'layedit','optimizeSelectOption'], function () {
         var form = layui.form,
             element = layui.element,
             layer = layui.layer,
@@ -298,9 +298,6 @@
             return false;
         });
         form.on('submit(saveBtn)', function (data) {
-            // 单击之后提交按钮不可选,防止重复提交
-            $('.site-demo-active').addClass('layui-btn-disabled');
-            $('.site-demo-active').attr('disabled', 'disabled');
             common.submitForm({
                 url: '/FlowManage/Flowinstance/SubmitForm?keyValue=' + keyValue,
                 param: postData,

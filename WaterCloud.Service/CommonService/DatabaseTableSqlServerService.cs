@@ -37,7 +37,7 @@ namespace WaterCloud.Service.CommonService
         {
             StringBuilder strSql = new StringBuilder();
             var parameter = new List<DbParam>();
-            strSql.Append(@"SELECT id Id,name TableName FROM sysobjects WHERE xtype = 'u'");
+            strSql.Append(@"SELECT id Id,name TableName,crdate CreateTime FROM sysobjects WHERE xtype = 'u'");
 
             if (!tableName.IsEmpty())
             {
@@ -47,7 +47,7 @@ namespace WaterCloud.Service.CommonService
 
             IEnumerable<TableInfo> list =await FindList<TableInfo>(strSql.ToString(), parameter.ToArray());
             pagination.records = list.Count();
-            var tempData = list.Skip(pagination.rows * (pagination.page - 1)).Take(pagination.rows).AsQueryable().ToList();
+            var tempData = list.OrderByDescending(a=>a.CreateTime).Skip(pagination.rows * (pagination.page - 1)).Take(pagination.rows).AsQueryable().ToList();
             await SetTableDetail(tempData);
             return tempData;
         }
@@ -92,7 +92,7 @@ namespace WaterCloud.Service.CommonService
         /// <returns></returns>
         private async Task<List<TableInfo>> GetTableDetailList()
         {
-            string strSql = @"SELECT syscolumns.id Id,syscolumns.name TableKey,sysobjects.name TableKeyName,sysindexes.rows TableCount
+            string strSql = @"SELECT syscolumns.id Id,syscolumns.name TableKey,sysobjects.name TableKeyName,sysindexes.rows TableCount,sysobjects.crdate CreateTime
                                      FROM syscolumns,sysobjects,sysindexes,sysindexkeys 
                                      WHERE sysobjects.xtype = 'PK' 
                                            AND sysobjects.parent_obj = syscolumns.id 
@@ -117,6 +117,7 @@ namespace WaterCloud.Service.CommonService
                 table.TableKey = string.Join(",", detailList.Where(p => p.Id == table.Id).Select(p => p.TableKey));
                 table.TableKeyName = detailList.Where(p => p.Id == table.Id).Select(p => p.TableKeyName).FirstOrDefault();
                 table.TableCount = detailList.Where(p => p.Id == table.Id).Select(p => p.TableCount).FirstOrDefault();
+                table.CreateTime = detailList.Where(p => p.Id == table.Id).Select(p => p.CreateTime).FirstOrDefault();
             }
         }
         #endregion

@@ -1,0 +1,75 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div class="layui-form layuimini-form" lay-filter="adminform">
+            <div class="layui-form-item">
+                <label class="layui-form-label">区域标识</label>
+                <div class="layui-input-block">
+                    <input type="text" name="AreaCode" id="AreaCode" readonly lay-verify="required"
+                           placeholder="区域编号" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">区域名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="AreaName" id="AreaName" required lay-verify="required"
+                           placeholder="区域名称" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">区域颜色</label>
+                <div class="layui-input-block">
+                    <select id="AreaColor" name="AreaColor">
+                        <option value="red">红色</option>
+                        <option value="yellow">黄色</option>
+                        <option value="blue">蓝色</option>
+                        <option value="green">绿色</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var FlowDesignObject;
+    function initForm(data) {
+        FlowDesignObject = data.FlowDesignObject;
+    }
+    layui.use(['form', 'jquery', 'common', 'optimizeSelectOption'], function () {
+        var $ = layui.jquery,
+            common = layui.common;
+        var form = layui.form;
+        var Method = $.request("Method");
+        //从flowschemes.js进入的节点信息
+        var area = FlowDesignObject;
+        var tmp = {
+            AreaName: area.name,
+            AreaCode: area.id,//默认的code
+            AreaColor: area.color,//默认的code
+        };
+        var cout = 0;
+        //初始化节点设置信息
+        if (Method == "Details") {
+            var readForm = layui.$('[lay-filter="adminform"]');
+            readForm.find('button').prop('disabled', true);
+            common.setReadOnly('adminform');
+        }
+        common.val('adminform', tmp);
+        form.render(); //重新渲染，防止radio/select等失效
+        wcLoading.close();
+        //提供给上父页面调用
+        getVal = function () {
+            tmp.AreaName = $('#AreaName').val();
+            tmp.AreaColor = $('#AreaColor').val();
+            var result = {
+                AreaName: tmp.AreaName,
+                AreaCode: tmp.AreaCode,
+                AreaColor: tmp.AreaColor,
+            };
+            return result;
+        }
+    })
+</script>

@@ -6,15 +6,15 @@
      <div class="layuimini-main">
          <fieldset class="table-search-fieldset layui-hide" id="searchField">
              <div>
-                 <form class="layui-form layui-form-pane" >
+                 <form class="layui-form layui-form-pane">
                      <div class="layui-form-item">
                          <div class="layui-inline">
                              <label class="layui-form-label">关键字:</label>
                              <div class="layui-input-inline">
-                                 <input type="text" id="txt_keyword" name="txt_keyword" autocomplete="off" class="layui-input" >
+                                 <input type="text" id="txt_keyword" name="txt_keyword" autocomplete="off" class="layui-input">
                              </div>
                          </div>
-                        <div class="layui-inline"> 
+                         <div class="layui-inline">
                              <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon">&#xe615;</i> 搜 索</button>
                          </div>
                      </div>
@@ -23,10 +23,14 @@
          </fieldset>
          <script type="text/html" id="toolbarDemo">
              <div class="layui-btn-container" id="toolbar">
-                 <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn layui-hide" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
-                 <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
-                 <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn layui-hide" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
+                 <button id="NF-add" authorize="yes" class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
+                 <button id="NF-edit" authorize="yes" class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
+                 <button id="NF-details" authorize="yes" class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"> <i class="layui-icon">&#xe60b;</i>查看</button>
              </div>
+         </script>
+         <script type="text/html" id="currentTableBar">
+             <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
+             <a id="NF-details" authorize class="layui-btn layui-btn-sm layui-btn-normal data-info-btn" lay-event="details"><i class="layui-icon">&#xe60b;</i></a>
          </script>
          <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
      </div>
@@ -39,13 +43,14 @@
              common = layui.common;
          wcLoading.close();
          //权限控制(js是值传递)
+         currentTableBar.innerHTML = common.authorizeButtonNew(currentTableBar.innerHTML);
          toolbarDemo.innerHTML = common.authorizeButtonNew(toolbarDemo.innerHTML);
          commonTable.rendertable({
              elem: '#currentTableId',
              id: 'currentTableId',
              url: '/SystemOrganize/SystemSet/GetGridJson',
              cols: [[
-                 //此处需修改
+                 { type: "radio", width: 50, fixed: 'left'},
                  { field: 'F_ProjectName', title: '项目名称', width: 120, sort: true },
                  { field: 'F_CompanyName', title: '公司名称', width: 120, sort: true },
                  { field: 'F_PrincipalMan', title: '联系人', width: 120, sort: true },
@@ -85,7 +90,8 @@
                          }
                      }
                  },
-                 { field: 'F_Description', title: '备注', minWidth: 120, sort: true }
+                 { field: 'F_Description', title: '备注', minWidth: 120, sort: true },
+                 { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
              ]]
          });
          // 监听搜索操作
@@ -96,16 +102,15 @@
                  curr: 1,
                  where: { keyword: data.field.txt_keyword }
              });
-             entity = null;
              return false;
          });
-         var entity;
-         table.on('row(currentTableFilter)', function (obj) {
-             obj.tr.addClass("layui-table-click").siblings().removeClass("layui-table-click");
-             entity = obj;
-         })
+         //行点击事件监听，控制按钮显示
+         var oneList = ["NF-edit", "NF-details", "NF-delete"];//选择1条显示
+         commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
          //toolbar监听事件
          table.on('toolbar(currentTableFilter)', function (obj) {
+             var data = table.checkStatus('currentTableId').data;
+             var id = data.length > 0 ? data[0].F_Id : null;
              if (obj.event === 'add') {  // 监听添加操作
                  common.modalOpen({
                      title: "添加界面",
@@ -115,25 +120,25 @@
                  });
              }
              else if (obj.event === 'edit') {
-                 if (entity == null) {
+                 if (id == null) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
                  common.modalOpen({
                      title: "编辑界面",
-                     url: "/SystemOrganize/SystemSet/Form?keyValue=" + entity.data.F_Id,
+                     url: "/SystemOrganize/SystemSet/Form?keyValue=" + id,
                      width: "700px",
                      height: "500px",
                  });
              }
              else if (obj.event === 'details') {
-                 if (entity == null) {
+                 if (id == null) {
                      common.modalMsg("未选中数据", "warning");
                      return false;
                  }
                  common.modalOpen({
                      title: "查看界面",
-                     url: "/SystemOrganize/SystemSet/Details?keyValue=" + entity.data.F_Id,
+                     url: "/SystemOrganize/SystemSet/Details?keyValue=" + id,
                      width: "700px",
                      height: "500px",
                      btn: []
@@ -146,6 +151,28 @@
                  } else {
                      _that.addClass('layui-hide');
                  }
+             }
+             return false;
+         });
+         //toolrow监听事件
+         table.on('tool(currentTableFilter)', function (obj) {
+             var id = obj.data.F_Id;
+             if (obj.event === 'edit') {
+                 common.modalOpen({
+                     title: "编辑界面",
+                     url: "/SystemOrganize/SystemSet/Form?keyValue=" + id,
+                     width: "700px",
+                     height: "500px",
+                 });
+             }
+             else if (obj.event === 'details') {
+                 common.modalOpen({
+                     title: "查看界面",
+                     url: "/SystemOrganize/SystemSet/Details?keyValue=" + id,
+                     width: "700px",
+                     height: "500px",
+                     btn: []
+                 });
              }
              return false;
          });

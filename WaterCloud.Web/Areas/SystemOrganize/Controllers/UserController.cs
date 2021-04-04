@@ -20,27 +20,23 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
     [Area("SystemOrganize")]
     public class UserController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public UserService _service { get; set; }
         public UserLogOnService _userLogOnService { get; set; }
         public ModuleService _moduleService { get; set; }
         public RoleService _roleService { get; set; }
         public OrganizeService _orgService { get; set; }
-
-        [HttpGet]
         [HandlerAjaxOnly]
-        public async Task<ActionResult> GetGridJson(Pagination pagination, string keyword)
+        [IgnoreAntiforgeryToken]
+        public async Task<ActionResult> GetGridJson(SoulPage<UserExtend> pagination, string keyword)
         {
-            pagination.order = "asc";
-            pagination.sort = "F_DepartmentId asc";
-            //导出全部页使用
-            if (pagination.rows == 0 && pagination.page == 0)
+            if (string.IsNullOrEmpty(pagination.field))
             {
-                pagination.rows = 99999999;
-                pagination.page = 1;
+                pagination.field = "F_DepartmentId";
+                pagination.order = "asc";
             }
-            var data =await _service.GetLookList(pagination, keyword);
-            return Success(pagination.records, data);
+            var data = await _service.GetLookList(pagination, keyword);
+            return Content(pagination.setData(data).ToJson());
         }
         [HttpGet]
         public virtual ActionResult AddForm()
@@ -103,7 +99,7 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
         [HandlerAjaxOnly]
         public async Task<ActionResult> GetUserFormJson()
         {
-            var data =await _service.GetForm(_service.currentuser.UserId);
+            var data =await _service.GetFormExtend(_service.currentuser.UserId);
             if (!string.IsNullOrEmpty(data.F_DepartmentId))
             {
                 List<string> str = new List<string>();
@@ -134,6 +130,7 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
         }
         [HttpPost]
         [HandlerAjaxOnly]
+        [ServiceFilter(typeof(HandlerLockAttribute))]
         public async Task<ActionResult> SubmitUserForm(string F_Account,string F_RealName, bool F_Gender,DateTime F_Birthday,string F_MobilePhone,string F_Email,string F_Description)
         {
             try
@@ -148,11 +145,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                 userEntity.F_Description = F_Description;
                 userEntity.F_Id = _service.currentuser.UserId;
                 await _service.SubmitUserForm(userEntity);
-                return await Success("操作成功。", className, userEntity.F_Id);
+                return await Success("操作成功。", "", userEntity.F_Id);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, _service.currentuser.UserId);
+                return await Error(ex.Message, "", _service.currentuser.UserId);
             }
         }
         [HttpPost]
@@ -176,11 +173,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
             try
             {
                 await _service.SubmitForm(userEntity, userLogOnEntity, keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
         [HttpPost]
@@ -195,11 +192,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                     return Error("操作失败，不能删除用户自身");
                 }
                 await _service.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
         [HttpGet]
@@ -209,17 +206,16 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
         }
         [HttpPost]
         [HandlerAjaxOnly]
-        [ServiceFilter(typeof(HandlerAuthorizeAttribute))]
         public async Task<ActionResult> SubmitRevisePassword(string F_UserPassword, string keyValue)
         {
             try
             {
                 await _userLogOnService.RevisePassword(F_UserPassword, keyValue);
-                return await Success("重置密码成功。", className, keyValue);
+                return await Success("重置密码成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error("重置密码失败," + ex.Message, className, keyValue);
+                return await Error("重置密码失败," + ex.Message, "", keyValue);
             }
         }
         [HttpGet]
@@ -234,11 +230,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
             try
             {
                 await _userLogOnService.ReviseSelfPassword(F_UserPassword, _service.currentuser.UserId);
-                return await Success("重置密码成功。", className, _service.currentuser.UserId);
+                return await Success("重置密码成功。", "", _service.currentuser.UserId);
             }
             catch (Exception ex)
             {
-                return await Error("重置密码失败," + ex.Message, className, _service.currentuser.UserId);
+                return await Error("重置密码失败," + ex.Message, "", _service.currentuser.UserId);
             }
         }
         [HttpPost]
@@ -256,11 +252,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                     return Error("操作失败，不能修改用户自身");
                 }
                 await _service.UpdateForm(userEntity);
-                return await Success("账户禁用成功。", className, keyValue);
+                return await Success("账户禁用成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error("账户禁用失败," + ex.Message, className, keyValue);
+                return await Error("账户禁用失败," + ex.Message, "", keyValue);
             }
         }
         [HttpPost]
@@ -278,11 +274,11 @@ namespace WaterCloud.Web.Areas.SystemOrganize.Controllers
                     return Error("操作失败，不能修改用户自身");
                 }
                 await _service.UpdateForm(userEntity);
-                return await Success("账户启用成功。", className, keyValue);
+                return await Success("账户启用成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error("账户启用失败,"+ex.Message, className, keyValue);
+                return await Error("账户启用失败,"+ex.Message, "", keyValue);
             }
         }
     }

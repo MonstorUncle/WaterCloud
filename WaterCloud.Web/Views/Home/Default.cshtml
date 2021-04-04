@@ -6,7 +6,7 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="~/lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="~/lib/layui/css/layui.css" media="all">
     <link rel="stylesheet" href="~/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
     <link rel="stylesheet" href="~/css/public.css" media="all">
     <script src="~/lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
@@ -159,6 +159,18 @@
                     <div class="layui-row layui-col-space15">
                         <div class="layui-col-md6">
                             <div class="layui-card">
+                                <div class="layui-card-header"><a href="javascript:;" layuimini-content-href="/SystemManage/QuickModule/Index" data-title="快捷入口"><i class="fa fa-credit-card icon icon-blue"></i>快捷入口</a></div>
+                                <div class="layui-card-body">
+                                    <div class="welcome-module">
+                                        <div class="layui-row layui-col-space10 layuimini-qiuck">
+                                            "<div class="layui-col-xs3 layuimini-qiuck-module"><a href="javascript:;" layuimini-content-href="/SystemSecurity/DbBackup/Index" data-title="数据备份" data-icon="fa null"> <i class="fa null"></i><cite>数据备份</cite></a></div>"
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-col-md6">
+                            <div class="layui-card">
                                 <div class="layui-card-header"><i class="fa fa-warning icon"></i>数据统计</div>
                                 <div class="layui-card-body">
                                     <div class="welcome-module">
@@ -224,18 +236,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="layui-col-md6">
-                            <div class="layui-card">
-                                <div class="layui-card-header"><a href="javascript:;" layuimini-content-href="/SystemManage/QuickModule/Index" data-title="快捷入口"><i class="fa fa-credit-card icon icon-blue"></i>快捷入口</a></div>
-                                <div class="layui-card-body">
-                                    <div class="welcome-module">
-                                        <div class="layui-row layui-col-space10 layuimini-qiuck">
-                                            "<div class="layui-col-xs3 layuimini-qiuck-module"><a href="javascript:;" layuimini-content-href="/SystemSecurity/DbBackup/Index" data-title="数据备份" data-icon="fa null"> <i class="fa null"></i><cite>数据备份</cite></a></div>"
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="layui-col-md12">
                             <div class="layui-card">
                                 <div class="layui-card-header"><i class="fa fa-line-chart icon"></i>报表统计</div>
@@ -267,7 +267,7 @@
                                     <tr>
                                         <td>框架名称</td>
                                         <td>
-                                            WaterCloud_Core
+                                            WaterCloud
                                         </td>
                                     </tr>
                                     <tr>
@@ -295,7 +295,7 @@
                     <div class="layui-card">
                         <div class="layui-card-header"><i class="fa fa-paper-plane-o icon"></i>作者心语</div>
                         <div class="layui-card-body layui-text layadmin-text">
-                            <p>本模板基于layuimini以及DaleCloud进行实现。</p>
+                            <p>本模板前端基于layuimini，后端对各种框架进行融合而实现。</p>
                             <p>开发文档地址：<a class="layui-btn layui-btn-xs layui-btn-danger" target="_blank" href="https://gitee.com/qian_wei_hong/WaterCloud/wikis/pages">WaterCloud文档</a></p>
                             <p>技术交流QQ群（1065447456）：<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=51RHQVG"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="watercloud" title="watercloud"></a>（加群请备注）</p>
                             <p>喜欢此模板的可以给我的Gitee加个Star支持一下</p>
@@ -306,7 +306,7 @@
             </div>
         </div>
     </div>
-    <script src="~/lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="~/lib/layui/layui.js" charset="utf-8"></script>
     <script src="~/js/lay-config.js?v=@WaterCloud.Code.GlobalContext.GetVersion()" charset="utf-8"></script>
     <script src="~/js/framework-ui.js?v=@WaterCloud.Code.GlobalContext.GetVersion()"></script>
     <script>
@@ -420,7 +420,7 @@
              * 报表功能
              */
             function loadChart() {
-                var myChart = echarts.init(document.getElementById('echarts-records'), 'walden');
+                var myChart = echarts.init(document.getElementById('echarts-records'));
                 var xData = [];
                 var armData = [];
                 var cpuData = [];
@@ -462,11 +462,32 @@
                     series: [
                         {
                             name: 'CPU使用率', type: 'line',
-                            data: cpuData
+                            data: cpuData,
+                            lineStyle: {
+                                normal: {
+                                    width: 2
+                                }
+                            },
+                            smooth: true,
+                            symbol: 'circle',
+                            symbolSize: 10,
+                            showAllSymbol: true,
+                            color: '#2499F8',
                         },
                         {
                             name: 'ARM使用率', type: 'line',
-                            data: armData
+                            data: armData,
+                            lineStyle: {
+                                normal: {
+                                    width: 2
+                                }
+                            },
+                            smooth: true,
+                            symbol: 'circle',
+                            symbolSize: 10,
+                            showAllSymbol: true,
+                            color: '#F90',
+
                         }
                     ]
                 };

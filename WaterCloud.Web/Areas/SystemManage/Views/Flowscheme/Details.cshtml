@@ -2,7 +2,7 @@
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Form.cshtml";
 }
-<link href="~/js/lay-module/flow/GooFlow.css" rel="stylesheet" />
+<link href="~/js/lay-module/flow/WaterFlow.css" rel="stylesheet" />
 @*<link href="~/lib/ueditor/formdesign/bootstrap/css/bootstrap.css" rel="stylesheet" />*@
 <style>
 
@@ -56,7 +56,7 @@
 <script>
     //只读参数
     var readonly = true;
-    layui.use(['form', 'layer', 'jquery', 'gooflow', 'flowlayout', 'common', 'element', 'formPreview', 'optimizeSelectOption'], function () {
+    layui.use(['form', 'layer', 'jquery', 'waterflow', 'flowlayout', 'common', 'element', 'formPreview', 'optimizeSelectOption'], function () {
         var form = layui.form, element = layui.element,
             layer = layui.layer,
             common = layui.common,
@@ -69,6 +69,7 @@
         var flowDesignPanel = $('#flowPanel').flowdesign({
             height: 300,
             widht: 300,
+            toolBtns: false,
             OpenNode: function (object) {
                 FlowDesignObject = object; //为NodeInfo窗口提供调用
 
@@ -99,7 +100,7 @@
                 valueList = $("#valueList").val().split(',');
                 top.layer.open({
                     type: 2,
-                    area: ['550px', '450px'], //宽高
+                    area: ['650px', '400px'], //宽高
                     maxmin: true, //开启最大化最小化按钮
                     title: '连线设置【' + object.name + '】',
                     content: '/SystemManage/Flowscheme/LineInfo?Method=' + 'Details',
@@ -113,6 +114,26 @@
                             layero.find('iframe')[0].contentWindow.initForm(data);
                         }
                     },
+                });
+                return;
+            },
+            OpenArea: function (object) {
+                FlowDesignObject = object; //为NodeInfo窗口提供调用
+                top.layer.open({
+                    type: 2,
+                    area: ['450px', '250px'], //宽高
+                    maxmin: true, //开启最大化最小化按钮
+                    title: '区域设置【' + object.name + '】',
+                    content: '/SystemManage/Flowscheme/AreaInfo?Method=' + 'Details',
+                    btn: ['确定', '取消'],
+                    success: function (layero, index) {
+                        //子界面定义一个窗口方法initForm，里面调用common.val给参数赋值
+                        if (layero.find('iframe')[0].contentWindow.initForm) {
+                            var data = {};
+                            data.FlowDesignObject = FlowDesignObject;
+                            layero.find('iframe')[0].contentWindow.initForm(data);
+                        }
+                    }
                 });
                 return;
             }

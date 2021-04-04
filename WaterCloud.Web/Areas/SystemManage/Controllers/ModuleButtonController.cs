@@ -18,7 +18,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
     [Area("SystemManage")]
     public class ModuleButtonController : ControllerBase
     {
-        private string className = System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName.Split('.')[5];
+
         public ModuleService _moduleService { get; set; }
         public ModuleButtonService _service { get; set; }
 
@@ -40,9 +40,9 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
         }
         [HttpGet]
         [HandlerAjaxOnly]
-        public async Task<ActionResult> GetTreeGridJson(string moduleId)
+        public async Task<ActionResult> GetTreeGridJson(string moduleId, string keyword)
         {
-            var data =await _service.GetLookList(moduleId);
+            var data = await _service.GetLookList(moduleId, keyword);
             return Success(data.Count, data);
         }
         [HttpGet]
@@ -68,11 +68,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                     moduleButtonEntity.F_Layers =(await _service.GetForm(moduleButtonEntity.F_ParentId)).F_Layers + 1;
                 }
                 await _service.SubmitForm(moduleButtonEntity, keyValue);
-                return await Success("操作成功。", className, keyValue);
+                return await Success("操作成功。", "", keyValue);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue);
+                return await Error(ex.Message, "", keyValue);
             }
         }
         [HttpPost]
@@ -83,11 +83,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
             try
             {
                 await _service.DeleteForm(keyValue);
-                return await Success("操作成功。", className, keyValue, DbLogType.Delete);
+                return await Success("操作成功。", "", keyValue, DbLogType.Delete);
             }
             catch (Exception ex)
             {
-                return await Error(ex.Message, className, keyValue, DbLogType.Delete);
+                return await Error(ex.Message, "", keyValue, DbLogType.Delete);
             }
         }
         [HttpGet]
@@ -123,7 +123,7 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
                 //treeModel.self = item;
                 treeList.Add(treeModel);
             }
-            return ResultDTree(treeList.TreeList());
+            return DTreeResult(treeList.TreeList());
         }
         [HttpPost]
         [HandlerAjaxOnly]
@@ -132,11 +132,11 @@ namespace WaterCloud.Web.Areas.SystemManage.Controllers
             try
             {
                 await _service.SubmitCloneButton(moduleId, Ids);
-                return await Success("克隆成功。", className, Ids, DbLogType.Create);
+                return await Success("克隆成功。", "", Ids, DbLogType.Create);
             }
             catch (Exception ex)
             {
-                return await Error("克隆失败，"+ex.Message, className, Ids, DbLogType.Create);
+                return await Error("克隆失败，"+ex.Message, "", Ids, DbLogType.Create);
             }
         }
     }

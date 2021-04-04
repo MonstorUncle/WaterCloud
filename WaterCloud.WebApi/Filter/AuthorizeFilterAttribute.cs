@@ -1,26 +1,27 @@
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Filters;
 using WaterCloud.Code;
-using Microsoft.AspNetCore.Authorization;
+using WaterCloud.Service.SystemOrganize;
 
 namespace WaterCloud.WebApi
 {
-    /// <summary>
-    /// 验证token
-    /// </summary>
-    public class AuthorizeFilterAttribute : ActionFilterAttribute
+	/// <summary>
+	/// 权限验证
+	/// </summary>
+	public class AuthorizeFilterAttribute : ActionFilterAttribute
     {
+        private readonly RoleAuthorizeService _service;
+        private string _authorize { get; set; }
+        public AuthorizeFilterAttribute(RoleAuthorizeService service)
+        {
+            _service = service;
+            _authorize = string.Empty;
+        }
         /// <summary>
-        /// 忽略token的方法
-        /// </summary>
-        public static readonly string[] IgnoreToken = { "Login", "LoginOff" };
-
-        /// <summary>
-        /// 异步接口日志
+        /// 验证
         /// </summary>
         /// <param name="context"></param>
         /// <param name="next"></param>
@@ -29,52 +30,47 @@ namespace WaterCloud.WebApi
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-
-            string token = context.HttpContext.Request.Headers[GlobalContext.SystemConfig.TokenName].ParseToString();
-            OperatorModel user = OperatorProvider.Provider.GetCurrent();
-            var description =
-            (Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor)context.ActionDescriptor;
-
-            //添加有允许匿名的Action，可以不用登录访问，如Login/Index
-            //控制器整体忽略或者单独方法忽略
-            var anonymous = description.ControllerTypeInfo.GetCustomAttribute(typeof(AllowAnonymousAttribute));
-            var methodanonymous = description.MethodInfo.GetCustomAttribute(typeof(AllowAnonymousAttribute));
-            if (user != null)
+            if (!GlobalContext.SystemConfig.Debug)
             {
-                // 根据传入的Token，添加token和客户参数
-                if (context.ActionArguments != null && context.ActionArguments.Count > 0)
+                string token = context.HttpContext.Request.Headers[GlobalContext.SystemConfig.TokenName].ParseToString();
+                OperatorModel user = OperatorProvider.Provider.GetCurrent();
+                var description =
+                (Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor)context.ActionDescriptor;
+                var methodanonymous = (AuthorizeAttribute)description.MethodInfo.GetCustomAttribute(typeof(AuthorizeAttribute));
+                if (user == null || methodanonymous == null)
                 {
-                    PropertyInfo property = context.ActionArguments.FirstOrDefault().Value.GetType().GetProperty("Token");
-                    if (property != null)
-                    {
-                        property.SetValue(context.ActionArguments.FirstOrDefault().Value, token, null);
-                    }
-                    switch (context.HttpContext.Request.Method.ToUpper())
-                    {
-                        case "GET":
-                            break;
-
-                        case "POST":
-                            property = context.ActionArguments.FirstOrDefault().Value.GetType().GetProperty("CustomerId");
-                            if (property != null)
-                            {
-                                property.SetValue(context.ActionArguments.FirstOrDefault().Value, user.UserId, null);
-                            }
-                            break;
-                    }
+                    AlwaysResult obj = new AlwaysResult();
+                    obj.message = "抱歉，没有操作权限";
+                    obj.state = ResultType.error.ToString();
+                    context.Result = new JsonResult(obj);
+                    return;
                 }
-            }
-            else if (anonymous == null && methodanonymous == null)
-            {
-                AjaxResult obj = new AjaxResult();
-                obj.message = "抱歉，没有操作权限";
-                obj.state = ResultType.error.ToString();
-                context.Result = new JsonResult(obj);
-                return;
+                _authorize = methodanonymous._authorize;
+                if (!AuthorizeCheck(user.RoleId))
+                {
+                    AlwaysResult obj = new AlwaysResult();
+                    obj.message = "抱歉，没有操作权限";
+                    obj.state = ResultType.error.ToString();
+                    context.Result = new JsonResult(obj);
+                    return;
+                }
             }
             var resultContext = await next();
 
             sw.Stop();
+
+        }
+        private bool AuthorizeCheck(string roleId)
+        {
+            try
+            {
+                return _service.ActionValidate(_authorize, true).GetAwaiter().GetResult();
+            }
+            catch (System.Exception)
+            {
+
+                return false;
+            }
 
         }
     }

@@ -47,5 +47,8 @@ namespace WaterCloud.Domain.SystemOrganize
         public string F_LastModifyUserId { get; set; }
         public DateTime? F_DeleteTime { get; set; }
         public string F_DeleteUserId { get; set; }
+        [NotMapped]
+        //tablecheck字段
+        public bool LAY_CHECKED { get; set; }
     }
 }
