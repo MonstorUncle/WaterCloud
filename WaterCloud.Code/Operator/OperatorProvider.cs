@@ -18,6 +18,8 @@ namespace WaterCloud.Code
         private string LoginProvider = GlobalContext.SystemConfig.LoginProvider;
         //是否允许一个账户在多处登录
         private bool LoginMultiple = GlobalContext.SystemConfig.LoginMultiple;
+        //缓存过期时间
+        private int LoginExpire = GlobalContext.SystemConfig.LoginExpire;
         public static OperatorProvider Provider
         {
             get { return new OperatorProvider(); }
@@ -53,7 +55,7 @@ namespace WaterCloud.Code
                     return GetToken();
             }
         }
-        public void SetProvider(string key,string value)
+        public void SetProvider(string key, string value)
         {
             switch (LoginProvider)
             {
@@ -71,17 +73,33 @@ namespace WaterCloud.Code
         }
         public string GetToken()
         {
-            //查请求头
-            string token = GlobalContext.ServiceProvider?.GetService<IHttpContextAccessor>()?.HttpContext.Request.Headers[GlobalContext.SystemConfig.TokenName].ParseToString();
-            if (!String.IsNullOrEmpty(token)) return token;
+			try
+			{
+				if (GlobalContext.ServiceProvider==null)
+				{
+                    return null;
+				}
+				if (GlobalContext.ServiceProvider.GetService<IHttpContextAccessor>()==null)
+				{
+                    return null;
+                }
+                //查请求头
+                string token = GlobalContext.ServiceProvider?.GetService<IHttpContextAccessor>()?.HttpContext.Request.Headers[GlobalContext.SystemConfig.TokenName].ParseToString();
+                if (!String.IsNullOrEmpty(token)) return token;
 
-            //查参数
-            token = GlobalContext.ServiceProvider?.GetService<IHttpContextAccessor>()?.HttpContext.Request.Query[GlobalContext.SystemConfig.TokenName];
-            if (!String.IsNullOrEmpty(token)) return token;
+                //查参数
+                token = GlobalContext.ServiceProvider?.GetService<IHttpContextAccessor>()?.HttpContext.Request.Query[GlobalContext.SystemConfig.TokenName];
+                if (!String.IsNullOrEmpty(token)) return token;
 
-            //查cookies
-            string cookie = GlobalContext.ServiceProvider?.GetService<IHttpContextAccessor>()?.HttpContext.Request.Cookies[GlobalContext.SystemConfig.TokenName];
-            return cookie == null ? string.Empty : cookie;
+                //查cookies
+                string cookie = GlobalContext.ServiceProvider?.GetService<IHttpContextAccessor>()?.HttpContext.Request.Cookies[GlobalContext.SystemConfig.TokenName];
+                return cookie == null ? string.Empty : cookie;
+
+            }
+            catch (Exception)
+			{
+                return null;
+			}
         }
         public void RemoveProvider(string key)
         {
@@ -105,7 +123,7 @@ namespace WaterCloud.Code
             try
             {
                 string loginMark = GetProvider(LoginUserMarkKey);
-                operatorModel =CacheHelper.Get<OperatorModel>(cacheKeyOperator + loginMark).Result;
+                operatorModel = CacheHelper.Get<OperatorModel>(cacheKeyOperator + loginMark).GetAwaiter().GetResult();
             }
             catch
             {
@@ -162,7 +180,7 @@ namespace WaterCloud.Code
                     operatorModel.loginMark = loginMark;
                 }
                 //redis 登录token列表更新
-                Dictionary<string, string> tokenMarkList =await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorModel.UserId);
+                Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorModel.UserId);
                 if (tokenMarkList == null)// 此账号第一次登录
                 {
                     tokenMarkList = new Dictionary<string, string>();
@@ -181,9 +199,9 @@ namespace WaterCloud.Code
                 }
 
                 await CacheHelper.Set(cacheKeyToken + operatorModel.UserId, tokenMarkList);
-                await CacheHelper.Set(cacheKeyOperator + operatorModel.loginMark, operatorModel,12);
+                await CacheHelper.Set(cacheKeyOperator + operatorModel.loginMark, operatorModel, LoginExpire);
                 await CacheHelper.Remove(cacheKeyOperator + facilityMark + operatorModel.UserId);
-                await CacheHelper.Set(cacheKeyOperator + facilityMark + operatorModel.UserId, token,12);
+                await CacheHelper.Set(cacheKeyOperator + facilityMark + operatorModel.UserId, token, LoginExpire);
                 return token;
             }
             catch (Exception)
@@ -216,21 +234,22 @@ namespace WaterCloud.Code
         /// <param name="token">登录票据</param>
         /// <param name="facilityMark">登录设备</param>
         /// <param name="loginMark">登录设备标识</param>
-        public async Task EmptyCurrent(string token,string facilityMark, string loginMark)
+        public async Task EmptyCurrent(string token, string facilityMark, string loginMark)
         {
             try
             {
-                OperatorModel operatorInfo =await CacheHelper.Get<OperatorModel>(cacheKeyOperator + loginMark);
+                OperatorModel operatorInfo = await CacheHelper.Get<OperatorModel>(cacheKeyOperator + loginMark);
                 if (operatorInfo != null)
                 {
-                    Dictionary<string, string> tokenMarkList =await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
+                    Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
                     tokenMarkList.Remove(loginMark);
                     await CacheHelper.Remove(cacheKeyOperator + loginMark);
-                    if (operatorInfo.LoginToken == token|| LoginProvider == Define.PROVIDER_WEBAPI)
+                    if (operatorInfo.LoginToken == token || LoginProvider == Define.PROVIDER_WEBAPI)
                     {
                         await CacheHelper.Remove(cacheKeyOperator + facilityMark + operatorInfo.UserId);
                     }
                     await CacheHelper.Set(cacheKeyToken + operatorInfo.UserId, tokenMarkList);
+                    await CacheHelper.Remove(facilityMark + GlobalContext.SystemConfig.TokenName + "_" + operatorInfo.UserId + "_" + operatorInfo.LoginTime);
                 }
             }
             catch (Exception)
@@ -273,23 +292,24 @@ namespace WaterCloud.Code
                 {
                     return operatorResult;
                 }
-                OperatorModel operatorInfo =await CacheHelper.Get<OperatorModel>(cacheKeyOperator + loginMark);
+                OperatorModel operatorInfo = await CacheHelper.Get<OperatorModel>(cacheKeyOperator + loginMark);
                 if (operatorInfo != null)
                 {
                     if (operatorInfo.LoginToken == token || LoginProvider == Define.PROVIDER_WEBAPI)
                     {
-                        TimeSpan span = (TimeSpan)(DateTime.Now - operatorInfo.LoginTime);
-                        //超时
-                        if (span.TotalHours >= 12)// 登录操作过12小时移除
-                        {
-                            operatorResult.stateCode = 0;
-                            Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
-                            tokenMarkList.Remove(loginMark);
-                            await CacheHelper.Set(cacheKeyToken + operatorInfo.UserId, tokenMarkList);
-                            await CacheHelper.Remove(cacheKeyOperator + loginMark);
-                        }
-                        //账号被顶(排除admin)
-                        else if (!LoginMultiple && !operatorInfo.IsSystem && token != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
+                        //TimeSpan span = (TimeSpan)(DateTime.Now - operatorInfo.LoginTime);
+                        ////超时
+                        //if (span.TotalHours >= 12)// 登录操作过12小时移除
+                        //{
+                        //    operatorResult.stateCode = 0;
+                        //    Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
+                        //    tokenMarkList.Remove(loginMark);
+                        //    await CacheHelper.Set(cacheKeyToken + operatorInfo.UserId, tokenMarkList);
+                        //    await CacheHelper.Remove(cacheKeyOperator + loginMark);
+                        //}
+                        ////账号被顶(排除admin)
+                        //else if (!LoginMultiple && !operatorInfo.IsSystem && token != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
+                        if (!LoginMultiple && !operatorInfo.IsSystem && token != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
                         {
                             operatorResult.stateCode = -2;
                             Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
@@ -297,7 +317,7 @@ namespace WaterCloud.Code
                             await CacheHelper.Set(cacheKeyToken + operatorInfo.UserId, tokenMarkList);
                             await CacheHelper.Remove(cacheKeyOperator + loginMark);
                         }
-                        else if(LoginProvider == Define.PROVIDER_WEBAPI && !operatorInfo.IsSystem && operatorInfo.LoginToken != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
+                        else if (LoginProvider == Define.PROVIDER_WEBAPI && !operatorInfo.IsSystem && operatorInfo.LoginToken != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
                         {
                             operatorResult.stateCode = -2;
                             Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
@@ -309,6 +329,9 @@ namespace WaterCloud.Code
                         {
                             operatorResult.userInfo = operatorInfo;
                             operatorResult.stateCode = 1;
+                            await CacheHelper.Expire(cacheKeyOperator + loginMark, LoginExpire);
+                            await CacheHelper.Expire(cacheKeyOperator + facilityMark + operatorInfo.UserId, LoginExpire);
+                            await CacheHelper.Expire(facilityMark + GlobalContext.SystemConfig.TokenName + "_" + operatorInfo.UserId + "_" + operatorInfo.LoginTime, LoginExpire);
                         }
                     }
                 }
@@ -336,7 +359,7 @@ namespace WaterCloud.Code
                     cookieMark = Guid.NewGuid().ToString();
                     SetProvider(LoginUserMarkKey, cookieMark);
                 }
-                string num =await CacheHelper.Get<string>(cacheKeyError + cookieMark);
+                string num = await CacheHelper.Get<string>(cacheKeyError + cookieMark);
                 if (!string.IsNullOrEmpty(num))
                 {
                     res = Convert.ToInt32(num);
@@ -362,14 +385,14 @@ namespace WaterCloud.Code
                     cookieMark = Guid.NewGuid().ToString();
                     SetProvider(LoginUserMarkKey, cookieMark);
                 }
-                string num =await CacheHelper.Get<string>(cacheKeyError + cookieMark);
+                string num = await CacheHelper.Get<string>(cacheKeyError + cookieMark);
                 if (!string.IsNullOrEmpty(num))
                 {
                     res = Convert.ToInt32(num);
                 }
                 res++;
                 num = res + "";
-                await CacheHelper.Set(cacheKeyError + cookieMark, num,24);
+                await CacheHelper.Set(cacheKeyError + cookieMark, num, 24);
             }
             catch (Exception)
             {

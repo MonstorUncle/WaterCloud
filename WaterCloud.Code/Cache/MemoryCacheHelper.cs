@@ -141,7 +141,10 @@ namespace WaterCloud.Code
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-
+            if (Cache.Get(key) == null)
+            {
+                return string.Empty;
+            }
             return Cache.Get(key).ToString();
         }
 

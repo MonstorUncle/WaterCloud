@@ -7,7 +7,10 @@
 
 namespace WaterCloud.Code
 {
-    public class AjaxResult
+    /// <summary>
+    /// 常用返回结果
+    /// </summary>
+    public class AlwaysResult
     {
         /// <summary>
         /// 操作结果类型
@@ -19,7 +22,10 @@ namespace WaterCloud.Code
         public string message { get; set; }
 
     }
-    public class AjaxResult<T>: AjaxResult
+    /// <summary>
+    /// 常用返回结果
+    /// </summary>
+    public class AlwaysResult<T>: AlwaysResult
     {
         /// <summary>
         /// 列表的记录数
@@ -31,9 +37,9 @@ namespace WaterCloud.Code
         public T data { get; set; }
     }
     /// <summary>
-    /// 返回AjaxResultLayUiTable所需数据格式
+    /// DTree返回结果
     /// </summary>
-    public class AjaxResultDTree
+    public class DTreeResult
     {
         /// <summary>
         /// 操作结果类型

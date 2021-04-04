@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -61,5 +62,53 @@ namespace WaterCloud.Code
             return o;
         }
         #endregion
+
+        /// <summary>
+        /// StackTrace获取模块名(此方法为上上层调用)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetModuleName(int count = 2)
+        {
+            try
+            {
+                if (GlobalContext.SystemConfig.Debug == true && count == 2)
+                {
+                    count++;
+                }
+                string className = new StackFrame(count, true).GetMethod().DeclaringType.FullName;
+                className = className.Split('+')[0];
+                className = className.Split('.').LastOrDefault();
+                string moduleName = className.Substring(0, className.Length - 7);
+                return moduleName;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteWithTime(ex);
+                return "";
+            }
+        }
+        /// <summary>
+        /// StackTrace获取方法名(此方法为上上上上层调用)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetClassName(int count = 4)
+        {
+            try
+            {
+                if (GlobalContext.SystemConfig.Debug == true && count == 4)
+                {
+                    count++;
+                }
+                string className = new StackFrame(count, true).GetMethod().DeclaringType.FullName;
+                className = className.Split('+')[0];
+                className = className.Split('.').LastOrDefault();
+                return className;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteWithTime(ex);
+                return "";
+            }
+        }
     }
 }

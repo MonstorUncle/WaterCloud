@@ -436,6 +436,10 @@ namespace WaterCloud.Code
                     {
                         return hostAddress.ToString();
                     }
+                    else if(hostAddress.AddressFamily == AddressFamily.InterNetworkV6)
+					{
+                        return hostAddress.MapToIPv4().ToString();
+                    }
                 }
             }
             catch (Exception)
@@ -454,6 +458,10 @@ namespace WaterCloud.Code
                     if (hostAddress.AddressFamily == AddressFamily.InterNetwork)
                     {
                         return hostAddress.ToString();
+                    }
+                    else if (hostAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        return hostAddress.MapToIPv4().ToString();
                     }
                 }
             }
@@ -607,78 +615,60 @@ namespace WaterCloud.Code
         #region IP位置查询
         public static string GetIpLocation(string ipAddress)
         {
-            string ipLocation = string.Empty;
+            string ipLocation = "未知";
             try
             {
                 if (!IsInnerIP(ipAddress))
                 {
-                    ipLocation = GetIpLocationFromTaoBao(ipAddress);
-                    if (string.IsNullOrEmpty(ipLocation))
-                    {
-                        ipLocation = GetIpLocationFromIpIp(ipAddress);
-                    }
-                    if (string.IsNullOrEmpty(ipLocation))
-                    {
-                        ipLocation = GetIpLocationFromPCOnline(ipAddress);
-                    }
+                    ipLocation = GetIpLocationFromPCOnline(ipAddress);
+                }
+				else
+				{
+                    ipLocation = "本地局域网";
                 }
             }
             catch (Exception)
             {
-                return string.Empty;
+                return ipLocation;
             }
             return ipLocation;
         }
-
-        private static string GetIpLocationFromTaoBao(string ipAddress)
+        public static string GetPconlineIpLocation(string ClientIp)
         {
+            string Location = "未知";
             try
             {
-                string url = "http://ip.taobao.com/service/getIpInfo2.php";
-                string postData = string.Format("ip={0}", ipAddress);
-                string result = HttpHelper.HttpPost(url, postData);
-                string ipLocation = string.Empty;
-                if (!string.IsNullOrEmpty(result))
+                string url = "http://whois.pconline.com.cn/ipJson.jsp?json=true";
+                if (ClientIp != "")
                 {
-                    var json = JsonHelper.ToJObject(result);
-                    var jsonData = json["data"];
-                    if (jsonData==null||!jsonData.Contains("region")|| !jsonData.Contains("city"))
+                    url += "&ip=" + ClientIp;
+                }
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding("GB2312"));
+                    string str = reader.ReadToEnd();
+                    reader.Close();
+                    reader.Dispose();
+
+                    if (string.IsNullOrEmpty(str))
                     {
-                        return null;
+                        Location = "未知";
                     }
-                    ipLocation = jsonData["region"] + " " + jsonData["city"];
-                    ipLocation = ipLocation.Trim();
+                    else
+                    {
+                        var json = JsonHelper.ToJObject(str);
+
+                        var nameData = json["addr"];
+                        Location = nameData.ToString();
+                    }
                 }
-                return ipLocation;
             }
             catch (Exception)
             {
-                return string.Empty;
+                Location = "未知";
             }
-
-        }
-
-        private static string GetIpLocationFromIpIp(string ipAddress)
-        {
-            try
-            {
-                string url = "http://freeapi.ipip.net/" + ipAddress;
-                string result = HttpHelper.HttpGet(url);
-                string ipLocation = string.Empty;
-                if (!string.IsNullOrEmpty(result))
-                {
-                    result = result.Replace("\"", string.Empty);
-                    var resultArr = result.Split(',');
-                    ipLocation = resultArr[1] + " " + resultArr[2];
-                    ipLocation = ipLocation.Trim();
-                }
-                return ipLocation;
-            }
-            catch (Exception)
-            {
-                return string.Empty;
-            }
-
+            return Location;
         }
 
         private static string GetIpLocationFromPCOnline(string ipAddress)
@@ -691,18 +681,16 @@ namespace WaterCloud.Code
                     ContentType = "text/html; charset=gb2312"
                 });
 
-                string ipLocation = string.Empty;
+                string ipLocation = "未知";
                 if (!string.IsNullOrEmpty(httpResult.Html))
                 {
-                    var resultArr = httpResult.Html.Split(' ');
-                    ipLocation = resultArr[0].Replace("省", "  ").Replace("市", "");
-                    ipLocation = ipLocation.Trim();
+                    ipLocation = httpResult.Html.Trim();
                 }
                 return ipLocation;
             }
             catch (Exception)
             {
-                return string.Empty;
+                return "未知";
             }    
 
         }

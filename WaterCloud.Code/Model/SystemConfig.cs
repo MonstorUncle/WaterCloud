@@ -56,5 +56,14 @@ namespace WaterCloud.Code.Model
         public string SysemUserPwd { get; set; }
         public string SysemMasterProject { get; set; }
         public string TokenName { get; set; }
+        //缓存过期时间
+        public int LoginExpire { get; set; }
+        public string HomePage { get; set; }
+        public string MainProgram { get; set; }
+        public bool? LocalLAN { get; set; }
+        /// <summary>
+        /// 雪花id配置
+        /// </summary>
+        public int WorkId { get; set; }
     }
 }

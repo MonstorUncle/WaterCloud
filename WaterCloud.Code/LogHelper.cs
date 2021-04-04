@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace WaterCloud.Code
@@ -214,8 +215,28 @@ namespace WaterCloud.Code
                 {
                     message="操作对象为空，请联系管理员";
                 }
+                else if (message.Contains("Value cannot be null"))
+                {
+                    message = "值为空，请联系管理员";
+                }
+            }
+            if (!IsHasCHZN(message))
+            {
+                message = "程序内部异常，请联系管理员";
             }
             return message;
+        }
+        /// <summary>
+        /// 检测是否有中文字符
+        /// </summary>
+        /// <param name="inputData"></param>
+        /// <returns></returns>
+        private static bool IsHasCHZN(string inputData)
+        {
+
+            Regex RegCHZN = new Regex("[\u4e00-\u9fa5]");
+            Match m = RegCHZN.Match(inputData);
+            return m.Success;
         }
         #endregion
     }

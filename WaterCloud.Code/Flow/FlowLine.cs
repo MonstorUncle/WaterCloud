@@ -17,6 +17,7 @@ namespace WaterCloud.Code
         public string name { get; set; }
         public bool dash { get; set; }
         public double M { get; set; }
+        public bool alt { get; set; }
 
         /// <summary> 分支条件 </summary>
         public List<DataCompare> Compares { get; set; }
@@ -35,56 +36,186 @@ namespace WaterCloud.Code
                     value = decimal.Parse(compare.Value);
                     frmvalue = decimal.Parse(frmDataJson.GetValue(compare.FieldName.ToLower()).ToString()); //表单中填写的值
                 }
-                switch (compare.Operation)
-                {
-                    case DataCompare.Equal:
-                        if (compare.FieldName == "申请人"|| compare.FieldName == "所属部门")
-                        {
-                            bool res = false;
-                            var arr= compare.Value.Split(',');
-                            foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                bool res = false;
+				if (compare.Condition=="and")
+				{
+                    switch (compare.Operation)
+                    {
+                        case DataCompare.Equal:
+                            result &= compare.Value == frmDataJson.GetValue(compare.FieldName).ToString();
+                            break;
+                        case DataCompare.NotEqual:
+                            result &= compare.Value != frmDataJson.GetValue(compare.FieldName).ToString();
+                            break;
+                        case DataCompare.Larger:
+                            result &= frmvalue > value;
+                            break;
+                        case DataCompare.Less:
+                            result &= frmvalue < value;
+                            break;
+                        case DataCompare.LargerEqual:
+                            result &= frmvalue <= value;
+                            break;
+                        case DataCompare.LessEqual:
+                            result &= frmvalue <= value;
+                            break;
+                        case DataCompare.In:
+                            if (compare.FieldName == "申请人" || compare.FieldName == "所属部门")
                             {
-                                if (arr.Contains(item))
+                                var arr = compare.Value.Split(',');
+                                foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                                {
+                                    if (arr.Contains(item))
+                                    {
+                                        res = true;
+                                        break;
+                                    }
+                                }
+                                result &= res;
+                                break;
+                            }
+                            else
+                            {
+                                var arr = compare.Value.Split(',');
+                                if (arr.Contains(frmvalue.ToString()))
                                 {
                                     res = true;
                                     break;
                                 }
+                                result &= res;
+                                break;
                             }
-                            result &= res;
                             break;
-                        }
-                        result &= compare.Value == frmDataJson.GetValue(compare.FieldName).ToString();
-                        break;
-                    case DataCompare.NotEqual:
-                        if (compare.FieldName == "申请人" || compare.FieldName == "所属部门")
-                        {
-                            bool res = true;
-                            var arr = compare.Value.Split(',');
-                            foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                        case DataCompare.NotIn:
+                            if (compare.FieldName == "申请人" || compare.FieldName == "所属部门")
                             {
-                                if (arr.Contains(item))
+                                var arr = compare.Value.Split(',');
+                                foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                                {
+                                    if (arr.Contains(item))
+                                    {
+                                        res = false;
+                                        break;
+                                    }
+                                }
+                                result &= res;
+                                break;
+                            }
+                            else
+                            {
+                                var arr = compare.Value.Split(',');
+                                if (arr.Contains(frmvalue.ToString()))
                                 {
                                     res = false;
                                     break;
                                 }
+                                result &= res;
+                                break;
                             }
-                            result &= res;
                             break;
-                        }
-                        result &= compare.Value != frmDataJson.GetValue(compare.FieldName).ToString();
-                        break;
-                    case DataCompare.Larger:
-                        result &= frmvalue > value;
-                        break;
-                    case DataCompare.Less:
-                        result &= frmvalue < value;
-                        break;
-                    case DataCompare.LargerEqual:
-                        result &= frmvalue <= value;
-                        break;
-                    case DataCompare.LessEqual:
-                        result &= frmvalue <= value;
-                        break;
+                    }
+                }
+				else
+				{
+                    switch (compare.Operation)
+                    {
+                        case DataCompare.Equal:
+                            if (compare.FieldName == "申请人" || compare.FieldName == "所属部门")
+                            {
+                                var arr = compare.Value.Split(',');
+                                foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                                {
+                                    if (arr.Contains(item))
+                                    {
+                                        res = true;
+                                        break;
+                                    }
+                                }
+                                result |=  res;
+                                break;
+                            }
+                            result |= compare.Value == frmDataJson.GetValue(compare.FieldName).ToString();
+                            break;
+                        case DataCompare.NotEqual:
+                            if (compare.FieldName == "申请人" || compare.FieldName == "所属部门")
+                            {
+                                var arr = compare.Value.Split(',');
+                                foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                                {
+                                    if (arr.Contains(item))
+                                    {
+                                        res = false;
+                                        break;
+                                    }
+                                }
+                                result |= res;
+                                break;
+                            }
+                            result |= compare.Value != frmDataJson.GetValue(compare.FieldName).ToString();
+                            break;
+                        case DataCompare.Larger:
+                            result |= frmvalue > value;
+                            break;
+                        case DataCompare.Less:
+                            result |= frmvalue < value;
+                            break;
+                        case DataCompare.LargerEqual:
+                            result |= frmvalue <= value;
+                            break;
+                        case DataCompare.LessEqual:
+                            result |= frmvalue <= value;
+                            break;
+                        case DataCompare.In:
+                            if (compare.FieldName == "申请人" || compare.FieldName == "所属部门")
+                            {
+                                var arr = compare.Value.Split(',');
+                                foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                                {
+                                    if (arr.Contains(item))
+                                    {
+                                        res = true;
+                                        break;
+                                    }
+                                }
+                                result |= res;
+                                break;
+                            }
+                            else
+                            {
+                                var arr = compare.Value.Split(',');
+                                if (arr.Contains(frmvalue.ToString()))
+                                {
+                                    res = true;
+                                }
+                                result |= res;
+                                break;
+                            }
+                        case DataCompare.NotIn:
+                            if (compare.FieldName == "申请人" || compare.FieldName == "所属部门")
+                            {
+                                var arr = compare.Value.Split(',');
+                                foreach (var item in frmDataJson.GetValue(compare.FieldName).ToString().Split(','))
+                                {
+                                    if (arr.Contains(item))
+                                    {
+                                        res = false;
+                                        break;
+                                    }
+                                }
+                                result |= res;
+                                break;
+                            }
+                            else
+                            {
+                                var arr = compare.Value.Split(',');
+                                if (arr.Contains(frmvalue.ToString()))
+                                {
+                                    res = false;
+                                }
+                                result |= res;
+                                break;
+                            }
+                    }
                 }
             }
 
@@ -103,6 +234,8 @@ namespace WaterCloud.Code
         public const string LessEqual = "<=";
         public const string NotEqual = "!=";
         public const string Equal = "=";
+        public const string In = "in";
+        public const string NotIn = "not in";
 
         /// <summary>操作类型比如大于/等于/小于</summary>
         public string Operation { get; set; }
@@ -119,5 +252,9 @@ namespace WaterCloud.Code
         /// 显示值
         /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// 条件关系
+        /// </summary>
+        public string Condition { get; set; }
     }
 }

@@ -286,6 +286,11 @@ namespace WaterCloud.Code
                                     mapPropertyInfoDict[j].SetValue(entity, row.GetCell(j).ParseToString().ToInt());
                                     break;
 
+                                case "System.Single":
+                                case "System.Nullable`1[System.Single]":
+                                    mapPropertyInfoDict[j].SetValue(entity, row.GetCell(j).ParseToString().ParseToFloat());
+                                    break;
+
                                 case "System.Int64":
                                 case "System.Nullable`1[System.Int64]":
                                     mapPropertyInfoDict[j].SetValue(entity, row.GetCell(j).ParseToString().ToLong());

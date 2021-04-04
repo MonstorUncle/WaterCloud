@@ -1,0 +1,12 @@
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\bin\Debug\netcoreapp5.0\WaterCloud.Code.deps.json
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\bin\Debug\netcoreapp5.0\WaterCloud.Code.dll
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\bin\Debug\netcoreapp5.0\ref\WaterCloud.Code.dll
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\bin\Debug\netcoreapp5.0\WaterCloud.Code.pdb
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\WaterCloud.Code.csprojAssemblyReference.cache
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\WaterCloud.Code.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\WaterCloud.Code.AssemblyInfoInputs.cache
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\WaterCloud.Code.AssemblyInfo.cs
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\WaterCloud.Code.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\WaterCloud.Code.dll
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\ref\WaterCloud.Code.dll
+C:\Users\Administrator\source\repos\WaterCloud\WaterCloud.Code\obj\Debug\netcoreapp5.0\WaterCloud.Code.pdb
