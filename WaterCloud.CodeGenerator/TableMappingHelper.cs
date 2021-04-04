@@ -75,6 +75,10 @@ namespace WaterCloud.CodeGenerator
         {
             string sTempDatatype = string.Empty;
             sDatatype = sDatatype.ToLower();
+            if (sDatatype.Contains("numer("))
+            {
+                sDatatype = "numer(8,2)";
+            }
             switch (sDatatype)
             {
                 case "int":
@@ -111,6 +115,7 @@ namespace WaterCloud.CodeGenerator
                     break;
 
                 case "datetime":
+                case "datetime2":
                 case "date":
                 case "smalldatetime":
                 case "timestamp":
