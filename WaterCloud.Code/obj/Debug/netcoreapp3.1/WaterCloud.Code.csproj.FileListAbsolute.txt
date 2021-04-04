@@ -1,8 +1,0 @@
-E:\core3.1\WaterCloud.Code\obj\Debug\netcoreapp3.1\WaterCloud.Code.AssemblyInfoInputs.cache
-E:\core3.1\WaterCloud.Code\obj\Debug\netcoreapp3.1\WaterCloud.Code.AssemblyInfo.cs
-E:\core3.1\WaterCloud.Code\obj\Debug\netcoreapp3.1\WaterCloud.Code.csproj.CoreCompileInputs.cache
-E:\core3.1\WaterCloud.Code\bin\Debug\netcoreapp3.1\WaterCloud.Code.deps.json
-E:\core3.1\WaterCloud.Code\bin\Debug\netcoreapp3.1\WaterCloud.Code.dll
-E:\core3.1\WaterCloud.Code\bin\Debug\netcoreapp3.1\WaterCloud.Code.pdb
-E:\core3.1\WaterCloud.Code\obj\Debug\netcoreapp3.1\WaterCloud.Code.dll
-E:\core3.1\WaterCloud.Code\obj\Debug\netcoreapp3.1\WaterCloud.Code.pdb
