@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -71,10 +71,6 @@ namespace WaterCloud.Code
         {
             try
             {
-                if (GlobalContext.SystemConfig.Debug == true && count == 2)
-                {
-                    count++;
-                }
                 string className = new StackFrame(count, true).GetMethod().DeclaringType.FullName;
                 className = className.Split('+')[0];
                 className = className.Split('.').LastOrDefault();
