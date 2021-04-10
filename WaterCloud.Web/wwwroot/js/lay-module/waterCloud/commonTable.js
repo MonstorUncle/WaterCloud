@@ -308,21 +308,6 @@ layui.define(["jquery", "layer", 'table', 'soulTable', 'common', 'tabletree'], f
             tabletree.render(options);
             return options;
         },
-        //treetable刷新
-        reloadtreetable: function (tree, options) {
-            var loading = layer.load(0, { shade: false });
-            var defaults = {
-                where: {}
-            };
-            var options = $.extend(defaults, options);
-            options.where.time = new Date().Format("yyyy-MM-dd hh:mm:ss");
-            //执行搜索重载
-            tabletree.reload({
-                where: options.where
-            });
-            //关闭加载
-            layer.closeAll('loading');
-        },
         //table行点击事件及按钮显示控制
         tableRowClick: function (type, tableFilter, tableId, oneList, moreList) {
             var oneList = !!oneList ? oneList : [];

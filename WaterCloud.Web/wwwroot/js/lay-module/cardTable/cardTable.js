@@ -186,7 +186,7 @@ layui.define(['table', 'laypage','jquery', 'element'], function(exports) {
 
 		$.get(url, function (result) {
 			data = result;
-		});
+		},'json');
 
 		$.ajaxSettings.async = true;
 		return data;

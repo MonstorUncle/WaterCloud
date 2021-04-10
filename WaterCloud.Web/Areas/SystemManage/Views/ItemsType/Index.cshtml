@@ -20,7 +20,7 @@
             treeIdName: 'F_Id',  // id字段名称
             treePidName: 'F_ParentId',     // pid字段名称
             cols: [[
-                { type: "radio", width: 50 },
+                { type: "radio", width: 50, fixed: 'left'  },
                 { field: 'F_FullName', title: '名称', width: 200 },
                 { field: 'F_EnCode', title: '编号', width: 120 },
                 { field: 'F_SortCode', title: '排序', width: 60 },
@@ -45,16 +45,15 @@
                     }
                 },
                 { field: 'F_Description', title: '备注', minWidth: 150 },
-                { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center" }
+                { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right'  }
             ]],
         };
         commonTable.rendertreetable(options);
         // 监听搜索操作
         form.on('submit(data-search-btn)', function (data) {
             queryJson = data.field.txt_keyword;
-            common.reloadtreetable(rendertree, {
-                where: { keyword: queryJson },
-            });
+            options.where = { keyword: queryJson };
+            commonTable.rendertreetable(options);
             return false;
         });
         //行点击事件监听，控制按钮显示
