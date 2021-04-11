@@ -182,14 +182,13 @@ layui.define(['table', 'laypage','jquery', 'element'], function(exports) {
 	/** 同 步 请 求 获 取 数 据 */
 	function getData(url) {
 		$.ajaxSettings.async = false;
-		var data = null;
-
-		$.get(url, function (result) {
-			data = result;
-		},'json');
-
-		$.ajaxSettings.async = true;
-		return data;
+		var redata = null;
+		$.getJSON(url, function (data) {
+			redata = data;
+		}).fail(function () {
+			redata = null;
+		});
+		return redata;
 	}
 	//卡片点击事件
 	window.cardTableCheckedCard = function (elem,obj) {
