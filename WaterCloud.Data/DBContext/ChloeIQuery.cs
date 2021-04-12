@@ -273,14 +273,14 @@ namespace WaterCloud.DataBase
                 else if (property.PropertyType == typeof(Nullable<int>))
                 {
                     int i;
-					try
-					{
+                    try
+                    {
                         i = int.Parse(filterObj.value);
                     }
-					catch (Exception)
-					{
+                    catch (Exception)
+                    {
                         i = -999;
-					}
+                    }
                     right = Expression.Constant(i, typeof(int?));
                 }
                 else if (property.PropertyType == typeof(DateTime))
@@ -308,8 +308,8 @@ namespace WaterCloud.DataBase
                 else if (property.PropertyType == typeof(bool))
                 {
                     bool i = false;
-					if (filterObj.value.ToString().ToLower()=="1"|| filterObj.value.ToString().ToLower() == "true")
-					{
+                    if (filterObj.value.ToString().ToLower() == "1" || filterObj.value.ToString().ToLower() == "true")
+                    {
                         i = true;
                     }
                     right = Expression.Constant(i);
@@ -352,12 +352,12 @@ namespace WaterCloud.DataBase
                     filter = Expression.NotEqual(left, right);
                     break;
                 case "gt":
-					try
-					{
+                    try
+                    {
                         filter = Expression.GreaterThan(left, right);
                     }
-					catch (Exception)
-					{
+                    catch (Exception)
+                    {
                         filter = Expression.NotEqual(left, right);
                     }
                     break;
@@ -515,7 +515,7 @@ namespace WaterCloud.DataBase
                         break;
                     case "group":
                         gresult = ConvertList<T>(item.children, param);
-                        if (gresult==null)
+                        if (gresult == null)
                         {
                             break;
                         }
@@ -634,6 +634,42 @@ namespace WaterCloud.DataBase
                                 }
                             }
                             gresult = Expression.Call(Expression.Constant(list), typeof(List<bool?>).GetMethod("Contains", new Type[] { typeof(bool?) }), left);
+                        }
+                        else if (property.PropertyType == typeof(Nullable<float>))
+                        {
+                            List<float?> list = new List<float?>();
+                            foreach (var temp in item.values)
+                            {
+                                list.Add(float.Parse(temp));
+                            }
+                            gresult = Expression.Call(Expression.Constant(list), typeof(List<float?>).GetMethod("Contains", new Type[] { typeof(float?) }), left);
+                        }
+                        else if (property.PropertyType == typeof(float))
+                        {
+                            List<float> list = new List<float>();
+                            foreach (var temp in item.values)
+                            {
+                                list.Add(float.Parse(temp));
+                            }
+                            gresult = Expression.Call(Expression.Constant(list), typeof(List<float>).GetMethod("Contains", new Type[] { typeof(float) }), left);
+                        }
+                        else if (property.PropertyType == typeof(Nullable<double>))
+                        {
+                            List<double?> list = new List<double?>();
+                            foreach (var temp in item.values)
+                            {
+                                list.Add(float.Parse(temp));
+                            }
+                            gresult = Expression.Call(Expression.Constant(list), typeof(List<double?>).GetMethod("Contains", new Type[] { typeof(double?) }), left);
+                        }
+                        else if (property.PropertyType == typeof(double))
+                        {
+                            List<double> list = new List<double>();
+                            foreach (var temp in item.values)
+                            {
+                                list.Add(float.Parse(temp));
+                            }
+                            gresult = Expression.Call(Expression.Constant(list), typeof(List<double>).GetMethod("Contains", new Type[] { typeof(double) }), left);
                         }
                         else
                         {
