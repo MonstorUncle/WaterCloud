@@ -32,25 +32,34 @@ $.jsonWhere = function (data, action) {
 //select绑定
 $.fn.bindSelect = function (options) {
     var defaults = {
-        id: "id",
-        text: "text",
+        id: "",
+        text: "",
         search: false,
         url: "",
         param: [],
         change: null,
-        data:null,
+        data: null,
+        checked: 0,
     };
     var options = $.extend(defaults, options);
     var $element = $(this);
-    if (options.data!=null) {
+    if (options.data != null) {
         $.each(options.data, function (i) {
             if (options.id == "") {
+                var temp = $("<option></option>").val(i).html(options.data[i]);
                 //字典
-                $element.append($("<option></option>").val(i).html(options.data[i]));
+                if (i == options.checked) {
+                    temp.prop("checked", true);
+                }
+                $element.append(temp);
             }
             else {
+                var temp = $("<option></option>").val(options.data[i][options.id]).html(options.data[i][options.text]);
                 //list
-                $element.append($("<option></option>").val(options.data[i][options.id]).html(options.data[i][options.text]));
+                if (options.data[i][options.id] == options.checked) {
+                    temp.prop("checked", true);
+                }
+                $element.append(temp);
             }
         });
         $element.on("change", function (e) {
@@ -73,22 +82,126 @@ $.fn.bindSelect = function (options) {
             dataType: "json",
             async: false,
             success: function (data) {
-                $.each(data, function (i) {
-                    if (options.id=="") {
-                        $element.append($("<option></option>").val(data[i]).html(data[i]));
+                if (options.id == "") {
+                    var temp = $("<option></option>").val(i).html(options.data[i]);
+                    //字典
+                    if (i == options.checked) {
+                        temp.prop("checked", true);
                     }
-                    else {
-                        $element.append($("<option></option>").val(data[i][options.id]).html(data[i][options.text]));
+                    $element.append(temp);
+                }
+                else {
+                    var temp = $("<option></option>").val(options.data[i][options.id]).html(options.data[i][options.text]);
+                    //list
+                    if (options.data[i][options.id] == options.checked) {
+                        temp.prop("checked", true);
                     }
-                });
+                    $element.append(temp);
+                }
                 $element.on("change", function (e) {
                     if (options.change != null) {
-                        options.change(data[$(this).find("option:selected").index()]);
+                        options.change(options.data[$(this).find("option:selected").index()]);
                     }
                 });
             }
         });
-    } 
+    }
+}
+//radio绑定
+$.fn.bindRadio = function (options) {
+    var defaults = {
+        id: "",
+        text: "",
+        search: false,
+        url: "",
+        param: [],
+        change: null,
+        data: null,
+        checked: 0,
+        filterName:""
+    };
+    var options = $.extend(defaults, options);
+    var $element = $(this);
+    if (options.data != null) {
+        $.each(options.data, function (i) {
+            if (!options.id) {
+                var temp = $("<input>").val(i).attr("title", options.data[i]).attr("type", "radio").attr("name", $element.attr("id"));
+                //字典
+                if (!options.filterName) {
+                    temp.attr("lay-filter", $element.attr("id"));
+                }
+                else {
+                    temp.attr("lay-filter", filterName);
+                }
+                if (i == options.checked) {
+                    temp.prop("checked", "true");
+                }
+
+                $element.append(temp);
+            }
+            else {
+                var temp = $("<input>").val(options.data[i][options.id]).attr("title", options.data[i][options.text]).attr("type", "radio").attr("name", options.id);
+                //list
+                if (!options.filterName) {
+                    temp.attr("lay-filter", $element.attr("id"));
+                }
+                else {
+                    temp.attr("lay-filter", filterName);
+                }
+                if (options.data[i][options.id] == options.checked) {
+                    temp.prop("checked", "true");
+                }
+                $element.append();
+            }
+        });
+    }
+    else if (options.url != "") {
+        //ie缓存问题
+        if (options.url.indexOf("?") >= 0) {
+            options.url = options.url + '&v=' + new Date().Format("yyyy-MM-dd hh:mm:ss");
+        }
+        else {
+            options.url = options.url + '?v=' + new Date().Format("yyyy-MM-dd hh:mm:ss");
+        }
+        $.ajax({
+            url: options.url,
+            data: options.param,
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                $.each(data, function (i) {
+                    if (!options.id) {
+                        var temp = $("<input>").val(i).attr("title", options.data[i]).attr("type", "radio").attr("name", $element.attr("id"));
+                        //字典
+                        if (!options.filterName) {
+                            temp.attr("lay-filter", $element.attr("id"));
+                        }
+                        else {
+                            temp.attr("lay-filter", filterName);
+                        }
+                        if (i == options.checked) {
+                            temp.prop("checked", "true");
+                        }
+                        $element.append(temp);
+                    }
+                    else {
+                        var temp = $("<input>").val(options.data[i][options.id]).attr("title", options.data[i][options.text]).attr("type", "radio").attr("name", $element.attr("id"));
+                        //list
+                        if (!options.filterName) {
+                            temp.attr("lay-filter", $element.attr("id"));
+                        }
+                        else {
+                            temp.attr("lay-filter", filterName);
+                        }
+                        if (options.data[i][options.id] == options.checked) {
+                            temp.prop("checked", "true");
+                        }
+                        $element.append();
+                    }
+                });
+            }
+        });
+    }
 }
 // 时间格式方法
 Date.prototype.Format = function (fmt) {
