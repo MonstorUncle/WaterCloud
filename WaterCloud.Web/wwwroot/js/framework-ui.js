@@ -32,8 +32,8 @@ $.jsonWhere = function (data, action) {
 //select绑定
 $.fn.bindSelect = function (options) {
     var defaults = {
-        id: "",
-        text: "",
+        id: "id",
+        text: "text",
         search: false,
         url: "",
         param: [],
@@ -82,27 +82,29 @@ $.fn.bindSelect = function (options) {
             dataType: "json",
             async: false,
             success: function (data) {
-                if (options.id == "") {
-                    var temp = $("<option></option>").val(i).html(options.data[i]);
-                    //字典
-                    if (i == options.checked) {
-                        temp.prop("checked", true);
+                $.each(data, function (i) {
+                    if (options.id == "") {
+                        var temp = $("<option></option>").val(i).html(data[i]);
+                        //字典
+                        if (i == options.checked) {
+                            temp.prop("checked", true);
+                        }
+                        $element.append(temp);
                     }
-                    $element.append(temp);
-                }
-                else {
-                    var temp = $("<option></option>").val(options.data[i][options.id]).html(options.data[i][options.text]);
-                    //list
-                    if (options.data[i][options.id] == options.checked) {
-                        temp.prop("checked", true);
+                    else {
+                        var temp = $("<option></option>").val(data[i][options.id]).html(data[i][options.text]);
+                        //list
+                        if (data[i][options.id] == options.checked) {
+                            temp.prop("checked", true);
+                        }
+                        $element.append(temp);
                     }
-                    $element.append(temp);
-                }
-                $element.on("change", function (e) {
-                    if (options.change != null) {
-                        options.change(options.data[$(this).find("option:selected").index()]);
-                    }
-                });
+                    $element.on("change", function (e) {
+                        if (options.change != null) {
+                            options.change(options.data[$(this).find("option:selected").index()]);
+                        }
+                    });
+                })
             }
         });
     }
@@ -110,15 +112,15 @@ $.fn.bindSelect = function (options) {
 //radio绑定
 $.fn.bindRadio = function (options) {
     var defaults = {
-        id: "",
-        text: "",
+        id: "id",
+        text: "text",
         search: false,
         url: "",
         param: [],
         change: null,
         data: null,
         checked: 0,
-        filterName:""
+        filterName: ""
     };
     var options = $.extend(defaults, options);
     var $element = $(this);
@@ -171,7 +173,7 @@ $.fn.bindRadio = function (options) {
             success: function (data) {
                 $.each(data, function (i) {
                     if (!options.id) {
-                        var temp = $("<input>").val(i).attr("title", options.data[i]).attr("type", "radio").attr("name", $element.attr("id"));
+                        var temp = $("<input>").val(i).attr("title", data[i]).attr("type", "radio").attr("name", $element.attr("id"));
                         //字典
                         if (!options.filterName) {
                             temp.attr("lay-filter", $element.attr("id"));
@@ -185,7 +187,7 @@ $.fn.bindRadio = function (options) {
                         $element.append(temp);
                     }
                     else {
-                        var temp = $("<input>").val(options.data[i][options.id]).attr("title", options.data[i][options.text]).attr("type", "radio").attr("name", $element.attr("id"));
+                        var temp = $("<input>").val(data[i][options.id]).attr("title", data[i][options.text]).attr("type", "radio").attr("name", $element.attr("id"));
                         //list
                         if (!options.filterName) {
                             temp.attr("lay-filter", $element.attr("id"));
@@ -193,7 +195,7 @@ $.fn.bindRadio = function (options) {
                         else {
                             temp.attr("lay-filter", filterName);
                         }
-                        if (options.data[i][options.id] == options.checked) {
+                        if (data[i][options.id] == options.checked) {
                             temp.prop("checked", "true");
                         }
                         $element.append();
