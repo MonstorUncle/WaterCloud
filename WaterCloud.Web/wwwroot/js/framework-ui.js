@@ -84,7 +84,7 @@ $.fn.bindSelect = function (options) {
             success: function (data) {
                 $.each(data, function (i) {
                     if (options.id == "") {
-                        var temp = $("<option></option>").val(i).html(data[i]);
+                        var temp = $("<option></option>").val(data[i]).html(data[i]);
                         //字典
                         if (i == options.checked) {
                             temp.prop("checked", true);
@@ -173,7 +173,7 @@ $.fn.bindRadio = function (options) {
             success: function (data) {
                 $.each(data, function (i) {
                     if (!options.id) {
-                        var temp = $("<input>").val(i).attr("title", data[i]).attr("type", "radio").attr("name", $element.attr("id"));
+                        var temp = $("<input>").val(data[i]).attr("title", data[i]).attr("type", "radio").attr("name", $element.attr("id"));
                         //字典
                         if (!options.filterName) {
                             temp.attr("lay-filter", $element.attr("id"));
