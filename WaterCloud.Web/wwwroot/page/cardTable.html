@@ -25,6 +25,8 @@
 							</div>
 							<div class="layui-inline">
 								<button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon">&#xe615;</i> 搜 索</button>
+								<button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-btn"><i class="layui-icon">&#xe615;</i> 获取数据</button>
+								<button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-checked-btn"><i class="layui-icon">&#xe615;</i> 获取选中数据</button>
 							</div>
 						</div>
 					</form>
@@ -34,24 +36,35 @@
 		</div>
 	</div>
 	<script>
-		layui.use(['table', 'form', 'jquery', 'cardTable'], function () {
+		layui.use(['table','layer', 'form', 'jquery', 'cardTable'], function () {
 			let table = layui.table;
 			let form = layui.form;
 			let $ = layui.jquery;
-            let cardTable = layui.cardTable;
+            let layer = layui.layer;
+			let cardTable = layui.cardTable;
 
-            cardTable.render({
-                elem: '#currentTableId',
+			cardTable.render({
+				elem: '#currentTableId',
 				url: '../json/card.json',
 			})
-            // 监听搜索操作
+			// 监听搜索操作
 			form.on('submit(data-search-btn)', function (data) {
-                queryJson = data.field;
-                cardTable.reload("currentTableId", {
-                    where: queryJson,
-                });
+				queryJson = data.field;
+				cardTable.reload("currentTableId", {
+					where: queryJson,
+				});
+				return false;
+			});
+            form.on('submit(data-checked-btn)', function () {
+                var data = cardTable.getChecked("currentTableId");
+                layer.msg(JSON.stringify(data));
                 return false;
             });
+			form.on('submit(data-btn)', function () {
+				var data = cardTable.getAllData("currentTableId");
+                layer.msg(JSON.stringify(data));
+				return false;
+			});
 		})
 	</script>
 </body>

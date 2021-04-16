@@ -209,6 +209,7 @@ layui.define(['table', 'laypage','jquery', 'element'], function(exports) {
 		},
 		/* 重载 */
 		reload: function (id, opt) {
+			_instances[id].option.checkedItem = null;
 			_instances[id].reload(opt);
 		},
 		/* 获取选中数据 */
@@ -216,6 +217,9 @@ layui.define(['table', 'laypage','jquery', 'element'], function(exports) {
 			var option = _instances[id].option;
 			var data = option.checkedItem;
 			var item = {};
+            if (!data) {
+				return null;
+            }
 			item[option.request.idName] = data.id;
 			item[option.request.imageName] = data.image;
 			item[option.request.titleName] = data.title;
@@ -229,11 +233,11 @@ layui.define(['table', 'laypage','jquery', 'element'], function(exports) {
 			var data = [];
 			for (var i = 0; i < option.data.length; i++) {
 				var item = {};
-				item[option.request.idName] = data.id;
-				item[option.request.imageName] = data.image;
-				item[option.request.titleName] = data.title;
-				item[option.request.remarkName] = data.remark;
-				item[option.request.timeName] = data.time;
+				item[option.request.idName] = option.data[i].id;
+				item[option.request.imageName] = option.data[i].image;
+				item[option.request.titleName] = option.data[i].title;
+				item[option.request.remarkName] = option.data[i].remark;
+				item[option.request.timeName] = option.data[i].time;
 				data.push(item);
             }
 			return data;
