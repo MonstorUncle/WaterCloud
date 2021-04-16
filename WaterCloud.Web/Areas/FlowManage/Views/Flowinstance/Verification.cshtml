@@ -181,26 +181,23 @@
                 <div class="layui-col-xs8">
                     <div class="layui-tab layui-tab-brief" lay-filter="tab" style="margin: 0px">
                         <ul class="layui-tab-title">
-                            <li class="layui-this">流程信息</li>
-                            <li>表单信息</li>
+                            <li class="layui-this">表单信息</li>
+                            <li>流程信息</li>
                         </ul>
-
                         <div class="layui-tab-content">
                             <div class="layui-tab-item layui-show">
+                                <div id="frmPreview"></div>
+                            </div>
+                            <div class="layui-tab-item">
                                 <table class="layui-table" id="mainList">
                                 </table>
                                 <div id="flowPanel"></div>
                             </div>
-
-                            <div class="layui-tab-item">
-                                <div id="frmPreview"></div>
-                            </div>
-
                         </div>
                     </div>
 
                 </div>
-                <div class="layui-col-xs4" style="background-color: #1e9fff7d; min-height: 600px">
+                <div class="layui-col-xs4" style="background-color: #1e9fff7d; min-height: 500px">
                     <input type="hidden" id="F_FlowInstanceId" name="F_FlowInstanceId" />
 
                     <div class="layui-form-item layui-hide">
