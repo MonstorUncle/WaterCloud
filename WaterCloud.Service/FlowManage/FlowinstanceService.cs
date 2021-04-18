@@ -747,6 +747,17 @@ namespace WaterCloud.Service.FlowManage
             {
                 throw new Exception("该流程模板对应的表单已不存在，请重新设计流程");
             }
+            Dictionary<string, string> dic = JsonHelper.ToObject<Dictionary<string, string>>(entity.F_FrmData);
+            if (!dic.ContainsKey("申请人"))
+            {
+                dic.Add("申请人", currentuser.UserId);
+
+            }
+            if (!dic.ContainsKey("所属部门"))
+            {
+                dic.Add("所属部门", currentuser.DepartmentId);
+            }
+            entity.F_FrmData = dic.ToJson();
             var wfruntime = new FlowRuntime(await repository.FindEntity(entity.F_Id));
             entity.F_FrmContentData = form.F_ContentData;
             entity.F_FrmContentParse = form.F_ContentParse;

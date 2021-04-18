@@ -342,7 +342,7 @@ namespace WaterCloud.CodeGenerator
             sb.AppendLine("        }");
             sb.AppendLine();
             sb.AppendLine("        #region 提交数据");
-            sb.AppendLine("        public async Task SubmitForm(" + baseConfigModel.FileConfig.EntityName + $" entity, {idType} keyValue"+ idType == "int" || idType == "long"?"=0)":")");
+            sb.AppendLine("        public async Task SubmitForm(" + baseConfigModel.FileConfig.EntityName + $" entity, {idType} keyValue"+ (idType == "int" || idType == "long"?"=0)":")"));
             sb.AppendLine("        {");
             if (idType == "int" || idType == "long")
             {
