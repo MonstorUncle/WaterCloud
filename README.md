@@ -44,7 +44,7 @@
 
 - .net4.5版地址：https://gitee.com/qian_wei_hong/WaterCloud/tree/net4.5
 - .net5版地址：https://gitee.com/qian_wei_hong/WaterCloud/tree/net5
-- 项目演示地址：http://www.watercloud.ltd/  （账号：admin 密码：0000，数据库2个小时还原一次）
+- 项目演示地址：http://106.75.169.226:5000/  （账号：admin 密码：0000，数据库2个小时还原一次）
 - 文档地址：https://gitee.com/qian_wei_hong/WaterCloud/wikis/pages
 
 #### 前端以及后端使用技术介绍
