@@ -100,7 +100,7 @@ layui.define(['table', 'laypage','jquery', 'element'], function(exports) {
 			if (option.page) {
 				var data = [];
 				option.count = option.alldata.length;
-				for (var i = (option.currentPage - 1) * option.limit; i < option.currentPage * option.limit; i++) {
+				for (var i = (option.currentPage - 1) * option.limit; i < option.currentPage * option.limit && i < option.alldata.length; i++) {
 					data.push(option.alldata[i]);
 				}
 				option.data = data;
