@@ -25,7 +25,7 @@ namespace WaterCloud.Service.CommonService
         public async Task<List<TableInfo>> GetTableList(string tableName)
         {
             StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT table_name TableName FROM information_schema.tables WHERE table_schema='" + GetDatabase() + "' AND table_type='base table'");
+            strSql.Append(@"SELECT table_name TableName FROM information_schema.tables WHERE table_schema='" + GetDatabase() + "' AND (table_type='base table' or table_type='BASE TABLE' or table_type='view')");
             IEnumerable<TableInfo> list =await FindList<TableInfo>(strSql.ToString());
             if (!string.IsNullOrEmpty(tableName))
             {
@@ -39,7 +39,7 @@ namespace WaterCloud.Service.CommonService
         {
             StringBuilder strSql = new StringBuilder();
             var parameter = new List<DbParam>();
-            strSql.Append(@"SELECT table_name TableName,CREATE_TIME CreateTime FROM information_schema.tables where table_schema='" + GetDatabase() + "' and (table_type='base table' or table_type='BASE TABLE')");
+            strSql.Append(@"SELECT table_name TableName,CREATE_TIME CreateTime FROM information_schema.tables where table_schema='" + GetDatabase() + "' and (table_type='base table' or table_type='BASE TABLE' or table_type='view')");
 
             if (!string.IsNullOrEmpty(tableName))
             {
