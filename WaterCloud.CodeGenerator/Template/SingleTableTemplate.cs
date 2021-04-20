@@ -1009,7 +1009,7 @@ namespace WaterCloud.CodeGenerator
                             {
                                 sb.AppendLine("                <div class=\"layui-form-item\">");
                             }
-                            sb.AppendLine("                    <div class=\"layui-col-md6 layui-col-xs6 layui-hide\">");
+                            sb.AppendLine("                    <div class=\"layui-col-md6 layui-col-sm6 layui-hide\">");
                             sb.AppendLine("                        <label class=\"layui-form-label required\">" + item.Value + "</label>");
                             sb.AppendLine("                        <div class=\"layui-input-block\">");
                             sb.AppendLine("                            <input type=\"text\" id=\"" + item.Key + "\" name=\"" + item.Key + "\" autocomplete=\"off\" lay-verify=\"required\" placeholder=\"请输入\" class=\"layui-input\">");
@@ -1126,7 +1126,7 @@ namespace WaterCloud.CodeGenerator
                             {
                                 sb.AppendLine("                <div class=\"layui-form-item\">");
                             }
-                            sb.AppendLine("                    <div class=\"layui-col-md6 layui-col-xs6 layui-hide\">");
+                            sb.AppendLine("                    <div class=\"layui-col-md6 layui-col-sm6 layui-hide\">");
                             sb.AppendLine("                        <label class=\"layui-form-label required\">" + item.Value + "</label>");
                             sb.AppendLine("                        <div class=\"layui-input-block\">");
                             sb.AppendLine("                            <input type=\"text\" id=\"" + item.Key + "\" name=\"" + item.Key + "\" lay-verify=\"required\" class=\"layui-input\">");

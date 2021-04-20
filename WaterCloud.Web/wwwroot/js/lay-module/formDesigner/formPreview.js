@@ -644,13 +644,13 @@ layui.define(['layer', 'laytpl', 'element', 'form', 'slider', 'laydate', 'rate',
                 render: function (json, selected) {
                     if (selected === undefined) { selected = false; }
                     var _html = '<div id="{0}" class="layui-form-item layui-row grid {2}"  data-id="{0}" data-tag="{1}" data-index="{3}" >'.format(json.id, json.tag, selected ? 'active' : '', json.index);
-                    var colClass = 'layui-col-md6 layui-col-sm6 layui-col-xs6';
+                    var colClass = 'layui-col-md6 layui-col-sm6';
                     if (json.columns.length == 3) {
-                        colClass = 'layui-col-md4 layui-col-sm4 layui-col-xs4';
+                        colClass = 'layui-col-md4 layui-col-sm4';
                     } else if (json.columns.length == 4) {
-                        colClass = 'layui-col-md3 layui-col-sm3 layui-col-xs3';
+                        colClass = 'layui-col-md3 layui-col-sm3';
                     } else if (json.columns.length == 6) {
-                        colClass = 'layui-col-md2 layui-col-sm2 layui-col-xs2';
+                        colClass = 'layui-col-md2 layui-col-sm2';
                     }
                     for (var i = 0; i < json.columns.length; i++) {
                         _html += '<div class="{2} widget-col-list column{0}" data-index="{0}" data-parentindex="{1}">'.format(i, json.index, colClass);
