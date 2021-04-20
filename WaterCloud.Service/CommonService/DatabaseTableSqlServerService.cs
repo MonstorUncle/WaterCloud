@@ -23,7 +23,7 @@ namespace WaterCloud.Service.CommonService
         public async Task<List<TableInfo>> GetTableList(string tableName)
         {
             StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT id Id,name TableName FROM sysobjects WHERE xtype = 'u' order by name");
+            strSql.Append(@"SELECT id Id,name TableName FROM sysobjects WHERE (xtype = 'u' or xtype='V') order by name");
             IEnumerable<TableInfo> list =await FindList<TableInfo>(strSql.ToString());
             if (!tableName.IsEmpty())
             {
@@ -37,7 +37,7 @@ namespace WaterCloud.Service.CommonService
         {
             StringBuilder strSql = new StringBuilder();
             var parameter = new List<DbParam>();
-            strSql.Append(@"SELECT id Id,name TableName,crdate CreateTime FROM sysobjects WHERE xtype = 'u'");
+            strSql.Append(@"SELECT id Id,name TableName,crdate CreateTime FROM sysobjects WHERE (xtype = 'u' or xtype='V')");
 
             if (!tableName.IsEmpty())
             {
