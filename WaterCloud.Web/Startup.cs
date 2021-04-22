@@ -139,14 +139,16 @@ namespace WaterCloud.Web
             //更新数据库管理员和主系统
             try
             {
-                var context = DBContexHelper.Contex();
-                var _setService = new Service.SystemOrganize.SystemSetService(context);
-                Domain.SystemOrganize.SystemSetEntity temp = new Domain.SystemOrganize.SystemSetEntity();
-                temp.F_AdminAccount = GlobalContext.SystemConfig.SysemUserCode;
-                temp.F_AdminPassword = GlobalContext.SystemConfig.SysemUserPwd;
-                temp.F_DBProvider = GlobalContext.SystemConfig.DBProvider;
-                temp.F_DbString = GlobalContext.SystemConfig.DBConnectionString;
-                _setService.SubmitForm(temp, GlobalContext.SystemConfig.SysemMasterProject).GetAwaiter().GetResult();
+                using (var context = DBContexHelper.Contex())
+                {
+                    var _setService = new Service.SystemOrganize.SystemSetService(context);
+                    Domain.SystemOrganize.SystemSetEntity temp = new Domain.SystemOrganize.SystemSetEntity();
+                    temp.F_AdminAccount = GlobalContext.SystemConfig.SysemUserCode;
+                    temp.F_AdminPassword = GlobalContext.SystemConfig.SysemUserPwd;
+                    temp.F_DBProvider = GlobalContext.SystemConfig.DBProvider;
+                    temp.F_DbString = GlobalContext.SystemConfig.DBConnectionString;
+                    _setService.SubmitForm(temp, GlobalContext.SystemConfig.SysemMasterProject).GetAwaiter().GetResult();
+                }
             }
             catch (Exception ex)
             {
