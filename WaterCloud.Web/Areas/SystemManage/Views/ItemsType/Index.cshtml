@@ -69,7 +69,7 @@
                 keyValue = data.length > 0 ? data[0].F_Id : null;
                 common.modalOpen({
                     title: "添加分类",
-                    url: "/SystemManage/ItemsType/Form?event=add&keyValue=" + keyValue,
+                    url: "/SystemManage/ItemsType/Form?event=add&keyValue=" + (!!keyValue ? keyValue : ""),
                     width: "450px",
                     height: "380px",
                 });

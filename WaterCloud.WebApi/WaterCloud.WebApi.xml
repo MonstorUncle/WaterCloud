@@ -14,13 +14,11 @@
             用户接口
             </summary>
         </member>
-        <member name="M:WaterCloud.WebApi.Controllers.UserController.Login(System.String,System.String,System.String)">
+        <member name="M:WaterCloud.WebApi.Controllers.UserController.Login(WaterCloud.WebApi.Controllers.UserController.LoginRequest)">
             <summary>
             用户登录
             </summary>
-            <param name="userName">用户</param>
-            <param name="password">密码</param>
-            <param name="localurl">域名</param>
+            <param name="request">请求对象</param>
             <returns></returns>
         </member>
         <member name="M:WaterCloud.WebApi.Controllers.UserController.LoginOff">
@@ -29,23 +27,74 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:WaterCloud.WebApi.AuthorizeFilterAttribute">
+        <member name="T:WaterCloud.WebApi.Controllers.UserController.LoginRequest">
             <summary>
-            验证token
+            登录请求对象
             </summary>
         </member>
-        <member name="F:WaterCloud.WebApi.AuthorizeFilterAttribute.IgnoreToken">
+        <member name="P:WaterCloud.WebApi.Controllers.UserController.LoginRequest.userName">
             <summary>
-            忽略token的方法
+            用户名
+            </summary>
+        </member>
+        <member name="P:WaterCloud.WebApi.Controllers.UserController.LoginRequest.password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="P:WaterCloud.WebApi.Controllers.UserController.LoginRequest.localurl">
+            <summary>
+            域名
+            </summary>
+        </member>
+        <member name="P:WaterCloud.WebApi.AuthorizeAttribute._authorize">
+            <summary>
+            权限名称
+            </summary>
+        </member>
+        <member name="T:WaterCloud.WebApi.AuthorizeFilterAttribute">
+            <summary>
+            权限验证
             </summary>
         </member>
         <member name="M:WaterCloud.WebApi.AuthorizeFilterAttribute.OnActionExecutionAsync(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext,Microsoft.AspNetCore.Mvc.Filters.ActionExecutionDelegate)">
             <summary>
-            异步接口日志
+            验证
             </summary>
             <param name="context"></param>
             <param name="next"></param>
             <returns></returns>
+        </member>
+        <member name="T:WaterCloud.WebApi.LockAttribute">
+            <summary>
+            防重复提交
+            </summary>
+        </member>
+        <member name="M:WaterCloud.WebApi.LockAttribute.OnActionExecutionAsync(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext,Microsoft.AspNetCore.Mvc.Filters.ActionExecutionDelegate)">
+            <summary>
+            拦截
+            </summary>
+            <param name="context"></param>
+            <param name="next"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WaterCloud.WebApi.LoginFilterAttribute">
+            <summary>
+            验证token
+            </summary>
+        </member>
+        <member name="M:WaterCloud.WebApi.LoginFilterAttribute.OnActionExecutionAsync(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext,Microsoft.AspNetCore.Mvc.Filters.ActionExecutionDelegate)">
+            <summary>
+            验证
+            </summary>
+            <param name="context"></param>
+            <param name="next"></param>
+            <returns></returns>
+        </member>
+        <member name="T:WaterCloud.WebApi.ModelActionFilter">
+            <summary>
+            模型验证过滤器
+            </summary>
         </member>
     </members>
 </doc>

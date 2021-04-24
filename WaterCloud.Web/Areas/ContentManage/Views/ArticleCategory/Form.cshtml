@@ -29,6 +29,7 @@
 
         $(function () {
             initControl();
+            $('#F_ParentId').val("0");
             form.render();
        });
         wcLoading.close();
@@ -67,61 +68,61 @@
         <div class="layuimini-main">
             <div class="layui-form layuimini-form" lay-filter="adminform">
                 <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label required">上级</label>
+                    <div class="layui-input-block">
+                        <select id="F_ParentId" name="F_ParentId" lay-filter="F_ParentId" lay-verify="required" lay-search>
+                            <option value="0">父级</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
                     <label class="layui-form-label required">类别名称</label>
-                   <div class="layui-input-block">
+                    <div class="layui-input-block">
                         <input type="text" id="F_FullName" name="F_FullName" autocomplete="off" maxlength="50" lay-verify="required" class="layui-input">
-                   </div>
-               </div>
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label required">上级</label>
-                   <div class="layui-input-block">
-                       <select id="F_ParentId" name="F_ParentId" lay-filter="F_ParentId" lay-verify="required" lay-search>
-                           <option value="0">父级</option>
-                       </select>
-                   </div>
-               </div>
+                    <label class="layui-form-label required">排序</label>
+                    <div class="layui-input-block">
+                        <input type="number" pattern="[0-9]*" id="F_SortCode" name="F_SortCode" lay-verify="required|number" oninput="if(value.length>8)value=value.slice(0,8)" value="99" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label required">排序</label>
-                   <div class="layui-input-block">
-                       <input type="number" pattern="[0-9]*" id="F_SortCode" name="F_SortCode" lay-verify="required|number"  oninput="if(value.length>8)value=value.slice(0,8)" value="99"  autocomplete="off" class="layui-input">
-                   </div>
-               </div>
-                <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label">描述</label>
-                   <div class="layui-input-block">
+                    <label class="layui-form-label">描述</label>
+                    <div class="layui-input-block">
                         <input type="text" id="F_Description" name="F_Description" autocomplete="off" class="layui-input">
-                   </div>
-               </div>
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label">链接地址</label>
-                   <div class="layui-input-block">
+                    <label class="layui-form-label">链接地址</label>
+                    <div class="layui-input-block">
                         <input type="text" id="F_LinkUrl" name="F_LinkUrl" autocomplete="off" lay-verify="url" maxlength="255" class="layui-input">
-                   </div>
-               </div>
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label">图片地址</label>
-                   <div class="layui-input-block">
+                    <label class="layui-form-label">图片地址</label>
+                    <div class="layui-input-block">
                         <input type="text" id="F_ImgUrl" name="F_ImgUrl" autocomplete="off" lay-verify="url" maxlength="255" class="layui-input">
-                   </div>
-               </div>
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label">Seo标题</label>
-                   <div class="layui-input-block">
-                        <input type="text" id="F_SeoTitle" name="F_SeoTitle" autocomplete="off"  maxlength="255" class="layui-input">
-                   </div>
-               </div>
+                    <label class="layui-form-label">Seo标题</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="F_SeoTitle" name="F_SeoTitle" autocomplete="off" maxlength="255" class="layui-input">
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label">Seo关键字</label>
-                   <div class="layui-input-block">
+                    <label class="layui-form-label">Seo关键字</label>
+                    <div class="layui-input-block">
                         <input type="text" id="F_SeoKeywords" name="F_SeoKeywords" autocomplete="off" maxlength="255" class="layui-input">
-                   </div>
-               </div>
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
-                   <label class="layui-form-label">Seo描述</label>
-                   <div class="layui-input-block">
+                    <label class="layui-form-label">Seo描述</label>
+                    <div class="layui-input-block">
                         <input type="text" id="F_SeoDescription" name="F_SeoDescription" autocomplete="off" maxlength="255" class="layui-input">
-                   </div>
-               </div>
+                    </div>
+                </div>
                 <div class="layui-form-item layui-hide">
                     <label class="layui-form-label">选项</label>
                     <div class="layui-input-block">

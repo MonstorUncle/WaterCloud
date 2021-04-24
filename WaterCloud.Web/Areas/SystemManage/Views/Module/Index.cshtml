@@ -130,6 +130,9 @@
             var keyValue = data.length > 0 ? data[0].F_Id : null;
             var module = data.length > 0 ? data[0] : null;
             if (obj.event === 'add') {  // 监听操作
+                if (!keyValue || data[0].F_IsExpand == false || data[0].F_Target !="expand") {
+                    keyValue = "";
+                }
                 common.modalOpen({
                     title: "添加菜单",
                     url: "/SystemManage/Module/Form?event=add&keyValue=" + keyValue,

@@ -75,7 +75,7 @@
             if (obj.event === 'add') {  // 监听操作
                 common.modalOpen({
                     title: "添加机构",
-                    url: "/SystemOrganize/Organize/Form?event=add&keyValue=" + keyValue,
+                    url: "/SystemOrganize/Organize/Form?event=add&keyValue=" + (!!keyValue ? keyValue : ""),
                     width: "450px",
                     height: "520px",
                 });

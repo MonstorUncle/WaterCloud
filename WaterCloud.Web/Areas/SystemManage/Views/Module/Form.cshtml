@@ -39,6 +39,9 @@
                 if (!!keyValue) {
                     $('#F_ParentId').val(keyValue);
                 }
+                else {
+                    $('#F_ParentId').val("0");
+                }
             }
             form.render();
         });
