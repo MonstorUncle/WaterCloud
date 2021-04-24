@@ -1651,6 +1651,10 @@ layui.define(['table', 'form', 'laydate', 'util', 'excel', 'laytpl'], function (
 
                 var scollWidth = $tableMain.width() - $tableMain.prop('clientWidth') //纵向滚动条宽度;
                 $tableBox.children('.layui-table-fixed-r').css('right', scollWidth - 1);
+                var scollTop = sessionStorage.getItem("wc_table_scolltop");
+                if (!!scollTop) {
+                    $tableMain[0].scollTop = scollTop;
+                }
             }
         }
         /**

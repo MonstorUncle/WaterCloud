@@ -632,6 +632,8 @@ layui.define(['laytpl', 'laypage', 'layer', 'form', 'util'], function (exports) 
     //重置表格尺寸/结构
     Class.prototype.resize = function () {
         var that = this;
+        var scrollTop = $("#" + that.config.elem).next().children('.layui-table-box').children('.layui-table-main')[0].scrollTop;
+        sessionStorage.setItem("wc_table_scolltop", scrollTop);
         that.fullSize(); //让表格铺满
         that.setColsWidth(); //自适应列宽
         that.scrollPatch(); //滚动条补丁
