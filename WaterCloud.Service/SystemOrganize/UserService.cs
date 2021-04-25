@@ -162,7 +162,7 @@ namespace WaterCloud.Service.SystemOrganize
             }
             if (cachedata.F_DepartmentId != null)
             {
-                temp = cachedata.F_OrganizeId.Split(',');
+                temp = cachedata.F_DepartmentId.Split(',');
                 cachedata.F_DepartmentName = string.Join(",", uniwork.IQueryable<OrganizeEntity>().Where(a => temp.Contains(a.F_Id)).Select(a => a.F_FullName).ToList().ToArray());
             }
 
