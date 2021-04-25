@@ -632,11 +632,21 @@ layui.define(['laytpl', 'laypage', 'layer', 'form', 'util'], function (exports) 
     //重置表格尺寸/结构
     Class.prototype.resize = function () {
         var that = this;
+        sessionStorage.removeItem("wc_table_scolltop");
+        var scrollTop = 0;
+        if (!!that.config.id) {
+            scrollTop = that.layMain[0].scrollTop;
+        }
         that.fullSize(); //让表格铺满
         that.setColsWidth(); //自适应列宽
         that.scrollPatch(); //滚动条补丁
         if (layui.tableFilter) {
             layui.tableFilter.resize(that.config);
+            if (!!that.config.id) {
+                that.layMain[0].scrollTop = scrollTop;
+                //同步更新滚动
+                that.layFixed.find(ELEM_BODY).scrollTop(scrollTop);
+            }
         } // 这是要添加的那一行
     };
 

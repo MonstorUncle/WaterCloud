@@ -1645,7 +1645,7 @@ layui.define(['table', 'form', 'laydate', 'util', 'excel', 'laytpl'], function (
                 bodyHeight = bodyHeight - $table.next().children('.layui-table-box').children('.layui-table-header').outerHeight();
 
                 $table.next().children('.layui-table-box').children('.layui-table-body').height(bodyHeight)
-                var fixHeight = bodyHeight - _this.getScrollWidth($tableMain[0]),
+                var fixHeight = bodyHeight - _this.getScrollWidth($tableMain[0])-1,
                     layMainTableHeight = $tableMain.children('table').height()
                 $table.next().children('.layui-table-box').children('.layui-table-fixed').children('.layui-table-body').height(layMainTableHeight >= fixHeight ? fixHeight : 'auto')
 
