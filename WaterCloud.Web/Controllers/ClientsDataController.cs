@@ -353,7 +353,7 @@ namespace WaterCloud.Web.Controllers
             {
                 var dictionarytemp = new Dictionary<string, List<ModuleButtonEntity>>();
                 var data = await _roleAuthorizeService.GetButtonList(roles);
-                var dataModuleId = data.Distinct(new ExtList<ModuleButtonEntity>("F_ModuleId"));
+                var dataModuleId = data.Where(a => a.F_ModuleId != null && a.F_ModuleId != "").Distinct(new ExtList<ModuleButtonEntity>("F_ModuleId"));
                 foreach (ModuleButtonEntity item in dataModuleId)
                 {
                     var buttonList = data.Where(t => t.F_ModuleId == item.F_ModuleId).ToList();
@@ -412,7 +412,7 @@ namespace WaterCloud.Web.Controllers
             {
                 var dictionarytemp = new Dictionary<string, List<ModuleFieldsEntity>>();
                 var data = await _roleAuthorizeService.GetFieldsList(roles);
-                var dataModuleId = data.Distinct(new ExtList<ModuleFieldsEntity>("F_ModuleId"));
+                var dataModuleId = data.Where(a => a.F_ModuleId != null && a.F_ModuleId != "").Distinct(new ExtList<ModuleFieldsEntity>("F_ModuleId"));
                 foreach (ModuleFieldsEntity item in dataModuleId)
                 {
                     var buttonList = data.Where(t => t.F_ModuleId == item.F_ModuleId).ToList();
