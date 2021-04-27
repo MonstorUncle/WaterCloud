@@ -107,7 +107,7 @@ namespace WaterCloud.Service.SystemManage
                 moduleButtonEntity.F_AllowEdit = false;
                 moduleButtonEntity.F_AllowDelete = false;
                 var module = await uniwork.FindEntity<ModuleEntity>(a => a.F_Id == moduleButtonEntity.F_ModuleId);
-                if (module.F_Target != "expand" || module.F_Target != "iframe")
+                if (module.F_Target != "expand" && module.F_Target != "iframe")
                 {
                     throw new Exception("菜单不能创建按钮");
                 }
@@ -125,7 +125,7 @@ namespace WaterCloud.Service.SystemManage
             var data =await this.GetList();
             List<ModuleButtonEntity> entitys = new List<ModuleButtonEntity>();
             var module = await uniwork.FindEntity<ModuleEntity>(a => a.F_Id == moduleId);
-            if (module.F_Target != "expand" || module.F_Target != "iframe")
+            if (module.F_Target != "expand" && module.F_Target != "iframe")
             {
                 throw new Exception("菜单不能创建按钮");
             }

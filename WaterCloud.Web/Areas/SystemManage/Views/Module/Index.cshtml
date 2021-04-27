@@ -183,7 +183,7 @@
                     common.modalMsg("未选中数据", "warning");
                     return false;
                 }
-                if (module.F_Target != "iframe" || module.F_Target != "expand") {
+                if (module.F_Target != "iframe" && module.F_Target != "expand") {
                     common.modalAlert("菜单不能创建按钮,请修改后重试", "warning");
                     return false;
                 }
@@ -236,7 +236,7 @@
                 });
             }
             else if (obj.event === 'modulebutton') {
-                if (obj.data.F_Target != "iframe" || obj.data.F_Target != "expand") {
+                if (obj.data.F_Target != "iframe" && obj.data.F_Target != "expand") {
                     common.modalAlert("菜单不能创建按钮,请修改后重试", "warning");
                     return false;
                 }
