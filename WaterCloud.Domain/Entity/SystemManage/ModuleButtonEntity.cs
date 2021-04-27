@@ -28,7 +28,6 @@ namespace WaterCloud.Domain.SystemManage
         public int? F_Location { get; set; }
         [Required(ErrorMessage = "事件不能为空")]
         public string F_JsEvent { get; set; }
-        [Required(ErrorMessage = "连接不能为空")]
         public string F_UrlAddress { get; set; }
         public bool? F_Split { get; set; }
         public bool? F_IsPublic { get; set; }
