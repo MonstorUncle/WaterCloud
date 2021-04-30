@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WaterCloud.Domain.FlowManage
 {
-    public class VerificationExtend
+    public class VerificationExtend:NodeDesignateEntity
     {
         public string F_FlowInstanceId { get; set; }
         /// <summary>

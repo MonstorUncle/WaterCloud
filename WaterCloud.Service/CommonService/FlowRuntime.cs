@@ -1,4 +1,4 @@
-// <summary>
+﻿// <summary>
 // 一个正在运行中的流程实例
 //</summary>
 // ***********************************************************************
@@ -114,7 +114,7 @@ namespace WaterCloud.Service.CommonService
                 throw new Exception("无法寻找到下一个节点");
             }
 
-            if (FrmData == "") return lines[0].to;
+            if (string.IsNullOrEmpty(FrmData)) return lines[0].to;
 
             FrmData = FrmData.ToLower();//统一转小写
             var frmDataJson = FrmData.ToJObject();//获取数据内容

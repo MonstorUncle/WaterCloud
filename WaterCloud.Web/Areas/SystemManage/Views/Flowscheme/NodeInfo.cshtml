@@ -59,9 +59,13 @@
                     <div class="layui-tab-item">
                         <div class="layui-form-item">
                             <div class="layui-input-block" style="margin-left: 0px;">
-                                <input type="radio" name="NodeDesignate" lay-filter="NodeDesignate" value="ALL_USER" title="所有用户" checked>
-                                <input type="radio" name="NodeDesignate" lay-filter="NodeDesignate" value="SPECIAL_USER" title="指定用户">
-                                <input type="radio" name="NodeDesignate" lay-filter="NodeDesignate" value="SPECIAL_ROLE" title="指定角色">
+                                <select id="NodeDesignate" lay-filter="NodeDesignate" name="NodeDesignate">
+                                    <option value="ALL_USER">所有用户</option>
+                                    <option value="SPECIAL_USER">指定用户</option>
+                                    <option value="SPECIAL_ROLE">指定角色</option>
+                                    <option value="RUNTIME_SPECIAL_ROLE">运行时指定角色</option>
+                                    <option value="RUNTIME_SPECIAL_USER">运行时指定用户</option>
+                                </select>
                             </div>
                         </div>
 
@@ -79,7 +83,6 @@
                             </div>
                             <div class="layui-hide" id="alluser">
                                 <div class="layui-input-block" style="margin-left: 0px;">
-                                    <h3>所有人都可以审核</h3>
                                 </div>
                             </div>
                         </div>
@@ -151,10 +154,10 @@
             page: false,
             height: 'full-120',
             toolbar: false,//工具栏
-            
+
             cols: [[
                 { type: 'checkbox' },
-                
+
                 { field: 'F_Account', title: '账户', width: 120, sort: true },
                 { field: 'F_RealName', title: '姓名', width: 120, sort: true },
                 {
@@ -182,10 +185,10 @@
             page: false,
             height: 'full-120',
             toolbar: false,//工具栏
-            
+
             cols: [[
                 { type: 'checkbox' },
-                
+
                 { field: 'F_FullName', title: '角色名称', width: 120, sort: true },
                 {
                     field: 'F_Type', title: '角色类型', width: 120, sort: true,
@@ -224,7 +227,7 @@
                 tmp.NodeConfluenceType = data.value;
             });
 
-        form.on('radio(NodeDesignate)',
+        form.on('select(NodeDesignate)',
             function (data) {
                 tmp.NodeDesignate = data.value;
                 if (data.value === "SPECIAL_USER") {
@@ -241,6 +244,7 @@
                     $('#specialuser').addClass("layui-hide");
                     $('#alluser').removeClass("layui-hide");
                 }
+
             });
 
         //提供给上父页面调用
@@ -267,7 +271,7 @@
                     users: users,
                     roles: roles,
                     orgs: [],
-					currentDepart:$('#currentDepart').is(':checked')?true:false,
+                    currentDepart: $('#currentDepart').is(':checked') ? true : false,
                 }
             };
             //  $.extend(result, vm.tmp);

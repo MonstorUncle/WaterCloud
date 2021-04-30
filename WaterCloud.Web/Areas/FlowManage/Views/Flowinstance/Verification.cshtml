@@ -61,6 +61,7 @@
     var formtext;
     //只读参数
     var readonly = true;
+    var NextNodeDesignateType = "";
     layui.use(['form', 'table', 'layer', 'element', 'jquery', 'waterflow', 'flowlayout', 'common', 'formPreview'], function () {
         var form = layui.form, element = layui.element,
             table = layui.table,
@@ -112,6 +113,30 @@
                 async: false,
                 success: function (data) {
                     var schemeContent = JSON.parse(data.F_SchemeContent);
+                    if (!!data.CurrentMakerName) {
+                        $('#CurrentMakerName').val(data.CurrentMakerName);
+                    }
+                    else {
+                        $('#CurrentMakerName').parent().parent().remove();
+                    }
+                    NextNodeDesignateType = data.NextNodeDesignateType;
+                    if (!data.NextNodeDesignateType) {
+                        $('#NextMakerName').parent().parent().remove();
+                    }
+                    else if (data.NextNodeDesignateType == "RUNTIME_SPECIAL_ROLE") {
+                        $('#NextMakerName').removeAttr('disabled');
+                        $('#NextMakerName').attr('placeholder','请点击选择角色');
+                    }
+                    else if (data.NextNodeDesignateType == "RUNTIME_SPECIAL_USER") {
+                        $('#NextMakerName').removeAttr('disabled');
+                        $('#NextMakerName').attr('placeholder','请点击选择用户');
+                    }
+                    else {
+                        $('#NextMakerName').val(data.NextMakerName);
+                        if (!data.NextMakerName) {
+                            $('#NextMakerName').val("所有人");
+                        }
+                    }
                     flowDesignPanel = $('#flowPanel').flowdesign({
                         haveTool: false
                         , isprocessing: true
@@ -157,9 +182,17 @@
             flowDesignPanel.reinitSize($(window).width() * 2 / 3 - 40, $(window).height() - 100);
         });
         wcLoading.close();
+        form.on('select(VerificationFinally)',
+            function (data) {
+                if (data.value != "1") {
+                    $('#NextMakerName').parent().parent().remove();
+                }
+            });
         //监听提交
         form.on('submit(saveBtn)', function (data) {
             var postData = data.field;
+            postData.NodeDesignateType = NextNodeDesignateType;
+            postData.NodeDesignates = postData.NextNodeDesignates?postData.NextNodeDesignates.split(','):[];
             common.submitForm({
                 url: "/FlowManage/Flowinstance/Verification?keyValue=" + keyValue,
                 param: postData,
@@ -172,6 +205,31 @@
             return false;
         });
     });
+    function search() {
+        layui.use(['jquery', 'form', 'common'], function () {
+            var form = layui.form,
+                $ = layui.$,
+                common = layui.common;
+            var parentform = window.name;
+            //不同弹窗
+            if (NextNodeDesignateType == 'RUNTIME_SPECIAL_ROLE') {
+                common.modalOpen({
+                    title: "选择角色",
+                    url: "/SystemOrganize/Role/AddForm?parentform=" + parentform + "&name=" + "NextMakerName" + "&value=" + "NextNodeDesignates" + "&ids=" + $('#NextNodeDesignates').val(),
+                    width: "650px",
+                    height: "600px",
+                });
+            }
+            else if (NextNodeDesignateType == 'RUNTIME_SPECIAL_USER') {
+                common.modalOpen({
+                    title: "选择用户",
+                    url: "/SystemOrganize/User/AddForm?parentform=" + parentform + "&name=" + "NextMakerName" + "&value=" + "NextNodeDesignates" + "&ids=" + $('#NextNodeDesignates').val(),
+                    width: "650px",
+                    height: "600px",
+                });
+            }
+        });
+    }
 </script>
 
 <div class="layuimini-container">
@@ -189,6 +247,12 @@
                                 <div id="frmPreview"></div>
                             </div>
                             <div class="layui-tab-item">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">当前审核人</label>
+                                    <div class="layui-input-block">
+                                        <input id="CurrentMakerName" name="CurrentMakerName" class="layui-input" disabled>
+                                    </div>
+                                </div>
                                 <table class="layui-table" id="mainList">
                                 </table>
                                 <div id="flowPanel"></div>
@@ -197,7 +261,7 @@
                     </div>
 
                 </div>
-                <div class="layui-col-xs4" style="background-color: #1e9fff7d; min-height: 500px">
+                <div class="layui-col-xs4" style="background-color: #1e9fff7d; min-height: 500px;">
                     <input type="hidden" id="F_FlowInstanceId" name="F_FlowInstanceId" />
 
                     <div class="layui-form-item layui-hide">
@@ -216,6 +280,13 @@
                         <div class="layui-input-block">
                             <textarea name="F_VerificationOpinion" id="F_VerificationOpinion"
                                       placeholder="" autocomplete="off" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-hide">
+                        <label class="layui-form-label">下一步审核</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="NextMakerName" disabled="disabled" id="NextMakerName" lay-verify="required" onclick="search()" class="layui-input">
+                            <input type="text" name="NextNodeDesignates" id="NextNodeDesignates" class="layui-input layui-hide">
                         </div>
                     </div>
                     <div class="layui-form-item layui-hide">

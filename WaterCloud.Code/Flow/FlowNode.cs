@@ -36,6 +36,8 @@
         public const string SPECIAL_USER = "SPECIAL_USER";  //指定用户
         public const string ALL_USER = "ALL_USER";  //所有用户
         public const string SPECIAL_ROLE = "SPECIAL_ROLE";  //指定角色
+        public const string RUNTIME_SPECIAL_ROLE = "RUNTIME_SPECIAL_ROLE"; //运行时指定角色
+        public const string RUNTIME_SPECIAL_USER = "RUNTIME_SPECIAL_USER"; //运行时指定用户
 
         /// <summary>
         /// 节点执行权限类型

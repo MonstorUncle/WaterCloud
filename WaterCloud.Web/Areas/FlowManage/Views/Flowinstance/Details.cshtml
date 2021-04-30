@@ -110,6 +110,12 @@
                 async: false,
                 success: function (data) {
                     var schemeContent = JSON.parse(data.F_SchemeContent);
+                    if (!!data.CurrentMakerName) {
+                        $('#CurrentMakerName').val(data.CurrentMakerName);
+                    }
+                    else {
+                        $('#CurrentMakerName').parent().parent().remove();
+                    }
                     flowDesignPanel = $('#flowPanel').flowdesign({
                         haveTool: false
                         , isprocessing: true
@@ -172,6 +178,12 @@
 
                     <div class="layui-tab-content">
                         <div class="layui-tab-item layui-show">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">当前审核人</label>
+                                <div class="layui-input-block">
+                                    <input id="CurrentMakerName" name="CurrentMakerName" class="layui-input" disabled>
+                                </div>
+                            </div>
                             <table class="layui-table" id="mainList">
                             </table>
                             <div id="flowPanel"></div>

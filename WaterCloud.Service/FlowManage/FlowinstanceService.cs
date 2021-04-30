@@ -221,8 +221,18 @@ namespace WaterCloud.Service.FlowManage
         /// </summary>
         /// <param name="instanceId"></param>
         /// <returns></returns>
-        public async Task<bool> NodeVerification(string instanceId, Tag tag)
+        public async Task<bool> NodeVerification(VerificationExtend request)
         {
+            var user = currentuser;
+            var instanceId = request.F_FlowInstanceId;
+
+            var tag = new Tag
+            {
+                UserName = user.UserName,
+                UserId = user.UserId,
+                Description = request.F_VerificationOpinion,
+                Taged = Int32.Parse(request.F_VerificationFinally)
+            };
             FlowinstanceEntity flowInstance = await GetForm(instanceId);
             flowCreator = flowInstance.F_CreatorUserId;
             FlowInstanceOperationHistory flowInstanceOperationHistory = new FlowInstanceOperationHistory
@@ -273,9 +283,7 @@ namespace WaterCloud.Service.FlowManage
                     flowInstance.F_ActivityType = wfruntime.nextNodeType;
                     flowInstance.F_ActivityName = wfruntime.nextNode.name;
                     flowInstance.F_IsFinish = (wfruntime.nextNodeType == 4 ? 1 : 0);
-                    flowInstance.F_MakerList =
-                        (wfruntime.nextNodeType == 4 ? "" : GetNextMakers(wfruntime));
-
+                    flowInstance.F_MakerList = wfruntime.nextNodeType == 4 ? "" : GetNextMakers(wfruntime, request);
                     await AddTransHistory(wfruntime);
                 }
                 else
@@ -298,7 +306,7 @@ namespace WaterCloud.Service.FlowManage
                     flowInstance.F_ActivityId = wfruntime.nextNodeId;
                     flowInstance.F_ActivityType = wfruntime.nextNodeType;
                     flowInstance.F_ActivityName = wfruntime.nextNode.name;
-                    flowInstance.F_MakerList = wfruntime.nextNodeType == 4 ? "" : GetNextMakers(wfruntime);
+                    flowInstance.F_MakerList = (wfruntime.GetNextNodeType() != 4 ? GetNextMakers(wfruntime, request) : "");
                     flowInstance.F_IsFinish = (wfruntime.nextNodeType == 4 ? 1 : 0);
                     await AddTransHistory(wfruntime);
                 }
@@ -388,7 +396,7 @@ namespace WaterCloud.Service.FlowManage
         /// 一般用于本节点审核完成后，修改流程实例的当前执行人，可以做到通知等功能
         /// </summary>
         /// <returns></returns>
-        private string GetNextMakers(FlowRuntime wfruntime)
+        private string GetNextMakers(FlowRuntime wfruntime, NodeDesignateEntity request = null)
         {
             string makerList = "";
             if (wfruntime.nextNodeId == "-1")
@@ -398,6 +406,31 @@ namespace WaterCloud.Service.FlowManage
             if (wfruntime.nextNodeType == 0)//如果是会签节点
             {
                 makerList = GetForkNodeMakers(wfruntime, wfruntime.nextNodeId);
+            }
+            else if (wfruntime.nextNode.setInfo.NodeDesignate == Setinfo.RUNTIME_SPECIAL_ROLE)
+            { //如果是运行时指定角色
+                if (wfruntime.nextNode.setInfo.NodeDesignate != request.NodeDesignateType)
+                {
+                    throw new Exception("前端提交的节点权限类型异常，请检查流程");
+                }
+                var users = new List<string>();
+				foreach (var item in request.NodeDesignates)
+				{
+                    var temps = uniwork.IQueryable<UserEntity>(a => a.F_RoleId.Contains(item) && a.F_EnabledMark == true && a.F_DeleteMark == false).Select(a => a.F_Id).ToList();
+					if (temps!=null&&temps.Count>0)
+					{
+                        users.AddRange(temps);
+                    }
+                }
+                makerList = JsonHelper.ArrayToString(users.Distinct().ToList(), makerList);
+            }
+            else if (wfruntime.nextNode.setInfo.NodeDesignate == Setinfo.RUNTIME_SPECIAL_USER)
+            {  //如果是运行时指定用户
+                if (wfruntime.nextNode.setInfo.NodeDesignate != request.NodeDesignateType)
+                {
+                    throw new Exception("前端提交的节点权限类型异常，请检查流程");
+                }
+                makerList = JsonHelper.ArrayToString(request.NodeDesignates, makerList);
             }
             else
             {
@@ -519,6 +552,10 @@ namespace WaterCloud.Service.FlowManage
                     users = users.Distinct().ToList();
                     makerList = JsonHelper.ArrayToString(users, makerList);
                 }
+                else if (node.setInfo.NodeDesignate == Setinfo.RUNTIME_SPECIAL_ROLE || node.setInfo.NodeDesignate == Setinfo.RUNTIME_SPECIAL_USER)
+                {
+                    //如果是运行时选定的用户，则暂不处理。由上个节点审批时选定
+                }
             }
             else  //如果没有设置节点信息，默认所有人都可以审核
             {
@@ -526,6 +563,85 @@ namespace WaterCloud.Service.FlowManage
             }
             return makerList;
         }
+
+        /// <summary>
+        /// 判定节点需要选择执行人或执行角色
+        /// </summary>
+        /// <param name="request"></param>
+        /// <exception cref="Exception"></exception>
+        private void CheckNodeDesignate(NodeDesignateEntity request)
+        {
+            if ((request.NodeDesignateType == Setinfo.RUNTIME_SPECIAL_ROLE
+                 || request.NodeDesignateType == Setinfo.RUNTIME_SPECIAL_USER) && request.NodeDesignates.Length == 0)
+            {
+                throw new Exception("下个节点需要选择执行人或执行角色");
+            }
+        }
+        /// <summary>
+        /// 返回用于处理流程节点
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<FlowinstanceEntity> GetForVerification(string id)
+        {
+            var flowinstance = GetForm(id).GetAwaiter().GetResult();
+            var runtime = new FlowRuntime(flowinstance);
+            if (runtime.nextNodeType != -1 && runtime.nextNode != null && runtime.nextNode.setInfo != null && runtime.nextNodeType != 4)
+            {
+                flowinstance.NextNodeDesignateType = runtime.nextNode.setInfo.NodeDesignate;
+				if (flowinstance.NextNodeDesignateType==Setinfo.SPECIAL_USER)
+				{
+                    flowinstance.NextNodeDesignates = runtime.nextNode.setInfo.NodeDesignateData.users;
+                    flowinstance.NextMakerName = string.Join(',', uniwork.IQueryable<UserEntity>(a => flowinstance.NextNodeDesignates.Contains(a.F_Id)).Select(a => a.F_RealName).ToList());
+                }
+                else if (flowinstance.NextNodeDesignateType == Setinfo.SPECIAL_ROLE)
+                {
+                    flowinstance.NextNodeDesignates = runtime.nextNode.setInfo.NodeDesignateData.roles;
+                    List<UserEntity> list = new List<UserEntity>();
+                    List<string> users = new List<string>();
+                    foreach (var item in flowinstance.NextNodeDesignates)
+                    {
+                        var temp = uniwork.IQueryable<UserEntity>(a => a.F_RoleId.Contains(item)).ToList();
+                        var tempList = new List<UserEntity>();
+                        if (runtime.nextNode.setInfo.NodeDesignateData.currentDepart)
+                        {
+                            var currentDepartment = uniwork.FindEntity<UserEntity>(flowCreator).GetAwaiter().GetResult().F_DepartmentId.Split(',').ToList();
+                            foreach (var user in temp)
+                            {
+                                var nextCurrentDepartment = user.F_DepartmentId.Split(',').ToList();
+                                if (TextHelper.IsArrayIntersection(currentDepartment, nextCurrentDepartment))
+                                {
+                                    tempList.Add(user);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            tempList = temp;
+                        }
+                        var tempFinal = tempList.Select(a => a.F_Id).ToList();
+                        users.AddRange(tempFinal);
+                    }
+                    users = users.Distinct().ToList();
+                    flowinstance.NextMakerName = string.Join(',', uniwork.IQueryable<UserEntity>(a => users.Contains(a.F_Id)).Select(a => a.F_RealName).ToList());
+                }
+            }
+            if (runtime.currentNode != null && runtime.currentNode.setInfo != null && runtime.currentNodeType != 4)
+            {
+                flowinstance.CurrentNodeDesignateType = runtime.currentNode.setInfo.NodeDesignate;
+				if (flowinstance.F_MakerList!="1" && !string.IsNullOrEmpty(flowinstance.F_MakerList))
+				{
+                    var temps = flowinstance.F_MakerList.Split(',');
+                    flowinstance.CurrentMakerName = string.Join(',', uniwork.IQueryable<UserEntity>(a => temps.Contains(a.F_Id)).Select(a => a.F_RealName).ToList());
+                }
+				else
+				{
+                    flowinstance.CurrentMakerName = "所有人";
+                }
+            }
+            return flowinstance;
+        }
+
         #endregion
 
         #region 提交数据
@@ -577,28 +693,24 @@ namespace WaterCloud.Service.FlowManage
         }
         public async Task Verification(VerificationExtend entity)
         {
-            var user = currentuser;
-            var tag = new Tag
-            {
-                UserName = user.UserName,
-                UserId = user.UserId,
-                Description = entity.F_VerificationOpinion,
-                Taged = Int32.Parse(entity.F_VerificationFinally)
-            };
-            bool isReject = TagState.Reject.Equals((TagState)tag.Taged);
+            bool isReject = TagState.Reject.Equals((TagState)Int32.Parse(entity.F_VerificationFinally));
             if (isReject)  //驳回
             {
                 await NodeReject(entity);
             }
             else
             {
-                await NodeVerification(entity.F_FlowInstanceId, tag);
+                await NodeVerification(entity);
             }
             await CacheHelper.Remove(cacheKey + entity.F_FlowInstanceId);
             await CacheHelper.Remove(cacheKey + "list");
         }
         public async Task CreateInstance(FlowinstanceEntity entity)
         {
+            var nodeDesignate = new NodeDesignateEntity();
+            nodeDesignate.NodeDesignates = entity.NextNodeDesignates;
+            nodeDesignate.NodeDesignateType = entity.NextNodeDesignateType;
+            CheckNodeDesignate(nodeDesignate);
             entity.F_EnabledMark = true;
             FlowschemeEntity scheme = null;
             if (!string.IsNullOrEmpty(entity.F_SchemeId))
@@ -647,7 +759,7 @@ namespace WaterCloud.Service.FlowManage
             entity.F_ActivityName = wfruntime.nextNode.name;
             entity.F_PreviousId = wfruntime.currentNodeId;
             entity.F_CreatorUserName = user.UserName;
-            entity.F_MakerList = (wfruntime.GetNextNodeType() != 4 ? GetNextMakers(wfruntime) : "");
+            entity.F_MakerList = (wfruntime.GetNextNodeType() != 4 ? GetNextMakers(wfruntime, nodeDesignate) : "");
             entity.F_IsFinish = (wfruntime.GetNextNodeType() == 4 ? 1 : 0);
             uniwork.BeginTrans();
             await uniwork.Insert(entity);
@@ -732,6 +844,10 @@ namespace WaterCloud.Service.FlowManage
         }
         public async Task UpdateInstance(FlowinstanceEntity entity)
         {
+            var nodeDesignate = new NodeDesignateEntity();
+            nodeDesignate.NodeDesignates = entity.NextNodeDesignates;
+            nodeDesignate.NodeDesignateType = entity.NextNodeDesignateType;
+            CheckNodeDesignate(nodeDesignate);
             FlowschemeEntity scheme = null;
             if (!string.IsNullOrEmpty(entity.F_SchemeId))
             {
@@ -778,7 +894,7 @@ namespace WaterCloud.Service.FlowManage
             entity.F_ActivityName = wfruntime.nextNode.name;
             entity.F_PreviousId = wfruntime.currentNodeId;
             entity.F_CreatorUserName = user.UserName;
-            entity.F_MakerList = (wfruntime.GetNextNodeType() != 4 ? GetNextMakers(wfruntime) : "");
+            entity.F_MakerList = (wfruntime.GetNextNodeType() != 4 ? GetNextMakers(wfruntime, nodeDesignate) : "");
             entity.F_IsFinish = (wfruntime.GetNextNodeType() == 4 ? 1 : 0);
             uniwork.BeginTrans();
             await uniwork.Update(entity);

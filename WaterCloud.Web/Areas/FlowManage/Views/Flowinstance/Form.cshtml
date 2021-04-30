@@ -57,7 +57,8 @@
     //参数传递到表单页
     //表单数据
     var formtext;
-    layui.use(['form', 'layer', 'element', 'jquery', 'table', 'waterflow', 'flowlayout', 'common', 'step', 'dtree', 'formPreview', 'layedit','optimizeSelectOption'], function () {
+    var NextNodeDesignateType;
+    layui.use(['form', 'layer', 'element', 'jquery', 'table', 'waterflow', 'flowlayout', 'common', 'step', 'dtree', 'formPreview', 'layedit', 'optimizeSelectOption'], function () {
         var form = layui.form,
             element = layui.element,
             layer = layui.layer,
@@ -75,13 +76,11 @@
             filter: 'stepForm',
             width: '100%', //设置容器宽度
             stepWidth: '750px',
-            height: '600px',
+            height: '650px',
             stepItems: [{
-                title: '基本信息'
-            }, {
-                title: '填写表单'
-            }, {
-                title: '查看流程'
+                title: '表单信息'
+            },{
+                title: '基础信息'
             }]
         });
         //权限字段
@@ -147,9 +146,8 @@
             }
         });
         /*=========流程设计（end）=====================*/
-
+        $('#NextMakerName').parent().parent().addClass('layui-hide');
         //流程模板选择列表
-
         var changeScheme = function (id) { //切换表单
             common.ajax({
                 url: '/SystemManage/Flowscheme/GetFormJson',
@@ -170,6 +168,37 @@
                     else {
                         $("#frmPreview").load(document.location.origin + '/form/' + data.F_WebId + '.html');
                     }
+                    NextNodeDesignateType = data.NextNodeDesignateType;
+                    $('#NextMakerName').parent().parent().removeClass('layui-hide');
+                    if (!data.NextNodeDesignateType) {
+                        $('#NextNodeDesignates').val('');
+                        $('#NextMakerName').val('');
+                        $('#NextMakerName').attr('disabled', 'disabled');
+                        $('#NextMakerName').removeAttr('placeholder');
+                        $('#NextMakerName').parent().parent().addClass('layui-hide');
+                    }
+                    else if (data.NextNodeDesignateType == "RUNTIME_SPECIAL_ROLE") {
+                        $('#NextNodeDesignates').val('');
+                        $('#NextMakerName').val('');
+                        $('#NextMakerName').removeAttr('disabled');
+                        $('#NextMakerName').attr('placeholder', '请点击选择角色');
+                    }
+                    else if (data.NextNodeDesignateType == "RUNTIME_SPECIAL_USER") {
+                        $('#NextNodeDesignates').val('');
+                        $('#NextMakerName').val('');
+                        $('#NextMakerName').removeAttr('disabled');
+                        $('#NextMakerName').attr('placeholder', '请点击选择用户');
+                    }
+                    else {
+                        $('#NextNodeDesignates').val('');
+                        $('#NextMakerName').val('');
+                        $('#NextMakerName').attr('disabled', 'disabled');
+                        $('#NextMakerName').removeAttr('placeholder');
+                        $('#NextMakerName').val(data.NextMakerName);
+                        if (!data.NextMakerName) {
+                            $('#NextMakerName').val("所有人");
+                        }
+                    }
                     //预览流程
                     flowDesignPanel.loadData(JSON.parse(data.F_SchemeContent));
                     postData.F_CustomName = data.F_SchemeName + " " + new Date().Format("yyyy-MM-dd hh:mm:ss");
@@ -177,7 +206,6 @@
             });
             form.render();
         }
-        var change = false;
         form.on('select(schemeChangeFilter)', function (obj) {
             if (!!obj.value) {
                 change = true;
@@ -188,6 +216,9 @@
             }
             $("#frmPreview").html('');
             $("#valueList").val('');
+            if (!!obj.value) {
+                changeScheme(obj.value);
+            }
             form.render();
         });
         $(function () {
@@ -271,15 +302,6 @@
         //监听提交
         form.on('submit(formStep)', function (data) {
             postData = $.extend(postData, data.field);
-            if (change) {
-                changeScheme(postData.F_SchemeId);
-                change = false;
-            }
-            step.next('#stepForm');
-            return false;
-        });
-
-        form.on('submit(formStep2)', function (data) {
             if (!!layedit.index) {
                 layedit.sync(layedit.index);
                 data.field[editor.id] = $('#' + editor.id).val();
@@ -298,6 +320,8 @@
             return false;
         });
         form.on('submit(saveBtn)', function (data) {
+            postData.NextNodeDesignateType = NextNodeDesignateType;
+            postData.NextNodeDesignates = postData.NextNodeDesignates ? postData.NextNodeDesignates.split(',') : [];
             common.submitForm({
                 url: '/FlowManage/Flowinstance/SubmitForm?keyValue=' + keyValue,
                 param: postData,
@@ -310,6 +334,31 @@
             return false;
         });
     });
+    function search() {
+        layui.use(['jquery', 'form', 'common'], function () {
+            var form = layui.form,
+                $ = layui.$,
+                common = layui.common;
+            var parentform = window.name;
+            //不同弹窗
+            if (NextNodeDesignateType == 'RUNTIME_SPECIAL_ROLE') {
+                common.modalOpen({
+                    title: "选择角色",
+                    url: "/SystemOrganize/Role/AddForm?parentform=" + parentform + "&name=" + "NextMakerName" + "&value=" + "NextNodeDesignates" + "&ids=" + $('#NextNodeDesignates').val(),
+                    width: "650px",
+                    height: "600px",
+                });
+            }
+            else if (NextNodeDesignateType == 'RUNTIME_SPECIAL_USER') {
+                common.modalOpen({
+                    title: "选择用户",
+                    url: "/SystemOrganize/User/AddForm?parentform=" + parentform + "&name=" + "NextMakerName" + "&value=" + "NextNodeDesignates" + "&ids=" + $('#NextNodeDesignates').val(),
+                    width: "650px",
+                    height: "600px",
+                });
+            }
+        });
+    }
 </script>
 
 <body>
@@ -321,14 +370,6 @@
                         <div>
                             <form class="layui-form layuimini-form">
                                 <div class="layui-form-item layui-hide">
-                                    <label class="layui-form-label required">流程编号</label>
-                                    <input type="text" name="valueList" id="valueList" class="layui-hide" hidden>
-                                    <div class="layui-input-block">
-                                        <input type="text" name="F_Code" id="F_Code" lay-verify="required"
-                                               class="layui-input">
-                                    </div>
-                                </div>
-                                <div class="layui-form-item layui-hide">
                                     <label class="layui-form-label required">选择流程模板</label>
                                     <div class="layui-input-block">
                                         <select id="F_SchemeId" name="F_SchemeId" lay-filter='schemeChangeFilter' lay-verify="required" lay-search>
@@ -336,10 +377,17 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="layui-form-item layui-form-text layui-hide">
-                                    <label class="layui-form-label">备注</label>
+                                <div class="layui-form-item" style="padding-top:15px">
+                                    <fieldset class="layui-elem-field">
+                                        <legend>申请内容</legend>
+                                        <div id="frmPreview"></div>
+                                    </fieldset>
+                                </div>
+                                <div class="layui-form-item layui-hide">
+                                    <label class="layui-form-label required">下一步审核</label>
                                     <div class="layui-input-block">
-                                        <textarea id="F_Description" name="F_Description" class="layui-textarea" placeholder="请输入备注"></textarea>
+                                        <input type="text" name="NextMakerName" disabled="disabled" id="NextMakerName" lay-verify="required" onclick="search()" class="layui-input">
+                                        <input type="text" name="NextNodeDesignates" id="NextNodeDesignates" class="layui-input layui-hide">
                                     </div>
                                 </div>
                                 <div class="form-group-bottom text-right">
@@ -355,25 +403,15 @@
                             <form class="layui-form layuimini-form">
                                 <div class="layui-form-item">
                                     <fieldset class="layui-elem-field">
-                                        <legend>申请内容</legend>
-                                        <div id="frmPreview"></div>
-                                    </fieldset>
-                                </div>
-                                <div class="form-group-bottom text-right">
-                                    <div class="layui-input-block">
-                                        <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
-                                        <button class="layui-btn" lay-submit lay-filter="formStep2">
-                                            &emsp;下一步&emsp;
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div>
-                            <form class="layui-form layuimini-form">
-                                <div class="layui-form-item">
-                                    <fieldset class="layui-elem-field">
-                                        <legend>流程步骤</legend>
+                                        <legend>基础信息</legend>
+                                        <div class="layui-form-item layui-hide">
+                                            <label class="layui-form-label">流程编号</label>
+                                            <input type="text" name="valueList" id="valueList" class="layui-hide" hidden>
+                                            <div class="layui-input-block">
+                                                <input type="text" name="F_Code" id="F_Code" disabled="disabled" lay-verify="required"
+                                                       class="layui-input">
+                                            </div>
+                                        </div>
                                         <div id="flowPanel"></div>
                                     </fieldset>
                                 </div>
