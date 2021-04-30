@@ -2,7 +2,7 @@
 <p></p>
 
 <p align="center">
-<img src="https://watercloud.vip/icon/favicon.ico" height="80"/>
+<img src="http://106.75.169.226:5000/icon/favicon.ico" height="80"/>
 </p>
 <div align="center">
 
