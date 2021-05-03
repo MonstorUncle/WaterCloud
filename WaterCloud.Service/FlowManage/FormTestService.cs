@@ -18,6 +18,7 @@ namespace WaterCloud.Service.FlowManage
         }
         public async Task Add(string flowInstanceId, string frmData)
         {
+            currentuser = OperatorProvider.Provider.GetCurrent();
             var req = frmData.ToObject<FormTestEntity>();
             req.F_FlowInstanceId = flowInstanceId;
             req.Create();
@@ -26,6 +27,7 @@ namespace WaterCloud.Service.FlowManage
         }
         public async Task Edit(string flowInstanceId, string frmData)
         {
+            currentuser = OperatorProvider.Provider.GetCurrent();
             var req = frmData.ToObject<FormTestEntity>();
             req.F_FlowInstanceId = flowInstanceId;
             await repository.Update(a => a.F_FlowInstanceId == req.F_FlowInstanceId, a => new FormTestEntity
