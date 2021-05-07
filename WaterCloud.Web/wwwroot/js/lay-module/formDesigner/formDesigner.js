@@ -346,7 +346,7 @@ layui.define(['layer', 'laytpl', 'element', 'form', 'slider', 'laydate', 'rate',
                 , '<h3 class="coltitle">设计</h3>'
                 , '<!-- 内容主体区域 -->'
                 , '<form class="layui-form">'
-                , '<div class="layui-form" id="formDesignerForm" lay-filter="formDesignerForm" style="position:absolute; height:410px; overflow:auto">'
+                , '<div class="layui-form" id="formDesignerForm" lay-filter="formDesignerForm" style="height:410px; overflow:auto">'
                 , '<div class="layui-row layui-empty">'
                 , '从左侧拖拽控件到此设计区域来添加字段'
                 , '</div>'
