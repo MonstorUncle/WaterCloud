@@ -289,7 +289,6 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(Nullable<DateTime>))
                 {
-                    left = Expression.Constant(filterObj.field);
                     right = Expression.Constant(DateTime.Parse(filterObj.value), typeof(DateTime?));
                 }
                 else if (property.PropertyType == typeof(string))
@@ -302,8 +301,15 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(Nullable<decimal>))
                 {
-                    left = Expression.Constant(filterObj.field);
                     right = Expression.Constant(decimal.Parse(filterObj.value), typeof(decimal?));
+                }
+                else if (property.PropertyType == typeof(float))
+                {
+                    right = Expression.Constant(float.Parse(filterObj.value));
+                }
+                else if (property.PropertyType == typeof(Nullable<float>))
+                {
+                    right = Expression.Constant(float.Parse(filterObj.value), typeof(float?));
                 }
                 else if (property.PropertyType == typeof(bool))
                 {
@@ -329,8 +335,7 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(Guid?))
                 {
-                    left = Expression.Property(left, "Value");
-                    right = Expression.Constant(Guid.Parse(filterObj.value));
+                    right = Expression.Constant(Guid.Parse(filterObj.value), typeof(Guid?));
                 }
                 else
                 {
