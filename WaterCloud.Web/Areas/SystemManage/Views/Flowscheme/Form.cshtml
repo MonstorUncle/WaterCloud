@@ -153,9 +153,14 @@
                     layer.msg("开始节点与结束节点不能设置");
                     return false;
                 }
+               //高度宽度超出就适应屏幕
+                var width = 650;
+                var height = 550;
+                var _width = document.body.clientWidth > width ? width + 'px' : document.body.clientWidth - 20 + 'px';
+                var _height = document.body.clientHeight > height ? height + 'px' : document.body.clientHeight - 20 + 'px';
                 top.layer.open({
                     type: 2,
-                    area: ['650px', '550px'], //宽高
+                    area: [_width, _height], //宽高
                     maxmin: true, //开启最大化最小化按钮
                     title: '节点设置【' + object.name + '】',
                     content: '/SystemManage/Flowscheme/NodeInfo',
@@ -184,9 +189,14 @@
             OpenLine: function (object) {
                 FlowDesignObject = object; //为NodeInfo窗口提供调用
                 valueList = $("#valueList").val().split(',');
+                //高度宽度超出就适应屏幕
+                var width = 650;
+                var height = 500;
+                var _width = document.body.clientWidth > width ? width + 'px' : document.body.clientWidth - 20 + 'px';
+                var _height = document.body.clientHeight > height ? height + 'px' : document.body.clientHeight - 20 + 'px';
                 top.layer.open({
                     type: 2,
-                    area: ['650px', '500px'], //宽高
+                    area: [_width, _height], //宽高
                     maxmin: true, //开启最大化最小化按钮
                     title: '连线设置【' + object.name + '】',
                     content: '/SystemManage/Flowscheme/LineInfo',
@@ -216,9 +226,14 @@
             },
             OpenArea: function (object) {
                 FlowDesignObject = object; //为NodeInfo窗口提供调用
+                //高度宽度超出就适应屏幕
+                var width = 450;
+                var height = 350;
+                var _width = document.body.clientWidth > width ? width + 'px' : document.body.clientWidth - 20 + 'px';
+                var _height = document.body.clientHeight > height ? height + 'px' : document.body.clientHeight - 20 + 'px';
                 top.layer.open({
                     type: 2,
-                    area: ['450px', '350px'], //宽高
+                    area: [_width, _height], //宽高
                     maxmin: true, //开启最大化最小化按钮
                     title: '区域设置【' + object.name + '】',
                     content: '/SystemManage/Flowscheme/AreaInfo',
