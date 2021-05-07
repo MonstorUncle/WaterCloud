@@ -22,10 +22,8 @@ namespace WaterCloud.DataBase
             Expression left = null; //组装左边
             //组装右边
             Expression right = null;
-
             if (property != null)
             {
-                left = Expression.Property(param, property);
                 if (property.PropertyType == typeof(int))
                 {
                     int i;
@@ -35,30 +33,48 @@ namespace WaterCloud.DataBase
                     }
                     catch (Exception)
                     {
-                        i = -999;
+                        i = -99999;
                     }
                     right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<int>))
                 {
-                    int i;
+                    int? i;
                     try
                     {
                         i = int.Parse(filterObj.Value);
                     }
                     catch (Exception)
                     {
-                        i = -999;
+                        i = null;
                     }
-                    right = Expression.Constant(i, typeof(int?));
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.Value) ? null : i, typeof(int?));
                 }
                 else if (property.PropertyType == typeof(DateTime))
                 {
-                    right = Expression.Constant(DateTime.Parse(filterObj.Value));
+                    DateTime i;
+                    try
+                    {
+                        i = DateTime.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = DateTime.Now.AddYears(-100);
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<DateTime>))
                 {
-                    right = Expression.Constant(DateTime.Parse(filterObj.Value), typeof(DateTime?));
+                    DateTime? i;
+                    try
+                    {
+                        i = DateTime.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.Value) ? null : i, typeof(DateTime?));
                 }
                 else if (property.PropertyType == typeof(string))
                 {
@@ -66,15 +82,55 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(decimal))
                 {
-                    right = Expression.Constant(decimal.Parse(filterObj.Value));
+                    decimal i;
+                    try
+                    {
+                        i = decimal.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = -99999;
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<decimal>))
                 {
-                    right = Expression.Constant(decimal.Parse(filterObj.Value), typeof(decimal?));
+                    decimal? i;
+                    try
+                    {
+                        i = decimal.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.Value) ? null : i, typeof(decimal?));
                 }
-                else if (property.PropertyType == typeof(Guid))
+                else if (property.PropertyType == typeof(float))
                 {
-                    right = Expression.Constant(Guid.Parse(filterObj.Value));
+                    float i;
+                    try
+                    {
+                        i = float.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = -99999;
+                    }
+                    right = Expression.Constant(i);
+                }
+                else if (property.PropertyType == typeof(Nullable<float>))
+                {
+                    float? i;
+                    try
+                    {
+                        i = float.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.Value) ? null : i, typeof(float?));
                 }
                 else if (property.PropertyType == typeof(bool))
                 {
@@ -94,10 +150,31 @@ namespace WaterCloud.DataBase
                     }
                     right = Expression.Constant(i, typeof(bool?));
                 }
+                else if (property.PropertyType == typeof(Guid))
+                {
+                    Guid i;
+                    try
+                    {
+                        i = Guid.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = new Guid();
+                    }
+                    right = Expression.Constant(i);
+                }
                 else if (property.PropertyType == typeof(Guid?))
                 {
-                    left = Expression.Property(left, "Value");
-                    right = Expression.Constant(Guid.Parse(filterObj.Value));
+                    Guid? i;
+                    try
+                    {
+                        i = Guid.Parse(filterObj.Value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.Value) ? null : i, typeof(Guid?));
                 }
                 else
                 {
@@ -266,30 +343,48 @@ namespace WaterCloud.DataBase
                     }
                     catch (Exception)
                     {
-                        i = -999;
+                        i = -99999;
                     }
                     right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<int>))
                 {
-                    int i;
+                    int? i;
                     try
                     {
                         i = int.Parse(filterObj.value);
                     }
                     catch (Exception)
                     {
-                        i = -999;
+                        i = null;
                     }
-                    right = Expression.Constant(i, typeof(int?));
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.value) ? null : i, typeof(int?));
                 }
                 else if (property.PropertyType == typeof(DateTime))
                 {
-                    right = Expression.Constant(DateTime.Parse(filterObj.value));
+                    DateTime i;
+                    try
+                    {
+                        i = DateTime.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = DateTime.Now.AddYears(-100);
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<DateTime>))
                 {
-                    right = Expression.Constant(DateTime.Parse(filterObj.value), typeof(DateTime?));
+                    DateTime? i;
+                    try
+                    {
+                        i = DateTime.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.value) ? null : i, typeof(DateTime?));
                 }
                 else if (property.PropertyType == typeof(string))
                 {
@@ -297,19 +392,55 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(decimal))
                 {
-                    right = Expression.Constant(decimal.Parse(filterObj.value));
+                    decimal i;
+                    try
+                    {
+                        i = decimal.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = -99999;
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<decimal>))
                 {
-                    right = Expression.Constant(decimal.Parse(filterObj.value), typeof(decimal?));
+                    decimal? i;
+                    try
+                    {
+                        i = decimal.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.value) ? null : i, typeof(decimal?));
                 }
                 else if (property.PropertyType == typeof(float))
                 {
-                    right = Expression.Constant(float.Parse(filterObj.value));
+                    float i;
+                    try
+                    {
+                        i = float.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = -99999;
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Nullable<float>))
                 {
-                    right = Expression.Constant(float.Parse(filterObj.value), typeof(float?));
+                    float? i;
+                    try
+                    {
+                        i = float.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.value) ? null : i, typeof(float?));
                 }
                 else if (property.PropertyType == typeof(bool))
                 {
@@ -331,11 +462,29 @@ namespace WaterCloud.DataBase
                 }
                 else if (property.PropertyType == typeof(Guid))
                 {
-                    right = Expression.Constant(Guid.Parse(filterObj.value));
+                    Guid i;
+                    try
+                    {
+                        i = Guid.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = new Guid();
+                    }
+                    right = Expression.Constant(i);
                 }
                 else if (property.PropertyType == typeof(Guid?))
                 {
-                    right = Expression.Constant(Guid.Parse(filterObj.value), typeof(Guid?));
+                    Guid? i;
+                    try
+                    {
+                        i = Guid.Parse(filterObj.value);
+                    }
+                    catch (Exception)
+                    {
+                        i = null;
+                    }
+                    right = Expression.Constant(string.IsNullOrEmpty(filterObj.value) ? null : i, typeof(Guid?));
                 }
                 else
                 {
@@ -344,8 +493,7 @@ namespace WaterCloud.DataBase
             }
             else //如果左边不是属性，直接是值的情况
             {
-                left = Expression.Constant(filterObj.field);
-                right = Expression.Constant(filterObj.value);
+                throw new Exception("暂不能解析该Key的类型");
             }
             Expression filter = Expression.Equal(left, right);
             switch (filterObj.type)
