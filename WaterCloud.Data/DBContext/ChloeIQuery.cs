@@ -24,6 +24,7 @@ namespace WaterCloud.DataBase
             Expression right = null;
             if (property != null)
             {
+                left = Expression.Property(param, property);
                 if (property.PropertyType == typeof(int))
                 {
                     int i;
