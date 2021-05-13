@@ -1,4 +1,4 @@
-/*
+﻿/*
 Navicat Oracle Data Transfer
 Oracle Client Version : 11.2.0.1.0
 
@@ -388,7 +388,7 @@ CREATE TABLE "OMS_UPLOADFILE" (
 "F_ID" NVARCHAR2(50) NOT NULL ,
 "F_FILEPATH" NVARCHAR2(50) NULL ,
 "F_FILENAME" NVARCHAR2(200) NOT NULL ,
-"F_FILETYPE" NVARCHAR2(200) NULL ,
+"F_FILETYPE" NUMBER(11) NULL ,
 "F_FILESIZE" NUMBER(11) NULL ,
 "F_FILEEXTENSION" NVARCHAR2(20) NULL ,
 "F_FILEBY" NVARCHAR2(50) NULL ,
@@ -4865,7 +4865,8 @@ CREATE TABLE "SYS_SYSTEMSET" (
 "F_ENDTIME" DATE NULL ,
 "F_DBSTRING" NCLOB NULL ,
 "F_DBPROVIDER" NVARCHAR2(50) NULL ,
-"F_HOSTURL" NVARCHAR2(255) NULL 
+"F_HOSTURL" NVARCHAR2(255) NULL ，
+"F_DBNUMBER" NVARCHAR2(50) NULL 
 )
 LOGGING
 NOCOMPRESS
@@ -4876,7 +4877,7 @@ NOCACHE
 -- ----------------------------
 -- Records of SYS_SYSTEMSET
 -- ----------------------------
-INSERT INTO "SYS_SYSTEMSET" VALUES ('d69fd66a-6a77-4011-8a25-53a79bdf5001', '/icon/favicon.ico', 'WaterCloud', '水之云信息系统', '水之云', 'admin', '0000', '0', '1', null, TO_DATE('2020-06-12 16:30:00', 'YYYY-MM-DD HH24:MI:SS'), '9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', TO_DATE('2021-02-26 09:46:55', 'YYYY-MM-DD HH24:MI:SS'), '9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', null, null, '136xxxxxxxx', 'xxxx', TO_DATE('2032-06-26 00:00:00', 'YYYY-MM-DD HH24:MI:SS'), 'Data Source=127.0.0.1:1521/orcl;Persist Security Info=True;User ID=ZJN;Password=123456; Connection Timeout=600; Max Pool Size = 512;', 'Oracle.ManagedDataAccess.Client', 'localhost');
+INSERT INTO "SYS_SYSTEMSET" VALUES ('d69fd66a-6a77-4011-8a25-53a79bdf5001', '/icon/favicon.ico', 'WaterCloud', '水之云信息系统', '水之云', 'admin', '0000', '0', '1', null, TO_DATE('2020-06-12 16:30:00', 'YYYY-MM-DD HH24:MI:SS'), '9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', TO_DATE('2021-02-26 09:46:55', 'YYYY-MM-DD HH24:MI:SS'), '9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', null, null, '136xxxxxxxx', 'xxxx', TO_DATE('2032-06-26 00:00:00', 'YYYY-MM-DD HH24:MI:SS'), 'Data Source=127.0.0.1:1521/orcl;Persist Security Info=True;User ID=ZJN;Password=123456; Connection Timeout=600; Max Pool Size = 512;', 'Oracle.ManagedDataAccess.Client', 'localhost','0');
 
 -- ----------------------------
 -- Table structure for SYS_USER

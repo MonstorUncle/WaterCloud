@@ -1,4 +1,4 @@
-/*
+﻿/*
  Navicat Premium Data Transfer
 
  Source Server         : 本地mssql
@@ -1114,7 +1114,7 @@ CREATE TABLE [dbo].[oms_uploadfile] (
   [F_Id] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
   [F_FilePath] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_FileName] nvarchar(200) COLLATE Chinese_PRC_CI_AS  NOT NULL,
-  [F_FileType] nvarchar(200) COLLATE Chinese_PRC_CI_AS  NULL,
+  [F_FileType] int  NULL,
   [F_FileSize] int  NULL,
   [F_FileExtension] nvarchar(20) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_FileBy] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
@@ -13523,7 +13523,8 @@ CREATE TABLE [dbo].[sys_systemset] (
   [F_EndTime] datetime2(7)  NULL,
   [F_DbString] nvarchar(max) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_DBProvider] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_HostUrl] nvarchar(255) COLLATE Chinese_PRC_CI_AS  NULL
+  [F_HostUrl] nvarchar(255) COLLATE Chinese_PRC_CI_AS  NULL，
+  [F_DbNumber] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL
 )
 GO
 
@@ -13534,7 +13535,7 @@ GO
 -- ----------------------------
 -- Records of sys_systemset
 -- ----------------------------
-INSERT INTO [dbo].[sys_systemset] ([F_Id], [F_Logo], [F_LogoCode], [F_ProjectName], [F_CompanyName], [F_AdminAccount], [F_AdminPassword], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_MobilePhone], [F_PrincipalMan], [F_EndTime], [F_DbString], [F_DBProvider], [F_HostUrl]) VALUES (N'd69fd66a-6a77-4011-8a25-53a79bdf5001', N'/icon/favicon.ico', N'WaterCloud', N'水之云信息系统', N'水之云', N'admin', N'0000', N'0', N'1', N'', N'2020-06-12 16:30:00.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-01-11 12:22:36.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'136xxxxxxxx', N'xxxx', N'2032-06-26 00:00:00.0000000', N'data source=localhost;database=watercloudnetdb;uid=root;pwd=root;', N'MySql.Data.MySqlClient', N'localhost')
+INSERT INTO [dbo].[sys_systemset] ([F_Id], [F_Logo], [F_LogoCode], [F_ProjectName], [F_CompanyName], [F_AdminAccount], [F_AdminPassword], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_MobilePhone], [F_PrincipalMan], [F_EndTime], [F_DbString], [F_DBProvider], [F_HostUrl]) VALUES (N'd69fd66a-6a77-4011-8a25-53a79bdf5001', N'/icon/favicon.ico', N'WaterCloud', N'水之云信息系统', N'水之云', N'admin', N'0000', N'0', N'1', N'', N'2020-06-12 16:30:00.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-01-11 12:22:36.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'136xxxxxxxx', N'xxxx', N'2032-06-26 00:00:00.0000000', N'data source=localhost;database=watercloudnetdb;uid=root;pwd=root;', N'MySql.Data.MySqlClient', N'localhost','0')
 GO
 
 
