@@ -242,15 +242,15 @@ namespace WaterCloud.Service.SystemOrganize
         public async Task<UserEntity> CheckLogin(string username, string password,string localurl)
         {
             //根据登录公司查找公司
-            if (!string.IsNullOrEmpty(localurl))
-            {
-                var setTemp=(await syssetApp.GetList()).Where(a=> localurl.Contains(a.F_HostUrl)).FirstOrDefault();
-                if (setTemp!=null)
-                {
-                    repository = new RepositoryBase<UserEntity>(setTemp.F_DbString,setTemp.F_DBProvider);
-                    uniwork = new RepositoryBase(setTemp.F_DbString, setTemp.F_DBProvider);
-                }
-            }
+            //if (!string.IsNullOrEmpty(localurl))
+            //{
+            //    var setTemp=(await syssetApp.GetList()).Where(a=> localurl.Contains(a.F_HostUrl)).FirstOrDefault();
+            //    if (setTemp!=null)
+            //    {
+            //        repository = new RepositoryBase<UserEntity>(setTemp.F_DbString,setTemp.F_DBProvider);
+            //        uniwork = new RepositoryBase(setTemp.F_DbString, setTemp.F_DBProvider);
+            //    }
+            //}
             UserEntity userEntity =await repository.FindEntity(t => t.F_Account == username);
             if (userEntity != null)
             {
