@@ -41,9 +41,9 @@
 - 适用范围：可以开发OA、ERP、BPM、CRM、WMS、TMS、MIS、BI、电商平台后台、物流管理系统、快递管理系统、教务管理系统等各类管理软件。
 - 租户管理(未实现，理论阶段)
 
-
-- .net4.5版地址：https://gitee.com/qian_wei_hong/WaterCloud/tree/net4.5
-- .net5版地址：https://gitee.com/qian_wei_hong/WaterCloud/tree/net5
+- .net5-SqlSugar版地址：https://gitee.com/qian_wei_hong/WaterCloud
+- .net5-Chloe版地址：https://gitee.com/qian_wei_hong/WaterCloud/tree/net5-Chloe
+- .net4.5版地址：https://gitee.com/qian_wei_hong/WaterCloud/tree/net4.5-Chloe
 - 项目演示地址：http://106.75.169.226:5000/  （账号：admin 密码：0000，数据库2个小时还原一次）
 - 文档地址：https://gitee.com/qian_wei_hong/WaterCloud/wikis/pages
 
