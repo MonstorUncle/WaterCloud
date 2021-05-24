@@ -295,32 +295,14 @@ namespace WaterCloud.Code
                 OperatorModel operatorInfo = await CacheHelper.Get<OperatorModel>(cacheKeyOperator + loginMark);
                 if (operatorInfo != null)
                 {
-                    if (operatorInfo.LoginToken == token || LoginProvider == Define.PROVIDER_WEBAPI)
+                    Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
+                    if ((token == operatorInfo.LoginToken || LoginProvider == Define.PROVIDER_WEBAPI) && tokenMarkList.ContainsKey(operatorInfo.loginMark) && tokenMarkList[operatorInfo.loginMark] == operatorInfo.LoginToken)
                     {
-                        //TimeSpan span = (TimeSpan)(DateTime.Now - operatorInfo.LoginTime);
-                        ////超时
-                        //if (span.TotalHours >= 12)// 登录操作过12小时移除
-                        //{
-                        //    operatorResult.stateCode = 0;
-                        //    Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
-                        //    tokenMarkList.Remove(loginMark);
-                        //    await CacheHelper.Set(cacheKeyToken + operatorInfo.UserId, tokenMarkList);
-                        //    await CacheHelper.Remove(cacheKeyOperator + loginMark);
-                        //}
                         ////账号被顶(排除admin)
-                        //else if (!LoginMultiple && !operatorInfo.IsSystem && token != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
-                        if (!LoginMultiple && !operatorInfo.IsSystem && token != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
+                        if (!LoginMultiple && !operatorInfo.IsSystem && operatorInfo.LoginToken != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
                         {
                             operatorResult.stateCode = -2;
-                            Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
-                            tokenMarkList.Remove(loginMark);
-                            await CacheHelper.Set(cacheKeyToken + operatorInfo.UserId, tokenMarkList);
-                            await CacheHelper.Remove(cacheKeyOperator + loginMark);
-                        }
-                        else if (LoginProvider == Define.PROVIDER_WEBAPI && !operatorInfo.IsSystem && operatorInfo.LoginToken != await CacheHelper.Get<string>(cacheKeyOperator + facilityMark + operatorInfo.UserId))
-                        {
-                            operatorResult.stateCode = -2;
-                            Dictionary<string, string> tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
+                            tokenMarkList = await CacheHelper.Get<Dictionary<string, string>>(cacheKeyToken + operatorInfo.UserId);
                             tokenMarkList.Remove(loginMark);
                             await CacheHelper.Set(cacheKeyToken + operatorInfo.UserId, tokenMarkList);
                             await CacheHelper.Remove(cacheKeyOperator + loginMark);
