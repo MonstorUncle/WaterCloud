@@ -24,16 +24,8 @@ namespace WaterCloud.Service
         public DataFilterService(IDbContext context)
         {
             currentuser = OperatorProvider.Provider.GetCurrent();
-            if (currentuser != null && !(currentuser.DBProvider == GlobalContext.SystemConfig.DBProvider && currentuser.DbString == GlobalContext.SystemConfig.DBConnectionString))
-            {
-                repository = new RepositoryBase<T>(currentuser.DbString, currentuser.DBProvider);
-                uniwork = new RepositoryBase(currentuser.DbString, currentuser.DBProvider);
-            }
-            else
-            {
-                repository = new RepositoryBase<T>(context);
-                uniwork = new RepositoryBase(context);
-            }
+            repository = new RepositoryBase<T>(context);
+            uniwork = new RepositoryBase(context);
             if (currentuser == null)
             {
                 currentuser = new OperatorModel();
