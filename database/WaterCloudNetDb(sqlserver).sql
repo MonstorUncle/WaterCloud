@@ -13523,7 +13523,7 @@ CREATE TABLE [dbo].[sys_systemset] (
   [F_EndTime] datetime2(7)  NULL,
   [F_DbString] nvarchar(max) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_DBProvider] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_HostUrl] nvarchar(255) COLLATE Chinese_PRC_CI_AS  NULL，
+  [F_HostUrl] nvarchar(255) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_DbNumber] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL
 )
 GO
