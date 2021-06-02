@@ -79,14 +79,14 @@ namespace WaterCloud.DataBase
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        IQuery<TEntity> IQueryable<TEntity>() where TEntity : class;
+        IQuery<TEntity> IQueryable<TEntity>(LockType locktype = LockType.NoLock) where TEntity : class;
         /// <summary>
         /// 查询根据条件
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        IQuery<TEntity> IQueryable<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
+        IQuery<TEntity> IQueryable<TEntity>(Expression<Func<TEntity, bool>> predicate, LockType locktype = LockType.NoLock) where TEntity : class;
         /// <summary>
         /// SQL查询
         /// </summary>

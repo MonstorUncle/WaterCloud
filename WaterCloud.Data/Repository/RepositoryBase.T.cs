@@ -86,13 +86,13 @@ namespace WaterCloud.DataBase
         {
             return _context.Query<TEntity>().FirstOrDefault(predicate);
         }
-        public IQuery<TEntity> IQueryable()
+        public IQuery<TEntity> IQueryable(LockType locktype = LockType.NoLock)
         {
-            return _context.Query<TEntity>();
+            return _context.Query<TEntity>(locktype);
         }
-        public IQuery<TEntity> IQueryable(Expression<Func<TEntity, bool>> predicate)
+        public IQuery<TEntity> IQueryable(Expression<Func<TEntity, bool>> predicate, LockType locktype = LockType.NoLock)
         {
-            return _context.Query<TEntity>().Where(predicate);
+            return _context.Query<TEntity>(locktype).Where(predicate);
         }
         public async Task<List<TEntity>> FindList(string strSql)
         {

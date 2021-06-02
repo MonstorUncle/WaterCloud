@@ -28,8 +28,8 @@ namespace WaterCloud.DataBase
         Task<int> Delete(Expression<Func<TEntity, bool>> predicate);
         Task<TEntity> FindEntity(object keyValue);
         Task<TEntity> FindEntity(Expression<Func<TEntity, bool>> predicate);
-        IQuery<TEntity> IQueryable();
-        IQuery<TEntity> IQueryable(Expression<Func<TEntity, bool>> predicate);
+        IQuery<TEntity> IQueryable(LockType locktype = LockType.NoLock);
+        IQuery<TEntity> IQueryable(Expression<Func<TEntity, bool>> predicate, LockType locktype = LockType.NoLock);
         Task<List<TEntity>> FindList(string strSql);
         Task<List<TEntity>> FindList(string strSql, DbParam[] dbParameter);
         Task<List<TEntity>> FindList(Pagination pagination);
