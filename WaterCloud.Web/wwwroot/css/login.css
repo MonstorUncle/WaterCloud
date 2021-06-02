@@ -226,3 +226,7 @@ p {
         color: orange;
         background-color: #FFFFCE;
     }
+.layui-form-select dl dd {
+    cursor: pointer;
+    color: black;
+}

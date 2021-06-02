@@ -23,6 +23,7 @@ layui.config({
     step: 'step-lay/step', // 分步表单扩展
     treeTable: 'treetable-lay/treeTable', //table树形扩展3.x
     tableSelect: 'tableSelect/tableSelect', // table选择扩展
+    tableEdit: 'tableSelect/tableEdit', // table编辑扩展
     iconPickerFa: 'iconPicker/iconPickerFa', // fa图标选择扩展
     echarts: 'echarts/echarts', // echarts图表扩展
     wangEditor: 'wangEditor/wangEditor', // wangEditor富文本扩展

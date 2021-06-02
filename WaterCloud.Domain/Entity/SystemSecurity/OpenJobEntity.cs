@@ -70,5 +70,26 @@ namespace WaterCloud.Domain.SystemSecurity
         public string F_LastModifyUserId { get; set; }
         public DateTime? F_DeleteTime { get; set; }
         public string F_DeleteUserId { get; set; }
+        /// <summary>
+        /// 任务类型
+        /// </summary>
+        public int? F_JobType { get; set; }
+        /// <summary>
+        /// 请求头
+        /// </summary>
+        public string F_RequestHeaders { get; set; }
+        /// <summary>
+        /// 请求内容
+        /// </summary>
+        public string F_RequestString { get; set; }
+        /// <summary>
+        /// 请求url
+        /// </summary>
+        public string F_RequestUrl { get; set; }
+        /// <summary>
+        /// 立即执行
+        /// </summary>
+        [NotMapped]
+        public bool? F_DoItNow { get; set; }
     }
 }

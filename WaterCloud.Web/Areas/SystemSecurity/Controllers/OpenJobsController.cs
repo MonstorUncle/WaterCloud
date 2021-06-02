@@ -115,6 +115,22 @@ namespace WaterCloud.Web.Areas.SystemSecurity.Controllers
                 return await Error(ex.Message, "", keyValue);
             }
         }
+        /// <summary>
+        /// 执行任务
+        /// </summary>
+        [HttpPost]
+        public async Task<ActionResult> DoNow(string keyValue)
+        {
+            try
+            {
+                await _service.DoNow(keyValue);
+                return await Success("操作成功。", "", null, null);
+            }
+            catch (Exception ex)
+            {
+                return await Error(ex.Message, "", null);
+            }
+        }
         [HttpPost]
         [HandlerAjaxOnly]
         public async Task<ActionResult> DeleteLogForm(string keyValue)

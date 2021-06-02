@@ -237,7 +237,7 @@ layui.define(['table', 'form', 'laydate', 'util', 'excel', 'laytpl'], function (
                     } else {
                         where_cache[myTable.id] = myTable.where || {}
                     }
-                } else if ((typeof myTable.url !== 'undefined' && !!myTable.url && myTable.page ? typeof myTable.where.filterSos === 'undefined' : true) && where_cache[myTable.id] && JSON.parse(where_cache[myTable.id].filterSos || '[]').length > 0) {
+                } else if ((typeof myTable.url !== 'undefined' && !!myTable.url &&  myTable.page ? typeof myTable.where.filterSos === 'undefined' : true) && where_cache[myTable.id] && JSON.parse(where_cache[myTable.id].filterSos || '[]').length > 0) {
                     myTable.where['filterSos'] = where_cache[myTable.id].filterSos
                     where_cache[myTable.id] = myTable.where;
                     _this.soulReload(myTable, false);
@@ -866,7 +866,7 @@ layui.define(['table', 'form', 'laydate', 'util', 'excel', 'laytpl'], function (
                     }
                 });
                 if (columnField.length > 0) {
-                    if (typeof myTable.url !== 'undefined' && !!myTable.url && myTable.page) {
+                    if (typeof myTable.url !== 'undefined' && !!myTable.url &&  myTable.page) {
                         var datas = JSON.parse(JSON.stringify(myTable.where)), url = myTable.url;
                         datas['columns'] = JSON.stringify(columnField);
                         $.ajax({
@@ -1778,7 +1778,7 @@ layui.define(['table', 'form', 'laydate', 'util', 'excel', 'laytpl'], function (
                 scrollLeft = $table.next().children('.layui-table-box').children('.layui-table-main').scrollLeft();
 
             isFilterReload[myTable.id] = typeof isr === 'undefined' ? true : isr;
-            if (typeof myTable.url !== 'undefined' && !!myTable.url && myTable.page) {
+            if (typeof myTable.url !== 'undefined' && !!myTable.url &&  myTable.page) {
                 $table.data('scrollLeft', scrollLeft);
                 /**
                  * 后台筛选

@@ -19,10 +19,18 @@
             url: '/SystemSecurity/OpenJobs/GetGridJson',
             page: false,
             cols: [[
-                { type: "radio", width: 50, fixed: 'left'},
+                { type: "radio", width: 50, fixed: 'left' },
                 { field: 'F_JobName', title: '名称', width: 120, sort: true },
                 { field: 'F_JobGroup', title: '组名', width: 120, sort: true },
+                {
+                    field: 'F_JobType', title: '类型', width: 120, sort: true,
+                    templet: function (d) {
+                        return top.clients.dataItems["JobType"][d.F_JobType] == undefined ? "" : top.clients.dataItems["JobType"][d.F_JobType];
+                    }
+                },
                 { field: 'F_FileName', title: '文件名', width: 180, sort: true },
+                { field: 'F_RequestUrl', title: '请求地址', width: 180, sort: true },
+                { field: 'F_RequestString', title: '请求参数', width: 180, sort: true },
                 { field: 'F_CronExpress', title: 'CRON', width: 150 },
                 {
                     field: 'F_EnabledMark', title: '状态', width: 80, sort: true,
@@ -66,7 +74,7 @@
                 },
 
                 { field: 'F_Description', title: '备注', minWidth: 200, sort: true },
-                { title: '操作', width: 260, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
+                { title: '操作', width: 310, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
             ]]
         });
         // 监听搜索操作
@@ -81,7 +89,7 @@
             return false;
         });
         //行点击事件监听，控制按钮显示
-        var oneList = ["NF-edit", "NF-delete", "NF-disabled", "NF-enabled", "NF-edit", "NF-log"];//选择1条显示
+        var oneList = ["NF-edit", "NF-delete", "NF-disabled", "NF-enabled", "NF-edit", "NF-log","NF-doNow"];//选择1条显示
         commonTable.tableRowClick("radio", "currentTableFilter", "currentTableId", oneList);
         /**
          * toolbar监听事件
@@ -119,6 +127,20 @@
                     url: "/SystemSecurity/OpenJobs/Form?keyValue=" + data[0].F_Id,
                     width: "750px",
                     height: "650px",
+                });
+            }
+            else if (obj.event === 'doNow') {
+                if (data.length == 0) {
+                    common.modalMsg("未选中数据", "warning");
+                    return false;
+                }
+                common.submitPost({
+                    prompt: "注：您确定要【执行】该项任务吗？",
+                    url: "/SystemSecurity/OpenJobs/DoNow",
+                    param: { keyValue: data[0].F_Id },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
                 });
             }
             else if (obj.event === 'disabled') {
@@ -199,6 +221,16 @@
                     height: "650px",
                 });
             }
+            else if (obj.event === 'doNow') {
+                common.submitPost({
+                    prompt: "注：您确定要【执行】该项任务吗？",
+                    url: "/SystemSecurity/OpenJobs/DoNow",
+                    param: { keyValue: obj.data.F_Id },
+                    success: function () {
+                        common.reload('data-search-btn');
+                    }
+                });
+            }
             else if (obj.event === 'disabled') {
                 if (obj.data.F_EnabledMark != true) {
                     common.modalMsg("任务未启动，无法关闭！", "warning");
@@ -267,17 +299,19 @@
                 <button id="NF-add" name="NF-add" authorize class="layui-btn layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon">&#xe654;</i>新增</button>
                 <button id="NF-edit" name="NF-edit" authorize class="layui-btn layui-btn-sm layui-btn-warm data-edit-btn layui-hide" lay-event="edit"><i class="layui-icon">&#xe642;</i>修改</button>
                 <button id="NF-delete" name="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn layui-hide" lay-event="delete"> <i class="layui-icon">&#xe640;</i>删除</button>
+                <button id="NF-doNow" name="NF-doNow" authorize class="layui-btn layui-btn-sm layui-btn-warm layui-hide" lay-event="doNow"><i class="layui-icon">&#xe609;</i>执行</button>
                 <button id="NF-enabled" name="NF-enabled" authorize class="layui-btn layui-btn-sm data-enabled-btn layui-hide" lay-event="enabled"> <i class="fa fa-play-circle"></i>启动</button>
                 <button id="NF-disabled" name="NF-disabled" authorize class="layui-btn layui-btn-sm layui-btn-danger data-disabled-btn layui-hide" lay-event="disabled"><i class="fa fa-stop-circle"></i>关闭</button>
-                <button id="NF-log" name="NF-log" authorize class="layui-btn layui-btn-sm data-log-btn layui-hide" lay-event="log"><i class="layui-icon">&#xe642;</i>日志</button>
+                <button id="NF-log" name="NF-log" authorize class="layui-btn layui-btn-sm data-log-btn layui-hide" lay-event="log"><i class="layui-icon">&#xe702;</i>日志</button>
             </div>
         </script>
         <script type="text/html" id="currentTableBar">
             <a id="NF-edit" authorize class="layui-btn layui-btn-sm" lay-event="edit"><i class="layui-icon">&#xe642;</i></a>
             <a id="NF-delete" authorize class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i class="layui-icon">&#xe640;</i></a>
+            <a id="NF-doNow" authorize class="layui-btn layui-btn-sm layui-btn-warm" lay-event="doNow"><i class="layui-icon">&#xe609;</i></a>
             <a id="NF-enabled" authorize class="layui-btn layui-btn-sm" lay-event="enabled"><i class="fa fa-play-circle"></i></a>
             <a id="NF-disabled" authorize class="layui-btn layui-btn-danger layui-btn-sm" lay-event="disabled"><i class="fa fa-stop-circle"></i></a>
-            <a id="NF-log" authorize class="layui-btn layui-btn-sm" lay-event="log"><i class="layui-icon">&#xe642;</i></a>
+            <a id="NF-log" authorize class="layui-btn layui-btn-sm" lay-event="log"><i class="layui-icon">&#xe702;</i></a>
         </script>
         <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
 

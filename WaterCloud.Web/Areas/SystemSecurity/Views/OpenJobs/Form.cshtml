@@ -18,18 +18,47 @@
                             <input type="text" id="F_JobName" name="F_JobName" maxlength="50" value="" lay-verify="required" class="layui-input ">
                         </div>
                     </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label required">任务类型</label>
+                        <div class="layui-input-block" id="F_JobType">
+                        </div>
+                    </div>
                     <div class="layui-form-item layui-hide">
                         <label class="layui-form-label required">文件名称</label>
                         <div class="layui-input-block">
-                            <select id="F_FileName" name="F_FileName"  lay-verify="required">
+                            <select id="F_FileName" name="F_FileName" lay-verify="required">
                                 <option value="">==请选择==</option>
                             </select>
                         </div>
                     </div>
                     <div class="layui-form-item layui-hide">
+                        <label class="layui-form-label required">请求地址</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="F_RequestUrl" name="F_RequestUrl" value="" lay-verify="required" class="layui-input ">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-hide">
+                        <label class="layui-form-label">请求头</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="F_RequestHeaders" name="F_RequestHeaders" class="layui-input ">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-hide">
+                        <label class="layui-form-label">请求参数</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="F_RequestString" name="F_RequestString" class="layui-input ">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-hide">
                         <label class="layui-form-label required">Cron表达式</label>
                         <div class="layui-input-block">
-                            <input type="text" id="F_CronExpress" name="F_CronExpress" maxlength="50"  lay-verify="required" value="" class="layui-input ">
+                            <input type="text" id="F_CronExpress" name="F_CronExpress" maxlength="50" lay-verify="required" value="" class="layui-input ">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-hide">
+                        <label class="layui-form-label">选项</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="F_DoItNow" id="F_DoItNow" checked="" value="true" title="立即执行">
                         </div>
                     </div>
                     <div class="layui-form-item layui-form-text layui-hide">
@@ -47,7 +76,7 @@
 
     </body>
     <script>
-        layui.use(['jquery', 'form', 'laydate', 'common', 'optimizeSelectOption','cron'], function () {
+        layui.use(['jquery', 'form', 'laydate', 'common', 'optimizeSelectOption', 'cron'], function () {
             var form = layui.form,
                 $ = layui.$,
                 common = layui.common,
@@ -66,6 +95,7 @@
                         async: false,
                         success: function (data) {
                             common.val('adminform', data);
+                            changeJobType(data.F_JobType);
                             cron.render({
                                 elem: "#F_CronExpress",           // 绑定元素
                                 value: data.F_CronExpress, // 默认值
@@ -77,6 +107,7 @@
                     });
                 }
                 else {
+                    changeJobType(0);
                     cron.render({
                         elem: "#F_CronExpress",           // 绑定元素
                         value: "0/20 * * * * ?", // 默认值
@@ -93,6 +124,36 @@
                     url: "/SystemSecurity/OpenJobs/QueryLocalHandlers",
                     id: ""
                 });
+                $("#F_JobType").bindRadio({
+                    data: top.clients.dataItems["JobType"],
+                    id: "",
+                });
+            }
+            form.on('radio(F_JobType)', function (data) {
+                changeJobType(data.value);
+            });
+            function changeJobType(value) {
+                if (value == "0") {
+                    $('#F_FileName').parent().parent().removeClass('layui-hide');
+                    $('#F_FileName').attr('lay-verify', 'required');
+                    $('#F_RequestUrl').parent().parent().addClass('layui-hide');
+                    $('#F_RequestUrl').removeAttr('lay-verify', 'required');
+                    $('#F_RequestHeaders').parent().parent().addClass('layui-hide');
+                    $('#F_RequestString').parent().parent().addClass('layui-hide');
+                    $('#F_RequestUrl').val("");
+                    $('#F_RequestHeaders').val("");
+                    $('#F_RequestString').val("");
+                }
+                else {
+                    $('#F_FileName').parent().parent().addClass('layui-hide');
+                    $('#F_FileName').removeAttr('lay-verify');
+                    $('#F_RequestUrl').parent().parent().removeClass('layui-hide');
+                    $('#F_RequestUrl').attr('lay-verify', 'required');
+                    $('#F_RequestHeaders').parent().parent().removeClass('layui-hide');
+                    $('#F_RequestString').parent().parent().removeClass('layui-hide');
+                    $('#F_FileName').val("");
+                }
+                form.render();
             }
             //select验证
             form.verify({

@@ -36,7 +36,7 @@
      </div>
  </div>
  <script>
-     layui.use(['jquery', 'form', 'table', 'common', 'layer', 'optimizeSelectOption'], function () {
+     layui.use(['jquery', 'form', 'table', 'common', 'commonTable', 'layer', 'optimizeSelectOption'], function () {
          var form = layui.form,
              commonTable = layui.commonTable,
              table = layui.table,
@@ -91,7 +91,7 @@
                      }
                  },
                  { field: 'F_Description', title: '备注', minWidth: 120, sort: true },
-                 { title: '操作', width: 170, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
+                 { title: '操作', width: 175, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
              ]]
          });
          // 监听搜索操作
