@@ -13,7 +13,7 @@ namespace WaterCloud.Code
         /// <returns></returns>
         public static string GuId()
         {
-            return Guid.NewGuid().ToString();
+            return IDGen.NextID().ToString();
         }
         /// <summary>
         /// 自动生成编号  201008251145409865
@@ -29,7 +29,7 @@ namespace WaterCloud.Code
         #endregion
         public static string GetGuid()
         {
-            return Guid.NewGuid().ToString().Replace("-", string.Empty).ToLower();
+            return IDGen.NextID().ToString().Replace("-", string.Empty).ToLower();
         }
     }
 }

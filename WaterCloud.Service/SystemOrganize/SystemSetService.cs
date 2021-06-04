@@ -140,7 +140,7 @@ namespace WaterCloud.Service.SystemOrganize
                 await CacheHelper.Remove(cacheKey + "list");
             }
             var set=await ibs.FindEntity<SystemSetEntity>(entity.F_Id);
-            var tempkey=new RepositoryBase(DBContexHelper.Contex(set.F_DbString, set.F_DBProvider)).IQueryable<UserEntity>().Where(a => a.F_IsAdmin == true && a.F_OrganizeId == keyValue).FirstOrDefault().F_Id;
+            var tempkey=ibs.IQueryable<UserEntity>().Where(a => a.F_IsAdmin == true && a.F_OrganizeId == keyValue).FirstOrDefault().F_Id;
             await CacheHelper.Remove(cacheKeyOperator + "info_" + tempkey);
             if (currentuser.UserId == null)
             {
