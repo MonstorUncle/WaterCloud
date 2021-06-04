@@ -173,7 +173,7 @@
                         else {
                             $('[data-clear]').parent().remove();
                         }
-                        code.innerHTML = data.F_Account + '<span class="layui-nav-more"></span>';
+                        code.innerHTML = data.F_Account + '<i class="layui-icon layui-icon-down layui-nav-more"></i>';
                         sessionStorage.setItem('currentUser', JSON.stringify(data));
                         if (data.MsgCout > 0) {
                             $('#noticeMarker').html('<span class="layui-badge-dot"></span>');
