@@ -25,7 +25,7 @@ namespace WaterCloud.Code
         /// <summary>
         /// 短 ID 生成器期初数据
         /// </summary>
-        private static Random _random = new();
+        private static Random _random = new Random();
 
         private const string Bigs = "ABCDEFGHIJKLMNPQRSTUVWXY";
         private const string Smalls = "abcdefghjklmnopqrstuvwxyz";
@@ -36,7 +36,7 @@ namespace WaterCloud.Code
         /// <summary>
         /// 线程安全锁
         /// </summary>
-        private static readonly object ThreadLock = new();
+        private static readonly object ThreadLock = new Random();
 
         /// <summary>
         /// 生成目前比较主流的短 ID

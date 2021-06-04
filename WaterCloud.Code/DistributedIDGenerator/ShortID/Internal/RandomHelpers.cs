@@ -22,12 +22,12 @@ namespace WaterCloud.Code
         /// <summary>
         /// 随机数对象
         /// </summary>
-        private static readonly Random Random = new();
+        private static readonly Random Random = new Random();
 
         /// <summary>
         /// 线程锁
         /// </summary>
-        private static readonly object ThreadLock = new();
+        private static readonly object ThreadLock = new Random();
 
         /// <summary>
         /// 生成线程安全的范围内随机数
