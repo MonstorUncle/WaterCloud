@@ -12,7 +12,7 @@
  Target Server Version : 15002000
  File Encoding         : 65001
 
- Date: 10/02/2021 13:04:03
+ Date: 17/05/2021 11:01:09
 */
 
 
@@ -11502,42 +11502,6 @@ GO
 -- ----------------------------
 
 -- ----------------------------
--- Table structure for sys_dbbackup
--- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_dbbackup]') AND type IN ('U'))
-	DROP TABLE [dbo].[sys_dbbackup]
-GO
-
-CREATE TABLE [dbo].[sys_dbbackup] (
-  [F_Id] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
-  [F_BackupType] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_DbName] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_FileName] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_FileSize] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_FilePath] nvarchar(500) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_BackupTime] datetime2(7)  NULL,
-  [F_SortCode] int  NULL,
-  [F_DeleteMark] tinyint  NULL,
-  [F_EnabledMark] tinyint  NULL,
-  [F_Description] nvarchar(500) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_CreatorTime] datetime2(7)  NULL,
-  [F_CreatorUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_LastModifyTime] datetime2(7)  NULL,
-  [F_LastModifyUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_DeleteTime] datetime2(7)  NULL,
-  [F_DeleteUserId] nvarchar(500) COLLATE Chinese_PRC_CI_AS  NULL
-)
-GO
-
-ALTER TABLE [dbo].[sys_dbbackup] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of sys_dbbackup
--- ----------------------------
-
--- ----------------------------
 -- Table structure for sys_filterip
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_filterip]') AND type IN ('U'))
@@ -11546,19 +11510,19 @@ GO
 
 CREATE TABLE [dbo].[sys_filterip] (
   [F_Id] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
-  [F_Type] tinyint  NULL,
-  [F_StartIP] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_EndIP] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_SortCode] int  NULL,
-  [F_DeleteMark] tinyint  NULL,
-  [F_EnabledMark] tinyint  NULL,
-  [F_Description] nvarchar(500) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_CreatorTime] datetime2(7)  NULL,
-  [F_CreatorUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_LastModifyTime] datetime2(7)  NULL,
-  [F_LastModifyUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_DeleteTime] datetime2(7)  NULL,
-  [F_DeleteUserId] nvarchar(500) COLLATE Chinese_PRC_CI_AS  NULL
+  [F_Type] varchar(1) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_StartIP] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_EndIP] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_SortCode] int  NOT NULL,
+  [F_DeleteMark] varchar(1) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_EnabledMark] varchar(1) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_Description] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_CreatorTime] datetime2(7)  NOT NULL,
+  [F_CreatorUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_LastModifyTime] datetime2(7)  NOT NULL,
+  [F_LastModifyUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_DeleteTime] datetime2(7)  NOT NULL,
+  [F_DeleteUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL
 )
 GO
 
@@ -12010,6 +11974,9 @@ GO
 INSERT INTO [dbo].[sys_items] ([F_Id], [F_ParentId], [F_EnCode], [F_FullName], [F_IsTree], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'2748F35F-4EE2-417C-A907-3453146AAF67', N'77070117-3F1A-41BA-BF81-B8B85BF10D5E', N'Certificate', N'证件名称', N'0', N'2', N'7', N'0', N'1', NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 GO
 
+INSERT INTO [dbo].[sys_items] ([F_Id], [F_ParentId], [F_EnCode], [F_FullName], [F_IsTree], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc87c0-7ff4-eeae-a897-b7418aeb4851', N'77070117-3F1A-41BA-BF81-B8B85BF10D5E', N'JobType', N'任务类型', N'0', N'2', N'18', N'0', N'1', N'', N'2021-05-16 22:28:02.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-05-16 22:28:14.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL)
+GO
+
 INSERT INTO [dbo].[sys_items] ([F_Id], [F_ParentId], [F_EnCode], [F_FullName], [F_IsTree], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'64c10822-0c85-4516-9b59-879b818547ae', N'77070117-3F1A-41BA-BF81-B8B85BF10D5E', N'MessageType', N'信息类型', N'0', N'2', N'16', N'0', N'1', N'', N'2020-07-29 16:51:19.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
 GO
 
@@ -12022,7 +11989,7 @@ GO
 INSERT INTO [dbo].[sys_items] ([F_Id], [F_ParentId], [F_EnCode], [F_FullName], [F_IsTree], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'954AB9A1-9928-4C6D-820A-FC1CDC85CDE0', N'77070117-3F1A-41BA-BF81-B8B85BF10D5E', N'AuditState', N'审核状态', N'0', N'2', N'6', N'0', N'1', NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 GO
 
-INSERT INTO [dbo].[sys_items] ([F_Id], [F_ParentId], [F_EnCode], [F_FullName], [F_IsTree], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'9a7079bd-0660-4549-9c2d-db5e8616619f', N'77070117-3F1A-41BA-BF81-B8B85BF10D5E', N'DbLogType', N'系统日志', N'0', N'2', N'16', N'0', N'1', NULL, N'2016-07-19 17:09:45.0000000', NULL, NULL, NULL, NULL, NULL)
+INSERT INTO [dbo].[sys_items] ([F_Id], [F_ParentId], [F_EnCode], [F_FullName], [F_IsTree], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'9a7079bd-0660-4549-9c2d-db5e8616619f', N'77070117-3F1A-41BA-BF81-B8B85BF10D5E', N'DbLogType', N'系统日志', N'0', N'2', N'17', N'0', N'1', N'', N'2016-07-19 17:09:45.0000000', NULL, N'2021-05-16 22:28:07.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL)
 GO
 
 INSERT INTO [dbo].[sys_items] ([F_Id], [F_ParentId], [F_EnCode], [F_FullName], [F_IsTree], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'9EB4602B-BF9A-4710-9D80-C73CE89BEC5D', N'77070117-3F1A-41BA-BF81-B8B85BF10D5E', N'OrganizeCategory', N'机构分类', N'0', N'2', N'2', N'0', N'1', NULL, NULL, NULL, N'2020-04-28 09:07:08.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL)
@@ -12111,6 +12078,21 @@ INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCo
 GO
 
 INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCode], [F_ItemName], [F_SimpleSpelling], [F_IsDefault], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'392f88a8-02c2-49eb-8aed-b2acf474272a', N'9a7079bd-0660-4549-9c2d-db5e8616619f', NULL, N'Update', N'修改', NULL, N'0', NULL, N'6', N'0', N'1', NULL, N'2016-07-19 17:11:14.0000000', NULL, N'2016-07-19 18:20:49.0000000', NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCode], [F_ItemName], [F_SimpleSpelling], [F_IsDefault], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc87c0-fa31-803c-198e-0c33e32ce183', N'39fc87c0-7ff4-eeae-a897-b7418aeb4851', NULL, N'0', N'Run', NULL, N'0', NULL, N'0', N'0', N'1', N'', N'2021-05-16 22:28:33.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCode], [F_ItemName], [F_SimpleSpelling], [F_IsDefault], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc87c1-15a9-292d-a4ad-27b3bdc43c99', N'39fc87c0-7ff4-eeae-a897-b7418aeb4851', NULL, N'1', N'Get', NULL, N'0', NULL, N'1', N'0', N'1', N'', N'2021-05-16 22:28:40.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCode], [F_ItemName], [F_SimpleSpelling], [F_IsDefault], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc87c1-2fe4-c8ac-324f-9b9546888a47', N'39fc87c0-7ff4-eeae-a897-b7418aeb4851', NULL, N'2', N'Post', NULL, N'0', NULL, N'2', N'0', N'1', N'', N'2021-05-16 22:28:47.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCode], [F_ItemName], [F_SimpleSpelling], [F_IsDefault], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc87c1-4dda-99fc-b451-2fe5a9d5214c', N'39fc87c0-7ff4-eeae-a897-b7418aeb4851', NULL, N'3', N'Put', NULL, N'0', NULL, N'3', N'0', N'1', N'', N'2021-05-16 22:28:54.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCode], [F_ItemName], [F_SimpleSpelling], [F_IsDefault], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc87c1-679d-0818-ab56-79c34e727672', N'39fc87c0-7ff4-eeae-a897-b7418aeb4851', NULL, N'4', N'Delete', NULL, N'0', NULL, N'4', N'0', N'1', N'', N'2021-05-16 22:29:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
 GO
 
 INSERT INTO [dbo].[sys_itemsdetail] ([F_Id], [F_ItemId], [F_ParentId], [F_ItemCode], [F_ItemName], [F_SimpleSpelling], [F_IsDefault], [F_Layers], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'3c884a03-4f34-4150-b134-966387f1de2a', N'9a7079bd-0660-4549-9c2d-db5e8616619f', NULL, N'Exit', N'退出', NULL, N'0', NULL, N'2', N'0', N'1', NULL, N'2016-07-19 17:10:49.0000000', NULL, N'2016-07-19 18:20:23.0000000', NULL, NULL, NULL)
@@ -12255,12 +12237,12 @@ GO
 
 CREATE TABLE [dbo].[sys_log] (
   [F_Id] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
-  [F_Date] datetime2(7)  NULL,
-  [F_Account] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_NickName] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_Type] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_IPAddress] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_IPAddressName] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
+  [F_Date] datetime2(7)  NOT NULL,
+  [F_Account] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_NickName] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_Type] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_IPAddress] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
+  [F_IPAddressName] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NOT NULL,
   [F_ModuleId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_ModuleName] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_Result] tinyint  NULL,
@@ -12279,6 +12261,9 @@ GO
 -- ----------------------------
 -- Records of sys_log
 -- ----------------------------
+INSERT INTO [dbo].[sys_log] ([F_Id], [F_Date], [F_Account], [F_NickName], [F_Type], [F_IPAddress], [F_IPAddressName], [F_ModuleId], [F_ModuleName], [F_Result], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_KeyValue], [F_CompanyId]) VALUES (N'39fc8a6b-74b4-8a8d-d69b-bb918c783eeb', N'2021-05-17 10:54:00.0000000', N'admin', N'超级管理员', N'Login', N'0.0.0.1', N'iana保留地址', NULL, N'系统登录', N'1', N'登录成功', N'2021-05-17 10:54:00.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, N'd69fd66a-6a77-4011-8a25-53a79bdf5001')
+GO
+
 
 -- ----------------------------
 -- Table structure for sys_module
@@ -12413,7 +12398,7 @@ GO
 INSERT INTO [dbo].[sys_module] ([F_Id], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_UrlAddress], [F_Target], [F_IsMenu], [F_IsExpand], [F_IsFields], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'96EE855E-8CD2-47FC-A51D-127C131C9FB9', N'73FD1267-79BA-4E23-A152-744AF73117E9', N'3', N'Log', N'操作日志', N'fa fa-clock-o', N'/SystemSecurity/Log/Index', N'iframe', N'1', N'0', N'0', N'0', N'0', N'0', N'1', N'0', N'1', N'', NULL, NULL, N'2020-07-08 10:13:23.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
 GO
 
-INSERT INTO [dbo].[sys_module] ([F_Id], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_UrlAddress], [F_Target], [F_IsMenu], [F_IsExpand], [F_IsFields], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'a303cbe1-60eb-437b-9a69-77ff8b48f173', N'253646c6-ffd8-4c7f-9673-f349bbafcbe5', N'3', N'SystemSet', N'租户设置', N'fa fa-connectdevelop', N'/SystemOrganize/SystemSet/Index', N'iframe', N'0', N'0', N'0', N'0', N'0', N'0', N'1', N'0', N'0', N'', N'2020-06-12 13:54:25.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2020-06-23 16:37:02.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
+INSERT INTO [dbo].[sys_module] ([F_Id], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_UrlAddress], [F_Target], [F_IsMenu], [F_IsExpand], [F_IsFields], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'a303cbe1-60eb-437b-9a69-77ff8b48f173', N'253646c6-ffd8-4c7f-9673-f349bbafcbe5', N'3', N'SystemSet', N'租户设置', N'fa fa-connectdevelop', N'/SystemOrganize/SystemSet/Index', N'iframe', N'1', N'0', N'0', N'0', N'0', N'0', N'1', N'0', N'1', N'', N'2020-06-12 13:54:25.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-05-14 14:44:39.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'')
 GO
 
 INSERT INTO [dbo].[sys_module] ([F_Id], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_UrlAddress], [F_Target], [F_IsMenu], [F_IsExpand], [F_IsFields], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'a3a4742d-ca39-42ec-b95a-8552a6fae579', N'73FD1267-79BA-4E23-A152-744AF73117E9', N'2', N'FilterIP', N'访问控制', N'fa fa-filter', N'/SystemSecurity/FilterIP/Index', N'iframe', N'1', N'0', N'0', N'0', N'0', N'0', N'2', N'0', N'1', NULL, N'2016-07-17 22:06:10.0000000', NULL, N'2020-04-16 14:10:38.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
@@ -12559,7 +12544,7 @@ GO
 INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'1ee1c46b-e767-4532-8636-936ea4c12003', N'423A200B-FA5F-4B29-B7B7-A3F5474B725F', N'0', N'1', N'NF-delete', N'删除字典', NULL, N'2', N'delete', N'/SystemManage/ItemsData/DeleteForm', N'0', N'0', N'0', N'0', N'4', N'0', N'1', NULL, NULL, NULL, N'2016-07-25 15:37:53.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
 GO
 
-INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'208c2915-d6d0-4bb0-8ec4-154f86561f5a', N'e3188a69-de3a-40ef-a5ff-5eaf460f5d20', N'0', N'1', N'NF-enabled', N'启用', NULL, N'2', N'enabled', N'/SystemSecurity/OpenJobs/ChangeStatus', N'0', N'0', N'0', N'0', N'4', N'0', N'1', N'', N'2020-05-26 13:55:50.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2020-05-27 08:42:27.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
+INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'208c2915-d6d0-4bb0-8ec4-154f86561f5a', N'e3188a69-de3a-40ef-a5ff-5eaf460f5d20', N'0', N'1', N'NF-enabled', N'启用', NULL, N'2', N'enabled', N'/SystemSecurity/OpenJobs/ChangeStatus', N'0', N'0', N'0', N'0', N'6', N'0', N'1', N'', N'2020-05-26 13:55:50.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-05-17 10:09:16.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'')
 GO
 
 INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'23780fa8-b92c-4c0e-830e-ddcbe6cf4463', N'64A1C550-2C61-4A8C-833D-ACD0C012260F', N'0', N'1', N'NF-modulefields', N'字段管理', NULL, N'2', N'modulefields', N'/SystemManage/ModuleFields/Index', N'0', N'0', N'0', N'0', N'6', N'0', N'1', N'', N'2020-05-21 14:28:48.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL, NULL)
@@ -12590,6 +12575,9 @@ INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Lay
 GO
 
 INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'38e39592-6e86-42fb-8f72-adea0c82cbc1', N'38CA5A66-C993-4410-AF95-50489B22939C', N'0', N'1', N'NF-revisepassword', N'密码重置', NULL, N'2', N'revisepassword', N'/SystemOrganize/User/RevisePassword', N'0', N'0', N'0', N'0', N'5', N'0', N'1', N'', N'2016-07-25 14:18:19.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2020-06-16 08:14:26.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'39fc8a42-6335-1ed5-6c73-a055419b61c8', N'e3188a69-de3a-40ef-a5ff-5eaf460f5d20', N'0', N'1', N'NF-doNow', N'执行', NULL, N'1', N'doNow', N'/SystemSecurity/OpenJobs/DoNow', NULL, N'0', N'0', N'0', N'4', N'0', N'1', N'', N'2021-05-17 10:09:08.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL, N'')
 GO
 
 INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'3a35c662-a356-45e4-953d-00ebd981cad6', N'96EE855E-8CD2-47FC-A51D-127C131C9FB9', N'0', N'1', N'NF-removelog', N'清空日志', NULL, N'1', N'removeLog', N'/SystemSecurity/Log/RemoveLog', N'0', N'0', N'0', N'0', N'1', N'0', N'1', NULL, NULL, NULL, N'2020-04-07 14:34:56.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
@@ -12760,7 +12748,7 @@ GO
 INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'cba403cb-6418-44b7-868d-19e04af673ce', N'd742c96e-b61c-4cea-afeb-81805789687b', N'0', N'1', N'NF-delete', N'删除分类', NULL, N'2', N'delete', N'/SystemManage/ItemsType/DeleteForm', N'0', N'0', N'0', N'0', N'4', N'0', N'1', NULL, NULL, NULL, N'2020-04-27 16:52:32.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
 GO
 
-INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'cc115cef-c2d1-4b97-adbc-ea885aea6190', N'e3188a69-de3a-40ef-a5ff-5eaf460f5d20', N'0', N'1', N'NF-log', N'日志', NULL, N'1', N'log', N'/SystemSecurity/OpenJobs/Details', NULL, N'0', N'0', N'0', N'6', N'0', N'1', N'', N'2020-12-02 13:14:32.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL, NULL)
+INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'cc115cef-c2d1-4b97-adbc-ea885aea6190', N'e3188a69-de3a-40ef-a5ff-5eaf460f5d20', N'0', N'1', N'NF-log', N'日志', NULL, N'1', N'log', N'/SystemSecurity/OpenJobs/Details', NULL, N'0', N'0', N'0', N'7', N'0', N'1', N'', N'2020-12-02 13:14:32.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-05-17 10:09:20.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'')
 GO
 
 INSERT INTO [dbo].[sys_modulebutton] ([F_Id], [F_ModuleId], [F_ParentId], [F_Layers], [F_EnCode], [F_FullName], [F_Icon], [F_Location], [F_JsEvent], [F_UrlAddress], [F_Split], [F_IsPublic], [F_AllowEdit], [F_AllowDelete], [F_SortCode], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_Authorize]) VALUES (N'cd65e50a-0bea-45a9-b82e-f2eacdbd209e', N'252229DB-35CA-47AE-BDAE-C9903ED5BA7B', N'0', N'1', N'NF-add', N'新建机构', NULL, N'1', N'add', N'/SystemManage/Organize/Form', N'0', N'0', N'0', N'0', N'1', N'0', N'1', NULL, NULL, NULL, N'2020-04-07 14:22:42.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL)
@@ -13246,7 +13234,12 @@ CREATE TABLE [dbo].[sys_openjob] (
   [F_LastModifyUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
   [F_DeleteTime] datetime2(7)  NULL,
   [F_DeleteUserId] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
-  [F_LastRunTime] datetime2(7)  NULL
+  [F_LastRunTime] datetime2(7)  NULL,
+  [F_JobType] int  NOT NULL,
+  [F_RequestHeaders] nvarchar(max) COLLATE Chinese_PRC_CI_AS  NULL,
+  [F_RequestString] nvarchar(max) COLLATE Chinese_PRC_CI_AS  NULL,
+  [F_RequestUrl] nvarchar(max) COLLATE Chinese_PRC_CI_AS  NULL,
+  [F_DbNumber] nvarchar(50) COLLATE Chinese_PRC_CI_AS  NULL,
 )
 GO
 
@@ -13260,13 +13253,38 @@ EXEC sp_addextendedproperty
 'COLUMN', N'F_LastRunTime'
 GO
 
+EXEC sp_addextendedproperty
+'MS_Description', N'任务类型0Run,1Get,2Post,3Put,4Delete',
+'SCHEMA', N'dbo',
+'TABLE', N'sys_openjob',
+'COLUMN', N'F_JobType'
+GO
+
+EXEC sp_addextendedproperty
+'MS_Description', N'请求头',
+'SCHEMA', N'dbo',
+'TABLE', N'sys_openjob',
+'COLUMN', N'F_RequestHeaders'
+GO
+
+EXEC sp_addextendedproperty
+'MS_Description', N'请求内容',
+'SCHEMA', N'dbo',
+'TABLE', N'sys_openjob',
+'COLUMN', N'F_RequestString'
+GO
+
+EXEC sp_addextendedproperty
+'MS_Description', N'请求地址',
+'SCHEMA', N'dbo',
+'TABLE', N'sys_openjob',
+'COLUMN', N'F_RequestUrl'
+GO
+
 
 -- ----------------------------
 -- Records of sys_openjob
 -- ----------------------------
-INSERT INTO [dbo].[sys_openjob] ([F_Id], [F_FileName], [F_JobName], [F_JobGroup], [F_StarRunTime], [F_EndRunTime], [F_CronExpress], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_LastRunTime]) VALUES (N'1d9ffe9c-4c59-4431-8539-4c5ea364237e', N'WaterCloud.Service.AutoJob.SaveServerStateJob', N'服务器状态', N'WaterCloud', N'2021-01-11 12:22:37.0000000', N'2021-01-11 12:22:36.0000000', N'0 */10 * * * ?', N'0', N'1', N'每10分钟更新一次服务器状态', N'2020-05-26 14:50:41.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-01-11 12:22:37.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'2021-01-10 13:20:00.0000000')
-GO
-
 
 -- ----------------------------
 -- Table structure for sys_openjoblog
@@ -13403,6 +13421,30 @@ GO
 -- ----------------------------
 -- Records of sys_quickmodule
 -- ----------------------------
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-7777-4b44-b153-e37844c2deea', N'01849cc9-c6da-4184-92f8-34875dac1d42', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-777a-69e7-e293-64cbee85113d', N'06bb3ea8-ec7f-4556-a427-8ff0ce62e873', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-7780-d306-9a64-7f55a1d13244', N'1dff096a-db2f-410c-af2f-12294bdbeccd', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-7784-64e1-a5de-4fe5989ad6b0', N'1e60fce5-3164-439d-8d29-4950b33011e2', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-778a-3ae3-c9f2-d2aac8bb49c7', N'2536fbf0-53ff-40a6-a093-73aa0a8fc035', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-778e-4e08-666a-8ec5e765d0ef', N'262ca754-1c73-436c-a9a2-b6374451a845', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-7790-8344-74ee-79b04339d500', N'26452c9a-243d-4c81-97b9-a3ad581c3bf4', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
+INSERT INTO [dbo].[sys_quickmodule] ([F_Id], [F_ModuleId], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId]) VALUES (N'39fc8a6b-7792-2b81-4f3b-71dec5e764e1', N'2c2ddbce-ee87-4134-9b32-54d0bd572910', N'0', N'1', NULL, N'2021-05-17 10:54:01.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, NULL, NULL)
+GO
+
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -13535,7 +13577,7 @@ GO
 -- ----------------------------
 -- Records of sys_systemset
 -- ----------------------------
-INSERT INTO [dbo].[sys_systemset] ([F_Id], [F_Logo], [F_LogoCode], [F_ProjectName], [F_CompanyName], [F_AdminAccount], [F_AdminPassword], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_MobilePhone], [F_PrincipalMan], [F_EndTime], [F_DbString], [F_DBProvider], [F_HostUrl]) VALUES (N'd69fd66a-6a77-4011-8a25-53a79bdf5001', N'/icon/favicon.ico', N'WaterCloud', N'水之云信息系统', N'水之云', N'admin', N'0000', N'0', N'1', N'', N'2020-06-12 16:30:00.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-01-11 12:22:36.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'136xxxxxxxx', N'xxxx', N'2032-06-26 00:00:00.0000000', N'data source=localhost;database=watercloudnetdb;uid=root;pwd=root;', N'MySql.Data.MySqlClient', N'localhost','0')
+INSERT INTO [dbo].[sys_systemset] ([F_Id], [F_Logo], [F_LogoCode], [F_ProjectName], [F_CompanyName], [F_AdminAccount], [F_AdminPassword], [F_DeleteMark], [F_EnabledMark], [F_Description], [F_CreatorTime], [F_CreatorUserId], [F_LastModifyTime], [F_LastModifyUserId], [F_DeleteTime], [F_DeleteUserId], [F_MobilePhone], [F_PrincipalMan], [F_EndTime], [F_DbString], [F_DBProvider], [F_HostUrl], [F_DbNumber]) VALUES (N'd69fd66a-6a77-4011-8a25-53a79bdf5001', N'/icon/favicon.ico', N'WaterCloud', N'水之云信息系统', N'水之云', N'admin', N'0000', N'0', N'1', N'', N'2020-06-12 16:30:00.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'2021-05-14 21:53:52.0000000', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', NULL, NULL, N'13600000000', N'xxxxx', N'2032-06-26 00:00:00.0000000', N'data source=localhost;database=watercloudnetdb;uid=root;pwd=root;', N'MySql', N'localhost', N'0')
 GO
 
 
@@ -13638,14 +13680,14 @@ GO
 -- ----------------------------
 -- Records of sys_userlogon
 -- ----------------------------
-INSERT INTO [dbo].[sys_userlogon] ([F_Id], [F_UserId], [F_UserPassword], [F_UserSecretkey], [F_AllowStartTime], [F_AllowEndTime], [F_LockStartDate], [F_LockEndDate], [F_FirstVisitTime], [F_PreviousVisitTime], [F_LastVisitTime], [F_ChangePasswordDate], [F_MultiUserLogin], [F_LogOnCount], [F_UserOnLine], [F_Question], [F_AnswerQuestion], [F_CheckIPAddress], [F_Language], [F_Theme], [F_LoginSession], [F_ErrorNum]) VALUES (N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'53f6542fade60b5ce89c40f2d4f63d3d', N'f9cd56029f3affb9', NULL, NULL, NULL, NULL, NULL, N'2020-04-17 14:47:44.0000000', N'2020-04-17 14:59:58.0000000', NULL, N'0', N'360', N'0', NULL, NULL, N'0', NULL, NULL, N'evrcyibdv42f3ykhfy1yz3ur', N'0')
+INSERT INTO [dbo].[sys_userlogon] ([F_Id], [F_UserId], [F_UserPassword], [F_UserSecretkey], [F_AllowStartTime], [F_AllowEndTime], [F_LockStartDate], [F_LockEndDate], [F_FirstVisitTime], [F_PreviousVisitTime], [F_LastVisitTime], [F_ChangePasswordDate], [F_MultiUserLogin], [F_LogOnCount], [F_UserOnLine], [F_Question], [F_AnswerQuestion], [F_CheckIPAddress], [F_Language], [F_Theme], [F_LoginSession], [F_ErrorNum]) VALUES (N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'9f2ec079-7d0f-4fe2-90ab-8b09a8302aba', N'd47247b35e447d4818719a164f17d697', N'80dd8a2de94161b0', NULL, NULL, NULL, NULL, NULL, N'2020-04-17 14:47:44.0000000', N'2020-04-17 14:59:58.0000000', NULL, N'0', N'360', N'0', NULL, NULL, N'0', NULL, NULL, N'evrcyibdv42f3ykhfy1yz3ur', N'0')
 GO
 
 
 -- ----------------------------
 -- Primary Key structure for table cms_articlecategory
 -- ----------------------------
-ALTER TABLE [dbo].[cms_articlecategory] ADD CONSTRAINT [PK__cms_arti__2C6EC723F323D81A] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[cms_articlecategory] ADD CONSTRAINT [PK__cms_arti__2C6EC723DA88EE23] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13654,7 +13696,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table cms_articlenews
 -- ----------------------------
-ALTER TABLE [dbo].[cms_articlenews] ADD CONSTRAINT [PK__cms_arti__2C6EC7231299A011] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[cms_articlenews] ADD CONSTRAINT [PK__cms_arti__2C6EC7231A9A3BE6] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13663,7 +13705,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table oms_flowinstance
 -- ----------------------------
-ALTER TABLE [dbo].[oms_flowinstance] ADD CONSTRAINT [PK__oms_flow__2C6EC7235C68F923] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[oms_flowinstance] ADD CONSTRAINT [PK__oms_flow__2C6EC7239333D594] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13672,7 +13714,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table oms_flowinstancehis
 -- ----------------------------
-ALTER TABLE [dbo].[oms_flowinstancehis] ADD CONSTRAINT [PK__oms_flow__2C6EC723E4A0AB79] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[oms_flowinstancehis] ADD CONSTRAINT [PK__oms_flow__2C6EC723484C11F8] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13681,7 +13723,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table oms_flowinstanceinfo
 -- ----------------------------
-ALTER TABLE [dbo].[oms_flowinstanceinfo] ADD CONSTRAINT [PK__oms_flow__2C6EC723BD38D28E] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[oms_flowinstanceinfo] ADD CONSTRAINT [PK__oms_flow__2C6EC7237DA2CCD7] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13690,7 +13732,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table oms_formtest
 -- ----------------------------
-ALTER TABLE [dbo].[oms_formtest] ADD CONSTRAINT [PK__oms_form__2C6EC723A77D3FF3] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[oms_formtest] ADD CONSTRAINT [PK__oms_form__2C6EC723EF698FA9] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13699,7 +13741,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table oms_message
 -- ----------------------------
-ALTER TABLE [dbo].[oms_message] ADD CONSTRAINT [PK__oms_mess__2C6EC723564EFB3A] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[oms_message] ADD CONSTRAINT [PK__oms_mess__2C6EC72370CE7231] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13708,7 +13750,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table oms_messagehis
 -- ----------------------------
-ALTER TABLE [dbo].[oms_messagehis] ADD CONSTRAINT [PK__oms_mess__2C6EC723C45A4D23] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[oms_messagehis] ADD CONSTRAINT [PK__oms_mess__2C6EC72369D2AA14] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13734,7 +13776,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table oms_uploadfile
 -- ----------------------------
-ALTER TABLE [dbo].[oms_uploadfile] ADD CONSTRAINT [PK__oms_uplo__2C6EC72329878BBC] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[oms_uploadfile] ADD CONSTRAINT [PK__oms_uplo__2C6EC7234B35B04A] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13743,7 +13785,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_area
 -- ----------------------------
-ALTER TABLE [dbo].[sys_area] ADD CONSTRAINT [PK__sys_area__2C6EC72314AA4E8B] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_area] ADD CONSTRAINT [PK__sys_area__2C6EC723754D5BAE] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13769,16 +13811,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_dataprivilegerule
 -- ----------------------------
-ALTER TABLE [dbo].[sys_dataprivilegerule] ADD CONSTRAINT [PK__sys_data__2C6EC723C70758AF] PRIMARY KEY CLUSTERED ([F_Id])
-WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
-ON [PRIMARY]
-GO
-
-
--- ----------------------------
--- Primary Key structure for table sys_dbbackup
--- ----------------------------
-ALTER TABLE [dbo].[sys_dbbackup] ADD CONSTRAINT [PK__sys_dbba__2C6EC7237CF681B7] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_dataprivilegerule] ADD CONSTRAINT [PK__sys_data__2C6EC723F18EE2CA] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13787,7 +13820,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_filterip
 -- ----------------------------
-ALTER TABLE [dbo].[sys_filterip] ADD CONSTRAINT [PK__sys_filt__2C6EC723BAF895D9] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_filterip] ADD CONSTRAINT [PK__sys_filt__2C6EC7231D74C820] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13796,7 +13829,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_flowscheme
 -- ----------------------------
-ALTER TABLE [dbo].[sys_flowscheme] ADD CONSTRAINT [PK__sys_flow__2C6EC72344B448AF] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_flowscheme] ADD CONSTRAINT [PK__sys_flow__2C6EC723B7302563] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13822,7 +13855,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_form
 -- ----------------------------
-ALTER TABLE [dbo].[sys_form] ADD CONSTRAINT [PK__sys_form__2C6EC723B4B43E42] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_form] ADD CONSTRAINT [PK__sys_form__2C6EC7239BEC2158] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13848,7 +13881,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_items
 -- ----------------------------
-ALTER TABLE [dbo].[sys_items] ADD CONSTRAINT [PK__sys_item__2C6EC723528FB879] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_items] ADD CONSTRAINT [PK__sys_item__2C6EC72359EC7D47] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13875,7 +13908,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_itemsdetail
 -- ----------------------------
-ALTER TABLE [dbo].[sys_itemsdetail] ADD CONSTRAINT [PK__sys_item__2C6EC72339AD6D20] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_itemsdetail] ADD CONSTRAINT [PK__sys_item__2C6EC72352F6FAE3] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13884,7 +13917,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_log
 -- ----------------------------
-ALTER TABLE [dbo].[sys_log] ADD CONSTRAINT [PK__sys_log__2C6EC7239A097717] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_log] ADD CONSTRAINT [PK__sys_log__2C6EC723CC4EB336] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13910,7 +13943,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_module
 -- ----------------------------
-ALTER TABLE [dbo].[sys_module] ADD CONSTRAINT [PK__sys_modu__2C6EC723D8D2CBB2] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_module] ADD CONSTRAINT [PK__sys_modu__2C6EC7235ED00C96] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13938,7 +13971,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_modulebutton
 -- ----------------------------
-ALTER TABLE [dbo].[sys_modulebutton] ADD CONSTRAINT [PK__sys_modu__2C6EC7232FDFE1AE] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_modulebutton] ADD CONSTRAINT [PK__sys_modu__2C6EC723F89C6891] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13965,7 +13998,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_modulefields
 -- ----------------------------
-ALTER TABLE [dbo].[sys_modulefields] ADD CONSTRAINT [PK__sys_modu__2C6EC72354F0A6D9] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_modulefields] ADD CONSTRAINT [PK__sys_modu__2C6EC7237BEC5A66] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -13991,7 +14024,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_notice
 -- ----------------------------
-ALTER TABLE [dbo].[sys_notice] ADD CONSTRAINT [PK__sys_noti__2C6EC7231334BD20] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_notice] ADD CONSTRAINT [PK__sys_noti__2C6EC7231362A00E] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14000,7 +14033,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_openjob
 -- ----------------------------
-ALTER TABLE [dbo].[sys_openjob] ADD CONSTRAINT [PK__sys_open__2C6EC72383904175] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_openjob] ADD CONSTRAINT [PK__sys_open__2C6EC7233E8DDAB5] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14009,7 +14042,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_openjoblog
 -- ----------------------------
-ALTER TABLE [dbo].[sys_openjoblog] ADD CONSTRAINT [PK__sys_open__2C6EC7235FBE64E0] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_openjoblog] ADD CONSTRAINT [PK__sys_open__2C6EC7237F8AD5CC] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14035,7 +14068,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_organize
 -- ----------------------------
-ALTER TABLE [dbo].[sys_organize] ADD CONSTRAINT [PK__sys_orga__2C6EC72393541C14] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_organize] ADD CONSTRAINT [PK__sys_orga__2C6EC723F6A88DC7] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14062,7 +14095,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_quickmodule
 -- ----------------------------
-ALTER TABLE [dbo].[sys_quickmodule] ADD CONSTRAINT [PK__sys_quic__2C6EC72367C39A56] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_quickmodule] ADD CONSTRAINT [PK__sys_quic__2C6EC72318D837E4] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14088,7 +14121,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_role
 -- ----------------------------
-ALTER TABLE [dbo].[sys_role] ADD CONSTRAINT [PK__sys_role__2C6EC723898BF945] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_role] ADD CONSTRAINT [PK__sys_role__2C6EC723CBFE8481] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14097,7 +14130,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_roleauthorize
 -- ----------------------------
-ALTER TABLE [dbo].[sys_roleauthorize] ADD CONSTRAINT [PK__sys_role__2C6EC72362042A3D] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_roleauthorize] ADD CONSTRAINT [PK__sys_role__2C6EC7233503CCEE] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14124,16 +14157,32 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_serverstate
 -- ----------------------------
-ALTER TABLE [dbo].[sys_serverstate] ADD CONSTRAINT [PK__sys_serv__2C6EC723F86139B3] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_serverstate] ADD CONSTRAINT [PK__sys_serv__2C6EC723699D7B5E] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
 
 
 -- ----------------------------
+-- Indexes structure for table sys_systemset
+-- ----------------------------
+CREATE UNIQUE NONCLUSTERED INDEX [IX_SYSTEMSET]
+ON [dbo].[sys_systemset] (
+  [F_DbNumber] ASC
+)
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_SYSTEMSET2]
+ON [dbo].[sys_systemset] (
+  [F_HostUrl] ASC
+)
+GO
+
+
+-- ----------------------------
 -- Primary Key structure for table sys_systemset
 -- ----------------------------
-ALTER TABLE [dbo].[sys_systemset] ADD CONSTRAINT [PK__sys_syst__2C6EC723B90C3554] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_systemset] ADD CONSTRAINT [PK__sys_syst__2C6EC723224323B7] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14159,7 +14208,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_user
 -- ----------------------------
-ALTER TABLE [dbo].[sys_user] ADD CONSTRAINT [PK__sys_user__2C6EC72356A5B099] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_user] ADD CONSTRAINT [PK__sys_user__2C6EC72301CD7085] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -14168,7 +14217,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table sys_userlogon
 -- ----------------------------
-ALTER TABLE [dbo].[sys_userlogon] ADD CONSTRAINT [PK__sys_user__2C6EC723D6A3C21C] PRIMARY KEY CLUSTERED ([F_Id])
+ALTER TABLE [dbo].[sys_userlogon] ADD CONSTRAINT [PK__sys_user__2C6EC723AD9378B7] PRIMARY KEY CLUSTERED ([F_Id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
