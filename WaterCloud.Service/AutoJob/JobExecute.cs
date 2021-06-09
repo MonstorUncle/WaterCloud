@@ -86,6 +86,16 @@ namespace WaterCloud.Service.AutoJob
                                         MethodInfo method = implementType.GetMethod("Start", new Type[] { });      // 获取方法信息
                                         object[] parameters = null;
                                         var temp = (Task<AlwaysResult>)method.Invoke(obj, parameters);     // 调用方法，参数为空
+                                        if (result.state.ToString() == ResultType.success.ToString())
+                                        {
+                                            log.F_EnabledMark = true;
+                                            log.F_Description = "执行成功，" + result.message.ToString();
+                                        }
+                                        else
+                                        {
+                                            log.F_EnabledMark = false;
+                                            log.F_Description = "执行失败，" + result.message.ToString();
+                                        }
                                     }
                                     else
                                     {
