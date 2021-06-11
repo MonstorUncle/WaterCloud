@@ -1660,7 +1660,8 @@ layui.define(['laytpl', 'form', 'util'], function (exports) {
     function updateFixedTbHead($view) {
         var $headBox = $view.children('.ew-tree-table-head');
         var $tbBox = $view.children('.ew-tree-table-box');
-        var sWidth = $tbBox.width() - $tbBox.prop('clientWidth');
+        //修复滚动条出现时，表头宽度不对的问题
+        var sWidth = $headBox.width() - $tbBox.prop('clientWidth');
         $headBox.css('border-right', (sWidth > 0 ? sWidth : 0) + 'px solid #f2f2f2');
     }
 
