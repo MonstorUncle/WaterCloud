@@ -24,6 +24,7 @@ layui.define(["jquery", "layer", 'table', 'soulTable', 'common', 'tabletree'], f
                 cellMinWidth: 100,//最小宽度
                 limit: 10,//每页数据 默认
                 limits: [10, 20, 30, 40, 50],
+                autoSort:false,
                 id:'currentTableId',
                 height: 'full-60',
                 loading: false,
