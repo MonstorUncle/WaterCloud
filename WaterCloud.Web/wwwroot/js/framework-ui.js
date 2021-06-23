@@ -1,4 +1,4 @@
-﻿$(function () {
+$(function () {
     //document.body.className = localStorage.getItem('config-skin');
     //$("[data-toggle='tooltip']").tooltip();
 })
@@ -49,7 +49,7 @@ $.fn.bindSelect = function (options) {
                 var temp = $("<option></option>").val(i).html(options.data[i]);
                 //字典
                 if (i == options.checked) {
-                    temp.prop("checked", true);
+                    temp.prop("selected", true);
                 }
                 $element.append(temp);
             }
@@ -57,7 +57,7 @@ $.fn.bindSelect = function (options) {
                 var temp = $("<option></option>").val(options.data[i][options.id]).html(options.data[i][options.text]);
                 //list
                 if (options.data[i][options.id] == options.checked) {
-                    temp.prop("checked", true);
+                    temp.prop("selected", true);
                 }
                 $element.append(temp);
             }
@@ -87,7 +87,7 @@ $.fn.bindSelect = function (options) {
                         var temp = $("<option></option>").val(data[i]).html(data[i]);
                         //字典
                         if (i == options.checked) {
-                            temp.prop("checked", true);
+                            temp.prop("selected", true);
                         }
                         $element.append(temp);
                     }
@@ -95,7 +95,7 @@ $.fn.bindSelect = function (options) {
                         var temp = $("<option></option>").val(data[i][options.id]).html(data[i][options.text]);
                         //list
                         if (data[i][options.id] == options.checked) {
-                            temp.prop("checked", true);
+                            temp.prop("selected", true);
                         }
                         $element.append(temp);
                     }
